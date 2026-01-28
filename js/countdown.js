@@ -1,4 +1,4 @@
-let countDown = new Date("07/26/2026");
+let countDown = new Date("06/06/2026");
 
 let $days = document.getElementById('days');
 let $hours = document.getElementById('hours');
