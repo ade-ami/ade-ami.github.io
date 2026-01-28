@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sail&display=swap" rel="stylesheet">
+    <title>WEDDING INVITATION</title>
+    <style>
+        /* Penyesuaian CSS untuk tombol musik melayang */
+        .music-control {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            z-index: 999;
+            background: rgba(255, 255, 255, 0.8);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .music-control.playing i {
+            animation: spin 3s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Elemen Audio -->
+    <!-- Ganti 'music.mp3' dengan URL file musik Anda -->
+    <audio id="backgroundMusic" loop>
+        <source src="img/music.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Tombol Kontrol Musik (Akan muncul setelah undangan dibuka) -->
+    <div id="musicToggle" class="music-control" style="display: none;">
+        <i class="fas fa-music"></i>
+    </div>
+
+    <div class="popup">
+        <div class="circle-img">
+            <img src="img/brides.png" alt="brides">
+        </div>
+        <div class="popup-text-center">
+            <h3 class="popup-brides-name">Ami & Ade</h3>
+            <p class="popup-date">- Minggu, 26 Juli 2026 -</p>
+            <p>Kepada Bapak/Ibu/Saudara/i</p>
+            <h3 class="invitation-name"></h3>
+            <p class="small-text">*Mohon maaf bila ada kesalahan pada penulisan nama/gelar</p>
+        </div>
+
+        <div class="btn-popup">
+            <button class="btn-primary">Buka Undangan</button>
+        </div>
+    </div>
+    <div class="container">
+        <!-- <img src="img/Depan-New-Arival-01-Atas1.png" width="100%"> -->
+        <div class="main-photo">
+            <img src="img/main_img.png" alt="" width="100%">
+        </div>
+        <div class="main-text">
+            <p class="top-title">The Wedding of</p>
+            <p class="top-name">Amy & Ade</p>
+            <p class="top-agenda">Minggu, 26 Juli 2026</p>
+        </div>
+
+        <div class="splitter">
+            <img src="img/Depan-New-Arival-05-Bawah1.png" width="100%">
+            <img src="img/Depan-New-Arival-01-Atas1.png" width="100%">
+        </div>
+
+        <div class="bismillah">
+            <img src="img/basmalah-1-2x.png" alt="">
+            <h6>Assalamualaikum Warahmatullahi Wabarakatuh</h6>
+            <p>Dengan memohon Ridho serta Rahmat Allah SWT, kami bermaksud menyelenggarakan Resepsi Pernikahan
+                putra-putri kami:</p>
+
+            <div class="photo-wrapper">
+                <div class="brides-photo">
+                    <img src="img/wanita.jpeg" alt="">
+                    <h6>Ami Fitriyanti</h6>
+                    <p>Putri dari:</p>
+                    <p>Bapak Thalim dan Ibu Maemunah</p>
+                </div>
+                <div class="brides-photo">
+                    <img src="img/pria.jpeg" alt="">
+                    <h6>Ade Martadikusumah</h6>
+                    <p>Putra dari:</p>
+                    <p>Bapak (Alm) Bapak M. Dachlan Supardi. dan Ibu Dedeh Ratnaningsih</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="splitter">
+            <img src="img/Depan-New-Arival-05-Bawah1.png" width="100%">
+            <img src="img/Depan-New-Arival-01-Atas1.png" width="100%">
+        </div>
+
+        <section id="event">
+            <h2>Menuju Hari Bahagia</h2>
+
+            <p>Siang dan malam berganti begitu cepat, di antara saat-saat mendebarkan yang belum pernah kami rasakan
+                sebelumnya. Kami nantikan kehadiran para keluarga dan sahabat, untuk menjadi saksi ikrar janji suci kami
+                di hari yang bahagia.</p>
+
+            <div class="time-event">
+                <div class="time-section">
+                    <div id="days" class="value">00</div>
+                    <div class="timelabel">Days</div>
+                </div>
+                <div class="time-section">
+                    <div id="hours" class="value">00</div>
+                    <div class="timelabel">Hours</div>
+                </div>
+                <div class="time-section">
+                    <div id="minutes" class="value">00</div>
+                    <div class="timelabel">Minutes</div>
+                </div>
+                <div class="time-section">
+                    <div id="seconds" class="value">00</div>
+                    <div class="timelabel">Seconds</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="splitter">
+            <img src="img/Depan-New-Arival-05-Bawah1.png" width="100%">
+            <img src="img/Depan-New-Arival-01-Atas1.png" width="100%">
+        </div>
+
+        <section id="location">
+            <h2>Akad Nikah</h2>
+
+            <div class="wrapper-location">
+                <h6>Akad Pernikahan akan dilaksanakan pada:</h6>
+                <div class="agenda">
+                    <span><i class="fas fa-calendar-alt"></i></span>
+                    <p>Minggu, 26 Juli 2026</p>
+                </div>
+                <div class="agenda">
+                    <span><i class="far fa-clock"></i></span>
+                    <p>09.00 WIB</p>
+                </div>
+                <div class="agenda">
+                    <span><i class="fas fa-map-marker-alt"></i></span>
+                    <p>Rumah Bpk Thalim</p>
+                </div>
+                <div class="agenda">
+                    <span>&nbsp;&nbsp;&nbsp;</span>
+                    <p>Kp Awi Mekar Rt 012/006 Desa Bungursari, Kec. Bungursari, KAB. PURWAKARTA, JAWA BARAT, ID, 41182
+                    </p>
+                </div>
+                <div class="maps-location">
+<iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d247.77159676688137!2d107.47226763022151!3d-6.477844321270096!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e690d567c20ff65%3A0xf78032c615d86944!2sKp%20awi%20mekar!5e0!3m2!1sid!2sid!4v1769575513566!5m2!1sid!2sid" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </div>
+        </section>
+
+        <section id="receptionLocation">
+            <h2>Resepsi<br> Pernikahan</h2>
+
+            <div class="wrapper-location">
+                <h6>Resepsi akan dilaksanakan pada:</h6>
+                <div class="agenda">
+                    <span><i class="fas fa-calendar-alt"></i></span>
+                    <p>Minggu, 26 Juli 2026</p>
+                </div>
+                <div class="agenda">
+                    <span><i class="far fa-clock"></i></span>
+                    <p>09.30 WIB - Selesai</p>
+                </div>
+                <div class="agenda">
+                    <span><i class="fas fa-map-marker-alt"></i></span>
+                    <p class="text-bold">Rumah Bpk Thalim</p>
+                </div>
+                <div class="agenda">
+                    <span>&nbsp;&nbsp;&nbsp;</span>
+                    <p>Kp Awi Mekar Rt 012/006 Desa Bungursari, Kec. Bungursari, KAB. PURWAKARTA, JAWA BARAT, ID, 41182
+                    </p>
+                </div>
+                <div class="maps-location">
+                    <a href="https://maps.app.goo.gl/stvJppt5qbMRT2H56" target="_blank">Lihat Maps</a>
+                </div>
+            </div>
+        </section>
+
+        <div class="splitter">
+            <img src="img/Depan-New-Arival-05-Bawah1.png" width="100%">
+            <img src="img/Depan-New-Arival-01-Atas1.png" width="100%">
+        </div>
+
+        <section id="healthProtocol">
+            <h2>Protokol<br> Kesehatan</h2>
+            <div class="health-protocol">
+                <div class="prokes">
+                    <img src="img/pakai_masker.png" alt="">
+                    <p>Memakai Masker</p>
+                </div>
+                <div class="prokes">
+                    <img src="img/jabat_tangan.png" alt="">
+                    <p>Menjabat Tangan</p>
+                </div>
+                <div class="prokes">
+                    <img src="img/pakai_sabun.png" alt="">
+                    <p>Memakai Sabun</p>
+                </div>
+                <div class="prokes">
+                    <img src="img/jaga_jarak.png" alt="">
+                    <p>Menjaga Jarak</p>
+                </div>
+                <div class="prokes">
+                    <img src="img/cuci_tangan.png" alt="">
+                    <p>Mencuci Tangan</p>
+                </div>
+                <div class="prokes">
+                    <img src="img/handsanitizer.png" alt="">
+                    <p>Menggunakan<br> Handsanitizer</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="splitter">
+            <img src="img/Depan-New-Arival-05-Bawah1.png" width="100%">
+            <img src="img/Depan-New-Arival-01-Atas1.png" width="100%">
+        </div>
+
+        <!-- <section id="gallery"></section> -->
+
+        <section id="sendGift">
+            <h2>Kirim Hadiah</h2>
+            <div class="send-gift">
+                <i class="fas fa-gift fa-6x"></i>
+                <p>Bagi anda yang ingin mengirimkan hadiah, silakan transfer hadiah anda melalui nomor rekening maupun
+                    dompet digital berikut:</p>
+                <hr style="border: 1px solid blue; width: 50%;">
+                <div class="icon-bni">
+                    <img src="img/bank_mandiri.png" alt="" width="40%">
+                    <ul>
+                        <li>Nomor Rekening: <span>1330023981830</span></li>
+                        <li>Atas Nama: <span>AMI FITRIYANTI</span></li>
+                    </ul>
+                </div>
+                <hr style="border: 1px solid blue; width: 50%;">
+                <div class="icon-sulselbar">
+                    <img src="img/bank_bca.jpg" alt="" width="40%">
+                    <ul>
+                        <li>Nomor Rekening: <span>4810315411</span></li>
+                        <li>Atas Nama: <span>Ade Martadikusumah</span></li>
+                    </ul>
+                </div>
+                <hr style="border: 1px solid blue; width: 50%;">
+                <div class="icon-qris">
+                    <img src="img/logo_qris.jpeg" alt="" width="40%">
+                </div>
+                <hr style="border: 1px solid blue; width: 50%;">
+                <p>Atas Doa dan Restu dari Bapak/Ibu/Saudara/i Kami ucapkan banyak terima kasih. </p>
+                <p>Kami Yang Berbahagia:</p>
+                <p class="brides-name">Amy & Ade</p>
+            </div>
+
+            <div class="splitter">
+                <img src="img/Depan-New-Arival-05-Bawah1.png" width="100%">
+            </div>
+        </section>
+
+        <!-- SCROLL TO TOP BUTTON -->
+        <a class="gotopbtn" href="#"> <i class="fas fa-arrow-up"></i> </a>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <div class="footer-menu">
+            <div class="box">
+                <a href="#"><i class="fas fa-home fa-2x tab-icon"></i></a>
+                <p>Home</p>
+            </div>
+            <div class="box">
+                <a href="#event"><i class="fas fa-calendar-alt fa-2x tab-icon"></i></a>
+                <p>Event</p>
+            </div>
+            <div class="box">
+                <a href="#location"><i class="fas fa-map-marker-alt fa-2x tab-icon"></i></a>
+                <p>location</p>
+            </div>
+            <div class="box">
+                <a href="#sendGift"><i class="fas fa-gift fa-2x tab-icon"></i></a>
+                <p>Gifts</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/countdown.js"></script>
+    <script>
+        const pObj = document.querySelector(".popup .invitation-name");
+        const params = new URLSearchParams(window.location.search);
+        pObj.innerHTML = params.get('to');
+
+        const popup = document.querySelector(".popup");
+        const btnPrimary = document.querySelector(".btn-primary");
+
+        // Logika Audio
+        const audio = document.getElementById("backgroundMusic");
+        const musicToggle = document.getElementById("musicToggle");
+        let isPlaying = false;
+
+        function toggleMusic() {
+            if (isPlaying) {
+                audio.pause();
+                musicToggle.classList.remove("playing");
+            } else {
+                audio.play();
+                musicToggle.classList.add("playing");
+            }
+            isPlaying = !isPlaying;
+        }
+
+        musicToggle.addEventListener("click", toggleMusic);
+
+        btnPrimary.addEventListener("click", function () {
+            // Tutup popup
+            popup.classList.remove("popup");
+            popup.classList.add("popup--close");
+
+            // Putar musik otomatis setelah interaksi klik
+            audio.play().then(() => {
+                isPlaying = true;
+                musicToggle.style.display = "flex";
+                musicToggle.classList.add("playing");
+            }).catch(error => {
+                console.log("Audio play failed:", error);
+            });
+        });
+    </script>
+</body>
+
+</html>
