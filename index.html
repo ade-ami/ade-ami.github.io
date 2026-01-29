@@ -1,39 +1,63 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="reset.css">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&family=Sail&display=swap"
         rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Sail&display=swap" rel="stylesheet">
-    <title>MY WEDDING AMY&ADE</title>
+    <!-- Favicons -->
+    <link href="img/flower_circle_frame.png" rel="icon">
+    <title>MY WEDDING AMY & ADE</title>
     <style>
-        /* Penyesuaian CSS untuk tombol musik melayang */
+        :root {
+            --navy: #1a2a44;
+            --blue: #2c5282;
+            --light-blue: #ebf4ff;
+            --grey: #718096;
+            --light-grey: #f7fafc;
+            --white: #ffffff;
+            --accent: #4a5568;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0f2f5;
+            color: var(--navy);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* --- Music Control --- */
         .music-control {
             position: fixed;
             bottom: 100px;
             right: 20px;
             z-index: 999;
-            background: rgba(255, 255, 255, 0.8);
-            width: 45px;
-            height: 45px;
+            background: var(--navy);
+            color: white;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
         }
 
         .music-control.playing i {
-            animation: spin 3s linear infinite;
+            animation: spin 4s linear infinite;
         }
 
         @keyframes spin {
@@ -45,318 +69,917 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* --- Popup / Cover --- */
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--navy), var(--blue));
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        .popup--close {
+            transform: translateY(-100%);
+        }
+
+        .circle-img {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+            margin-bottom: 25px;
+            background: #eee;
+        }
+
+        .circle-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .popup-brides-name {
+            font-family: 'Sail', cursive;
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background-color: var(--white);
+            color: var(--navy);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 25px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            background: var(--light-blue);
+        }
+
+        /* --- Container & Content --- */
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+            padding-bottom: 120px;
+            position: relative;
+        }
+
+        .main-photo {
+            position: relative;
+            height: 450px;
+            background: #cbd5e0;
+        }
+
+        .main-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .main-text {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--white);
+        }
+
+        .top-title {
+            font-size: 1.2rem;
+            color: var(--grey);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .top-name {
+            font-family: 'Sail', cursive;
+            font-size: 3.5rem;
+            color: var(--navy);
+            margin: 10px 0;
+        }
+
+        .top-agenda {
+            font-weight: 600;
+            color: var(--blue);
+            font-size: 1.1rem;
+        }
+
+        .bismillah {
+            padding: 50px 20px;
+            text-align: center;
+        }
+
+        .bismillah img {
+            width: 270px;
+            height: 45px;
+            margin-bottom: 25px;
+            opacity: 0.9;
+        }
+
+        .photo-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .brides-photo img {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid var(--light-blue);
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .brides-photo h6 {
+            font-family: 'Sail', cursive;
+            font-size: 2.2rem;
+            color: var(--navy);
+        }
+
+        /* --- Countdown --- */
+        #event {
+            background: var(--navy);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .time-event {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .time-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 10px;
+            border-radius: 12px;
+            min-width: 80px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .time-section .value {
+            font-size: 2rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .time-section .timelabel {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            opacity: 0.8;
+            letter-spacing: 1px;
+        }
+
+        /* --- Update Style Tombol Kalender (Mirip Salin Rekening) --- */
+        .btn-calendar {
+            display: inline-block;
+            margin-top: 30px;
+            background: white;
+            color: var(--navy);
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border: none;
+        }
+
+        .btn-calendar i {
+            margin-right: 5px;
+        }
+
+        .btn-calendar:hover {
+            transform: scale(1.05);
+            background: var(--light-blue);
+        }
+
+        /* --- Sections Shared --- */
+        section {
+            padding: 70px 25px;
+            text-align: center;
+        }
+
+        h2 {
+            font-family: 'Sail', cursive;
+            font-size: 2.8rem;
+            margin-bottom: 25px;
+            color: var(--navy);
+        }
+
+        .wrapper-location {
+            background: var(--light-grey);
+            padding: 30px 20px;
+            border-radius: 20px;
+            border-top: 4px solid var(--blue);
+            text-align: left;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .agenda {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: flex-start;
+        }
+
+        .agenda i {
+            color: var(--blue);
+            margin-top: 5px;
+            font-size: 1.1rem;
+        }
+
+        .maps-location iframe {
+            width: 100%;
+            height: 220px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border: none;
+        }
+
+        .btn-maps {
+            display: inline-block;
+            margin-top: 15px;
+            background: var(--blue);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+
+        /* --- GALLERY SECTION --- */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .gallery-item {
+            aspect-ratio: 1/1;
+            overflow: hidden;
+            border-radius: 12px;
+            background: #eee;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .gallery-item::after {
+            content: "\f00e";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.5rem;
+            opacity: 0;
+            transition: 0.3s;
+            z-index: 2;
+        }
+
+        .gallery-item:hover::after {
+            opacity: 0.8;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.1);
+            filter: brightness(0.7);
+        }
+
+        /* --- Gallery Zoom Modal --- */
+        .gallery-modal {
+            display: none;
+            position: fixed;
+            z-index: 3000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            user-select: none;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 80%;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            color: white;
+            font-size: 35px;
+            cursor: pointer;
+            transition: 0.3s;
+            z-index: 3010;
+        }
+
+        .close-modal:hover {
+            color: #ccc;
+        }
+
+        .modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 2.5rem;
+            cursor: pointer;
+            padding: 20px;
+            z-index: 3005;
+            transition: 0.3s;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-nav:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-nav.prev {
+            left: 10px;
+        }
+
+        .modal-nav.next {
+            right: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .modal-nav {
+                font-size: 1.8rem;
+                width: 45px;
+                height: 45px;
+                padding: 10px;
+            }
+        }
+
+        /* --- Health Protocol --- */
+        .health-protocol {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .prokes {
+            font-size: 0.75rem;
+            color: var(--grey);
+        }
+
+        .prokes i {
+            font-size: 1.8rem;
+            color: var(--blue);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* --- Gift Section --- */
+        .send-gift {
+            background: var(--light-blue);
+            padding: 40px 25px;
+            border-radius: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .bank-info {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 350px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .bank-logo {
+            height: 40px;
+            margin-bottom: 15px;
+            object-fit: contain;
+        }
+
+        .copy-btn {
+            background: var(--navy);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* --- Guest Book Section --- */
+        #guestBook {
+            background: var(--white);
+            padding: 70px 25px;
+        }
+
+        .form-container {
+            width: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            background: #fff;
+        }
+
+        /* --- Footer Menu --- */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid #eee;
+            z-index: 998;
+            padding: 8px 0 25px 0;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .footer-menu {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .footer-menu .box {
+            text-align: center;
+            color: var(--grey);
+            text-decoration: none;
+            font-size: 0.65rem;
+            flex: 1;
+            transition: 0.3s;
+        }
+
+        .footer-menu .box i {
+            color: var(--navy);
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.3rem;
+        }
+
+        .gotopbtn {
+            position: fixed;
+            bottom: 100px;
+            left: 20px;
+            background: var(--navy);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            opacity: 0.5;
+            z-index: 997;
+        }
+
+        .brides-name-footer {
+            font-family: 'Sail', cursive;
+            font-size: 2.5rem;
+            color: var(--navy);
+            margin-top: 10px;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--navy);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            z-index: 2000;
+            display: none;
+        }
     </style>
 </head>
 
 <body>
-    <!-- Elemen Audio -->
-    <!-- Ganti 'music.mp3' dengan URL file musik Anda -->
+    <div id="toast" class="toast">Berhasil disalin!</div>
+
+    <!-- Modal Galeri Zoom -->
+    <div id="galleryModal" class="gallery-modal" onclick="closeGalleryModal()">
+        <span class="close-modal" onclick="closeGalleryModal()">&times;</span>
+
+        <div class="modal-nav prev" onclick="prevImage(event)">
+            <i class="fas fa-chevron-left"></i>
+        </div>
+
+        <img class="modal-content" id="imgFull">
+
+        <div class="modal-nav next" onclick="nextImage(event)">
+            <i class="fas fa-chevron-right"></i>
+        </div>
+
+        <p style="color: white; margin-top: 20px; font-size: 0.85rem; opacity: 0.8; font-weight: 600;">
+            <span id="imgCounter">1 / 6</span>
+        </p>
+        <p style="color: white; margin-top: 5px; font-size: 0.75rem; opacity: 0.6;">Geser atau gunakan panah untuk
+            navigasi</p>
+    </div>
+
     <audio id="backgroundMusic" loop>
         <source src="img/music.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
     </audio>
 
-    <!-- Tombol Kontrol Musik (Akan muncul setelah undangan dibuka) -->
     <div id="musicToggle" class="music-control" style="display: none;">
-        <i class="fas fa-music"></i>
+        <i class="fas fa-compact-disc"></i>
     </div>
 
-    <div class="popup">
+    <div class="popup" id="weddingPopup">
         <div class="circle-img">
-            <img src="img/brides.png" alt="brides">
+            <img src="img/brides.jpg" alt="brides">
         </div>
         <div class="popup-text-center">
-            <h3 class="popup-brides-name">Ami & Ade</h3>
-            <p class="popup-date">- Sabtu, 06 Juni 2026 -</p>
-            <p>Kepada Bapak/Ibu/Saudara/i</p>
-            <h3 class="invitation-name"></h3>
-            <p class="small-text">*Mohon maaf bila ada kesalahan pada penulisan nama/gelar</p>
+            <p style="text-transform: uppercase; letter-spacing: 4px; font-size: 0.7rem; opacity: 0.8;">The Wedding
+                Invitation</p>
+            <h3 class="popup-brides-name">Amy & Ade</h3>
+            <p class="popup-date">Sabtu, 06 Juni 2026</p>
+            <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px;">
+                <p style="font-size: 0.9rem; opacity: 0.7;">Kepada Bapak/Ibu/Saudara/i</p>
+                <h3 id="guestName" style="margin: 10px 0; font-size: 1.6rem; font-weight: 700;">Tamu Undangan</h3>
+                <p class="small-text" style="font-size: 0.7rem; opacity: 0.6; font-style: italic;">*Mohon maaf bila ada
+                    kesalahan penulisan nama/gelar</p>
+            </div>
         </div>
-
-        <div class="btn-popup">
-            <button class="btn-primary">Buka Undangan</button>
-        </div>
+        <button class="btn-primary" onclick="openInvitation()">Buka Undangan</button>
     </div>
+
     <div class="container">
-        <!-- <img src="img/Depan-New-Arival-01-Atas1.png" width="100%"> -->
+        <!-- Hero Section -->
         <div class="main-photo">
-            <img src="img/main_img.png" alt="" width="100%">
+            <img src="img/brides.jpg" alt="Hero Image">
         </div>
         <div class="main-text">
             <p class="top-title">The Wedding of</p>
             <p class="top-name">Amy & Ade</p>
-            <p class="top-agenda">Sabtu, 06 Juni 2026</p>
+            <p class="top-agenda">06 . 06 . 2026</p>
         </div>
 
-        <div class="splitter">
-            <img src="img/Depan-New-Arival-05-Bawah1.png" width="100%">
-            <img src="img/Depan-New-Arival-01-Atas1.png" width="100%">
-        </div>
-
+        <!-- Bismillah & Brides -->
         <div class="bismillah">
-            <img src="img/basmalah-1-2x.png" alt="">
-            <h6>Assalamualaikum Warahmatullahi Wabarakatuh</h6>
-            <p>Dengan memohon Ridho serta Rahmat Allah SWT, kami bermaksud menyelenggarakan Resepsi Pernikahan
-                putra-putri kami:</p>
-
+            <img src="img/basmalah-1-2x.png" alt="Basmalah">
+            <h6 style="font-weight: 700; font-size: 1.15rem; margin-bottom: 15px;">Assalamualaikum Warahmatullahi
+                Wabarakatuh</h6>
+            <p style="color: var(--grey); font-size: 1.15rem; margin-bottom: 40px;">
+                وَمِنْ اٰيٰتِهٖٓ اَنْ خَلَقَ لَكُمْ مِّنْ اَنْفُسِكُمْ اَزْوَاجًا لِّتَسْكُنُوْٓا اِلَيْهَا وَجَعَلَ
+                بَيْنَكُمْ مَّوَدَّةً وَّرَحْمَةً ۗاِنَّ فِيْ ذٰلِكَ لَاٰيٰتٍ لِّقَوْمٍ يَّتَفَكَّرُوْنَ</p>
+            <p style="color: var(--grey); font-size: 1.15rem; margin-bottom: 40px;">
+                Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari
+                jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa
+                kasih dan sayang. Sungguh, pada yang demikian itu benar-benar terdapat tanda-tanda (kebesaran Allah)
+                bagi kaum yang berpikir. (QS. Ar-Rum Ayat 21)</p>
             <div class="photo-wrapper">
                 <div class="brides-photo">
-                    <img src="img/wanita.jpeg" alt="">
+                    <img src="img/wanita.jpeg" alt="Mempelai Wanita">
                     <h6>Ami Fitriyanti</h6>
-                    <p>Putri dari:</p>
-                    <p>Bapak Thalim dan Ibu Maemunah</p>
+                    <p style="font-size: 1rem; color: var(--grey);">Putri dari:</p>
+                    <p style="font-weight: 600; font-size: 1rem;">Bapak Pelda Talim (purn) & Ibu Maemunah</p>
+                </div>
+                <div style="font-family: 'Sail', cursive; font-size: 2.5rem; color: var(--blue); margin: 10px 0;">&
                 </div>
                 <div class="brides-photo">
-                    <img src="img/pria.jpeg" alt="">
+                    <img src="img/pria.jpeg" alt="Mempelai Pria">
                     <h6>Ade Martadikusumah</h6>
-                    <p>Putra dari:</p>
-                    <p>Bapak (Alm) Bapak M. Dachlan Supardi. dan Ibu Dedeh Ratnaningsih</p>
+                    <p style="font-size: 1rem; color: var(--grey);">Putra dari:</p>
+                    <p style="font-weight: 600; font-size: 1rem;">Bapak (Alm) M. Dachlan Supardi & Ibu Dedeh
+                        Ratnaningsih</p>
                 </div>
             </div>
         </div>
 
-        <div class="splitter">
-            <img src="img/Depan-New-Arival-05-Bawah1.png" width="100%">
-            <img src="img/Depan-New-Arival-01-Atas1.png" width="100%">
-        </div>
-
+        <!-- Countdown & Add to Calendar -->
         <section id="event">
-            <h2>Menuju Hari Bahagia</h2>
-
-            <p>Siang dan malam berganti begitu cepat, di antara saat-saat mendebarkan yang belum pernah kami rasakan
-                sebelumnya. Kami nantikan kehadiran para keluarga dan sahabat, untuk menjadi saksi ikrar janji suci kami
-                di hari yang bahagia.</p>
-
+            <h2 style="color: white;">Save The Date</h2>
             <div class="time-event">
-                <div class="time-section">
-                    <div id="days" class="value">00</div>
-                    <div class="timelabel">Days</div>
+                <div class="time-section"><span id="days" class="value">00</span><span class="timelabel">Hari</span>
                 </div>
-                <div class="time-section">
-                    <div id="hours" class="value">00</div>
-                    <div class="timelabel">Hours</div>
+                <div class="time-section"><span id="hours" class="value">00</span><span class="timelabel">Jam</span>
                 </div>
-                <div class="time-section">
-                    <div id="minutes" class="value">00</div>
-                    <div class="timelabel">Minutes</div>
+                <div class="time-section"><span id="minutes" class="value">00</span><span class="timelabel">Menit</span>
                 </div>
-                <div class="time-section">
-                    <div id="seconds" class="value">00</div>
-                    <div class="timelabel">Seconds</div>
+                <div class="time-section"><span id="seconds" class="value">00</span><span class="timelabel">Detik</span>
                 </div>
             </div>
+
+            <!-- TOMBOL GOOGLE CALENDAR (GAYA SALIN REKENING) -->
+            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Pernikahan+Amy+%26+Ade&dates=20260606T090000/20260606T130000&details=Mohon+doa+restu+untuk+pernikahan+kami.+Terima+kasih.&location=Kp+Awi+Mekar+Rt+012/006+Desa+Bungursari,+KAB.+PURWAKARTA"
+                target="_blank" class="btn-calendar">
+                <i class="far fa-calendar-check"></i> Save Calender
+            </a>
         </section>
 
-        <div class="splitter">
-            <img src="img/Depan-New-Arival-05-Bawah1.png" width="100%">
-            <img src="img/Depan-New-Arival-01-Atas1.png" width="100%">
-        </div>
-
+        <!-- Location -->
         <section id="location">
             <h2>Akad Nikah</h2>
-
             <div class="wrapper-location">
-                <h6>Akad Pernikahan akan dilaksanakan pada:</h6>
-                <div class="agenda">
-                    <span><i class="fas fa-calendar-alt"></i></span>
+                <div class="agenda"><i class="fas fa-calendar-check"></i>
                     <p>Sabtu, 06 Juni 2026</p>
                 </div>
-                <div class="agenda">
-                    <span><i class="far fa-clock"></i></span>
-                    <p>09.00 WIB</p>
+                <div class="agenda"><i class="far fa-clock"></i>
+                    <p>09.00 WIB - Selesai</p>
                 </div>
-                <div class="agenda">
-                    <span><i class="fas fa-map-marker-alt"></i></span>
-                    <p>Rumah Bpk Thalim</p>
-                </div>
-                <div class="agenda">
-                    <span>&nbsp;&nbsp;&nbsp;</span>
-                    <p>Kp Awi Mekar Rt 012/006 Desa Bungursari, Kec. Bungursari, KAB. PURWAKARTA, JAWA BARAT, ID, 41182
-                    </p>
+                <div class="agenda"><i class="fas fa-map-marker-alt"></i>
+                    <div>
+                        <p style="font-weight: 700;">Kediaman Mempelai Wanita</p>
+                        <p style="font-size: 0.85rem; color: var(--grey);">Kp Awi Mekar Rt 012/006 Desa Bungursari, KAB.
+                            PURWAKARTA</p>
+                    </div>
                 </div>
                 <div class="maps-location">
-<iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d247.77159676688137!2d107.47226763022151!3d-6.477844321270096!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e690d567c20ff65%3A0xf78032c615d86944!2sKp%20awi%20mekar!5e0!3m2!1sid!2sid!4v1769575513566!5m2!1sid!2sid" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d247.77159676688137!2d107.47226763022151!3d-6.477844321270096!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e690d567c20ff65%3A0xf78032c615d86944!2sKp%20awi%20mekar!5e0!3m2!1sid!2sid!4v1769575513566!5m2!1sid!2sid"
+                        allowfullscreen="" loading="lazy"></iframe>
                 </div>
+                <div style="text-align: center;"><a
+                        href="https://maps.google.com/maps?ll=-6.477829,107.472541&z=19&t=m&hl=id&gl=ID&mapclient=embed&cid=17834310350738581828"
+                        target="_blank" class="btn-maps">Buka Google Maps</a></div>
             </div>
         </section>
 
-        <section id="receptionLocation">
-            <h2>Resepsi<br> Pernikahan</h2>
-
-            <div class="wrapper-location">
-                <h6>Resepsi akan dilaksanakan pada:</h6>
-                <div class="agenda">
-                    <span><i class="fas fa-calendar-alt"></i></span>
-                    <p>Sabtu, 06 Juni 2026</p>
-                </div>
-                <div class="agenda">
-                    <span><i class="far fa-clock"></i></span>
-                    <p>09.30 WIB - Selesai</p>
-                </div>
-                <div class="agenda">
-                    <span><i class="fas fa-map-marker-alt"></i></span>
-                    <p class="text-bold">Rumah Bpk Thalim</p>
-                </div>
-                <div class="agenda">
-                    <span>&nbsp;&nbsp;&nbsp;</span>
-                    <p>Kp Awi Mekar Rt 012/006 Desa Bungursari, Kec. Bungursari, KAB. PURWAKARTA, JAWA BARAT, ID, 41182
-                    </p>
-                </div>
-                <div class="maps-location">
-                    <a href="https://maps.app.goo.gl/stvJppt5qbMRT2H56" target="_blank">Lihat Maps</a>
-                </div>
+        <!-- Gallery -->
+        <section id="gallery" style="background: var(--light-grey);">
+            <h2>Galeri Foto</h2>
+            <p style="font-size: 0.9rem; color: var(--grey); margin-bottom: 25px;">Klik foto untuk memperbesar</p>
+            <div class="gallery-grid" id="mainGallery">
+                <div class="gallery-item" onclick="openGalleryModal(0)"><img
+                        src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=400" alt="G1"></div>
+                <div class="gallery-item" onclick="openGalleryModal(1)"><img
+                        src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=400" alt="G2"></div>
+                <div class="gallery-item" onclick="openGalleryModal(2)"><img
+                        src="https://images.unsplash.com/photo-1465495910483-0d6749ee9f4a?q=80&w=400" alt="G3"></div>
+                <div class="gallery-item" onclick="openGalleryModal(3)"><img
+                        src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=400" alt="G4"></div>
+                <div class="gallery-item" onclick="openGalleryModal(4)"><img
+                        src="https://images.unsplash.com/photo-1522673607200-1648832cee33?q=80&w=400" alt="G5"></div>
+                <div class="gallery-item" onclick="openGalleryModal(5)"><img
+                        src="https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=400" alt="G6"></div>
             </div>
         </section>
 
-        <div class="splitter">
-            <img src="img/Depan-New-Arival-05-Bawah1.png" width="100%">
-            <img src="img/Depan-New-Arival-01-Atas1.png" width="100%">
-        </div>
-
+        <!-- Health Protocol -->
         <section id="healthProtocol">
-            <h2>Protokol<br> Kesehatan</h2>
+            <h2>Protokol Kesehatan</h2>
             <div class="health-protocol">
-                <div class="prokes">
-                    <img src="img/pakai_masker.png" alt="">
-                    <p>Memakai Masker</p>
+                <div class="prokes"><i class="fas fa-head-side-mask"></i>
+                    <p>Pakai Masker</p>
                 </div>
-                <div class="prokes">
-                    <img src="img/jabat_tangan.png" alt="">
-                    <p>Menjabat Tangan</p>
+                <div class="prokes"><i class="fas fa-hands-wash"></i>
+                    <p>Cuci Tangan</p>
                 </div>
-                <div class="prokes">
-                    <img src="img/pakai_sabun.png" alt="">
-                    <p>Memakai Sabun</p>
-                </div>
-                <div class="prokes">
-                    <img src="img/jaga_jarak.png" alt="">
-                    <p>Menjaga Jarak</p>
-                </div>
-                <div class="prokes">
-                    <img src="img/cuci_tangan.png" alt="">
-                    <p>Mencuci Tangan</p>
-                </div>
-                <div class="prokes">
-                    <img src="img/handsanitizer.png" alt="">
-                    <p>Menggunakan<br> Handsanitizer</p>
+                <div class="prokes"><i class="fas fa-people-arrows"></i>
+                    <p>Jaga Jarak</p>
                 </div>
             </div>
         </section>
 
-        <div class="splitter">
-            <img src="img/Depan-New-Arival-05-Bawah1.png" width="100%">
-            <img src="img/Depan-New-Arival-01-Atas1.png" width="100%">
-        </div>
-
-        <!-- <section id="gallery"></section> -->
-
+        <!-- Gift Section -->
         <section id="sendGift">
             <h2>Kirim Hadiah</h2>
             <div class="send-gift">
-                <i class="fas fa-gift fa-6x"></i>
-                <p>Bagi anda yang ingin mengirimkan hadiah, silakan transfer hadiah anda melalui nomor rekening maupun
-                    dompet digital berikut:</p>
-                <hr style="border: 1px solid blue; width: 50%;">
-                <div class="icon-bni">
-                    <img src="img/bank_mandiri.png" alt="" width="40%">
-                    <ul>
-                        <li>Nomor Rekening: <span>1330023981830</span></li>
-                        <li>Atas Nama: <span>AMI FITRIYANTI</span></li>
-                    </ul>
+                <p style="font-size: 0.85rem; color: var(--grey); margin-bottom: 20px;">Berikan tanda kasih Anda
+                    melalui:</p>
+                <div class="bank-info">
+                    <img src="https://upload.wikimedia.org/wikipedia/id/thumb/f/fa/Bank_Mandiri_logo.svg/1200px-Bank_Mandiri_logo.svg.png"
+                        alt="Mandiri" class="bank-logo">
+                    <p style="font-weight: 700; font-size: 1.1rem;">1330023981830</p>
+                    <p style="font-size: 0.85rem; color: var(--grey);">a.n AMI FITRIYANTI</p>
+                    <button class="copy-btn" onclick="copyText('1330023981830')"><i class="far fa-copy"></i> Salin
+                        Rekening</button>
                 </div>
-                <hr style="border: 1px solid blue; width: 50%;">
-                <div class="icon-sulselbar">
-                    <img src="img/bank_bca.jpg" alt="" width="40%">
-                    <ul>
-                        <li>Nomor Rekening: <span>4810315411</span></li>
-                        <li>Atas Nama: <span>Ade Martadikusumah</span></li>
-                    </ul>
+                <div class="bank-info">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Bank_Central_Asia.svg/1200px-Bank_Central_Asia.svg.png"
+                        alt="BCA" class="bank-logo">
+                    <p style="font-weight: 700; font-size: 1.1rem;">4810315411</p>
+                    <p style="font-size: 0.85rem; color: var(--grey);">a.n ADE MARTADIKUSUMAH</p>
+                    <button class="copy-btn" onclick="copyText('4810315411')"><i class="far fa-copy"></i> Salin
+                        Rekening</button>
                 </div>
-                <hr style="border: 1px solid blue; width: 50%;">
-                <div class="icon-qris">
-                    <img src="img/logo_qris.jpeg" alt="" width="40%">
-                </div>
-                <hr style="border: 1px solid blue; width: 50%;">
-                <p>Atas Doa dan Restu dari Bapak/Ibu/Saudara/i Kami ucapkan banyak terima kasih. </p>
-                <p>Kami Yang Berbahagia:</p>
-                <p class="brides-name">Amy & Ade</p>
-            </div>
-
-            <div class="splitter">
-                <img src="img/Depan-New-Arival-05-Bawah1.png" width="100%">
             </div>
         </section>
 
-        <!-- SCROLL TO TOP BUTTON -->
-        <a class="gotopbtn" href="#"> <i class="fas fa-arrow-up"></i> </a>
+        <!-- Guest Book Section -->
+        <section id="guestBook">
+            <h2>Buku Tamu</h2>
+            <p style="font-size: 0.9rem; color: var(--grey); margin-bottom: 30px;">
+                Berikan ucapan hangat dan doa restu Anda untuk kami berdua:
+            </p>
+            <div class="form-container">
+                <iframe
+                    src="https://docs.google.com/forms/d/e/1FAIpQLSdHYDpKgA4fsA41kbyjf0VZo-bws5XhBbps1dibHwFb1aM8Qw/viewform?embedded=true"
+                    width="350" height="586" frameborder="0" marginheight="0" marginwidth="0">Memuat…</iframe>
+            </div>
+
+            <p style="margin-top: 50px; font-weight: 600;">Kami Yang Berbahagia:</p>
+            <p class="brides-name-footer">Amy & Ade</p>
+        </section>
+
+        <!-- Scroll Top -->
+        <a class="gotopbtn" href="#"> <i class="fas fa-chevron-up"></i> </a>
     </div>
 
-    <!-- FOOTER -->
+    <!-- Footer Menu -->
     <div class="footer">
         <div class="footer-menu">
-            <div class="box">
-                <a href="#"><i class="fas fa-home fa-2x tab-icon"></i></a>
-                <p>Home</p>
-            </div>
-            <div class="box">
-                <a href="#event"><i class="fas fa-calendar-alt fa-2x tab-icon"></i></a>
-                <p>Event</p>
-            </div>
-            <div class="box">
-                <a href="#location"><i class="fas fa-map-marker-alt fa-2x tab-icon"></i></a>
-                <p>location</p>
-            </div>
-            <div class="box">
-                <a href="#sendGift"><i class="fas fa-gift fa-2x tab-icon"></i></a>
-                <p>Gifts</p>
-            </div>
+            <a href="#" class="box"><i class="fas fa-heart"></i>Sampul</a>
+            <a href="#event" class="box"><i class="fas fa-clock"></i>Waktu</a>
+            <a href="#location" class="box"><i class="fas fa-map-marked-alt"></i>Lokasi</a>
+            <a href="#gallery" class="box"><i class="fas fa-camera-retro"></i>Galeri</a>
+            <a href="#sendGift" class="box"><i class="fas fa-gift"></i>Hadiah</a>
+            <a href="#guestBook" class="box"><i class="fas fa-book-open"></i>Buku Tamu</a>
         </div>
     </div>
 
-    <script src="js/countdown.js"></script>
     <script>
-        const pObj = document.querySelector(".popup .invitation-name");
+        const guestObj = document.getElementById("guestName");
         const params = new URLSearchParams(window.location.search);
-        pObj.innerHTML = params.get('to');
+        if (params.get('to')) { guestObj.innerHTML = params.get('to'); }
 
-        const popup = document.querySelector(".popup");
-        const btnPrimary = document.querySelector(".btn-primary");
+        function openInvitation() {
+            document.getElementById("weddingPopup").classList.add("popup--close");
+            startMusic();
+        }
 
-        // Logika Audio
         const audio = document.getElementById("backgroundMusic");
         const musicToggle = document.getElementById("musicToggle");
         let isPlaying = false;
 
-        function toggleMusic() {
-            if (isPlaying) {
-                audio.pause();
-                musicToggle.classList.remove("playing");
-            } else {
-                audio.play();
-                musicToggle.classList.add("playing");
-            }
-            isPlaying = !isPlaying;
-        }
-
-        musicToggle.addEventListener("click", toggleMusic);
-
-        btnPrimary.addEventListener("click", function () {
-            // Tutup popup
-            popup.classList.remove("popup");
-            popup.classList.add("popup--close");
-
-            // Putar musik otomatis setelah interaksi klik
+        function startMusic() {
             audio.play().then(() => {
                 isPlaying = true;
                 musicToggle.style.display = "flex";
                 musicToggle.classList.add("playing");
-            }).catch(error => {
-                console.log("Audio play failed:", error);
-            });
+            }).catch(e => { musicToggle.style.display = "flex"; });
+        }
+
+        musicToggle.addEventListener("click", () => {
+            if (isPlaying) { audio.pause(); musicToggle.classList.remove("playing"); }
+            else { audio.play(); musicToggle.classList.add("playing"); }
+            isPlaying = !isPlaying;
         });
+
+        const countdownDate = new Date("June 06, 2026 09:00:00").getTime();
+        setInterval(function () {
+            const now = new Date().getTime();
+            const distance = countdownDate - now;
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            if (document.getElementById("days")) document.getElementById("days").innerHTML = days < 10 ? "0" + days : days;
+            if (document.getElementById("hours")) document.getElementById("hours").innerHTML = hours < 10 ? "0" + hours : hours;
+            if (document.getElementById("minutes")) document.getElementById("minutes").innerHTML = minutes < 10 ? "0" + minutes : minutes;
+            if (document.getElementById("seconds")) document.getElementById("seconds").innerHTML = seconds < 10 ? "0" + seconds : seconds;
+        }, 1000);
+
+        function copyText(text) {
+            const tempInput = document.createElement("input");
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+            const toast = document.getElementById("toast");
+            toast.style.display = "block";
+            setTimeout(() => { toast.style.display = "none"; }, 2000);
+        }
+
+        // --- Logika Navigasi Galeri Zoom ---
+        let currentImgIndex = 0;
+        const galleryImgs = Array.from(document.querySelectorAll('#mainGallery .gallery-item img')).map(img => img.src);
+
+        function openGalleryModal(index) {
+            currentImgIndex = index;
+            updateModalContent();
+            const modal = document.getElementById("galleryModal");
+            modal.style.display = "flex";
+            document.body.style.overflow = "hidden";
+        }
+
+        function updateModalContent() {
+            const modalImg = document.getElementById("imgFull");
+            const counter = document.getElementById("imgCounter");
+            modalImg.src = galleryImgs[currentImgIndex];
+            counter.innerText = `${currentImgIndex + 1} / ${galleryImgs.length}`;
+
+            modalImg.style.transform = "scale(0.95)";
+            setTimeout(() => {
+                modalImg.style.transform = "scale(1)";
+            }, 50);
+        }
+
+        function nextImage(event) {
+            if (event) event.stopPropagation();
+            currentImgIndex = (currentImgIndex + 1) % galleryImgs.length;
+            updateModalContent();
+        }
+
+        function prevImage(event) {
+            if (event) event.stopPropagation();
+            currentImgIndex = (currentImgIndex - 1 + galleryImgs.length) % galleryImgs.length;
+            updateModalContent();
+        }
+
+        function closeGalleryModal() {
+            document.getElementById("galleryModal").style.display = "none";
+            document.body.style.overflow = "auto";
+        }
+
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById("galleryModal");
+            if (modal.style.display === "flex") {
+                if (e.key === "ArrowRight") nextImage();
+                if (e.key === "ArrowLeft") prevImage();
+                if (e.key === "Escape") closeGalleryModal();
+            }
+        });
+
+        let touchstartX = 0;
+        let touchendX = 0;
+        const modalElement = document.getElementById('galleryModal');
+
+        modalElement.addEventListener('touchstart', e => {
+            touchstartX = e.changedTouches[0].screenX;
+        }, false);
+
+        modalElement.addEventListener('touchend', e => {
+            touchendX = e.changedTouches[0].screenX;
+            handleGesture();
+        }, false);
+
+        function handleGesture() {
+            if (touchendX < touchstartX - 50) nextImage();
+            if (touchendX > touchstartX + 50) prevImage();
+        }
     </script>
 </body>
 
-
 </html>
-
