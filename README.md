@@ -14,7 +14,7 @@ Proyek ini dilengkapi dengan berbagai fitur modern:
 * **🎯 Smart WhatsApp Generator**: Kirim undangan personal tanpa ribet. Nama tamu akan muncul otomatis di halaman depan berdasarkan parameter URL.
 * **🎵 Background Music**: Fitur pemutaran musik otomatis (*autoplay*) untuk memperkuat suasana romantis.
 * **📸 Interactive Gallery**: Galeri foto yang bersih dengan fitur *zoom* dan *lightbox*.
-* **✍️ Real-time Guestbook**: Buku tamu interaktif menggunakan database (Google Sheets API) agar tamu bisa mengirim doa secara langsung.
+* **✍️ Real-time Guestbook**: Buku tamu interaktif menggunakan database (superbase) agar tamu bisa mengirim doa secara langsung.
 * **📅 Save the Date**: Fitur pengingat kalender agar tamu tidak melewatkan hari bahagia ini.
 
 ---
