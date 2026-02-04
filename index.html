@@ -122,6 +122,27 @@
         footer {
             margin-bottom: 80px;
         }
+
+        /* Pagination Styles */
+        .pagination-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        .pagination-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .pagination-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body class="bg-blue-50 text-slate-900">
@@ -328,8 +349,21 @@
 
                 <div class="mt-20 text-left fade-down-element">
                     <h3 class="font-serif text-2xl mb-8 border-l-4 border-blue-500 pl-4 uppercase tracking-widest">Ucapan dari Tamu</h3>
-                    <div id="messages-container" class="space-y-4 max-h-[500px] overflow-y-auto pr-2 message-list">
+                    
+                    <!-- Container Pesan -->
+                    <div id="messages-container" class="space-y-4 pr-2 message-list">
                         <p class="text-blue-200/50 italic text-sm">Memuat daftar ucapan...</p>
+                    </div>
+
+                    <!-- Navigasi Panah (Pagination) -->
+                    <div id="pagination-controls" class="mt-8 flex items-center justify-between hidden">
+                        <button id="prev-page" onclick="changePage(-1)" class="pagination-btn">
+                            <i class="fa-solid fa-chevron-left"></i> Prev
+                        </button>
+                        <span id="page-info" class="text-xs font-bold text-blue-200 uppercase tracking-widest">Halaman 1</span>
+                        <button id="next-page" onclick="changePage(1)" class="pagination-btn">
+                            Next <i class="fa-solid fa-chevron-right"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -381,7 +415,6 @@
     <!-- DATABASE LOGIC (SUPABASE) -->
     <script>
         // --- KONFIGURASI SUPABASE ---
-        // Ganti dengan kredensial Supabase Anda
         const supabaseUrl = 'https://qczzjtraivdxdergbxjy.supabase.co';
         const supabaseKey = 'sb_publishable_sdf_MeOzRGvsGACogsDBLg_sDMgZOeW';
 
@@ -389,6 +422,11 @@
         if (typeof supabase !== 'undefined' && !supabaseUrl.includes('YOUR_PROJECT_URL')) {
             _supabase = supabase.createClient(supabaseUrl, supabaseKey);
         }
+
+        // State untuk Pagination
+        let allMessages = [];
+        let currentPage = 1;
+        const messagesPerPage = 5;
 
         // Global Toast Notification
         window.showToast = function(message) {
@@ -401,13 +439,62 @@
             }
         }
 
-        // Fungsi Ambil Data (Read)
-        async function fetchGuestbook() {
+        // Fungsi Render Pesan dengan Penomoran
+        function renderMessages() {
             const container = document.getElementById('messages-container');
-            if (!_supabase) {
-                container.innerHTML = '<p class="text-blue-200/50 italic text-sm">Database belum dikonfigurasi.</p>';
+            const paginationEl = document.getElementById('pagination-controls');
+            
+            if (allMessages.length === 0) {
+                container.innerHTML = '<p class="text-blue-200/50 italic text-sm">Belum ada ucapan.</p>';
+                paginationEl.classList.add('hidden');
                 return;
             }
+
+            paginationEl.classList.remove('hidden');
+            container.innerHTML = '';
+
+            // Hitung data untuk halaman saat ini
+            const startIndex = (currentPage - 1) * messagesPerPage;
+            const endIndex = startIndex + messagesPerPage;
+            const displayedMessages = allMessages.slice(startIndex, endIndex);
+
+            displayedMessages.forEach((msg, index) => {
+                const globalIndex = startIndex + index + 1; // Penomoran 1, 2, 3...
+                const el = document.createElement('div');
+                el.className = "bg-white/5 p-5 rounded-2xl border border-white/10 mb-4 fade-in";
+                el.innerHTML = `
+                    <h4 class="font-bold text-blue-400 text-xs uppercase mb-2">
+                        <span class="bg-blue-600 text-white px-2 py-1 rounded-md mr-2">#${globalIndex}</span>
+                        ${msg.Nama} 
+                        <span class="text-[9px] opacity-40 float-right">${msg.Status}</span>
+                    </h4>
+                    <p class="text-white/80 text-sm leading-relaxed">${msg.Ucapan}</p>
+                `;
+                container.appendChild(el);
+            });
+
+            updatePaginationUI();
+        }
+
+        // Update UI Navigasi
+        function updatePaginationUI() {
+            const totalPages = Math.ceil(allMessages.length / messagesPerPage);
+            document.getElementById('page-info').innerText = `Halaman ${currentPage} / ${totalPages}`;
+            document.getElementById('prev-page').disabled = (currentPage === 1);
+            document.getElementById('next-page').disabled = (currentPage === totalPages || totalPages === 0);
+        }
+
+        // Ganti Halaman
+        window.changePage = function(direction) {
+            currentPage += direction;
+            renderMessages();
+            // Scroll ke judul ucapan agar pengguna tahu konten berubah
+            document.getElementById('messages-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Ambil Data Utama
+        async function fetchGuestbook() {
+            if (!_supabase) return;
 
             try {
                 const { data, error } = await _supabase
@@ -416,32 +503,16 @@
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
-
-                container.innerHTML = '';
-                if (!data || data.length === 0) {
-                    container.innerHTML = '<p class="text-blue-200/50 italic text-sm">Belum ada ucapan.</p>';
-                    return;
-                }
-
-                data.forEach(msg => {
-                    const el = document.createElement('div');
-                    el.className = "bg-white/5 p-5 rounded-2xl border border-white/10 mb-4 fade-in";
-                    el.innerHTML = `
-                        <h4 class="font-bold text-blue-400 text-xs uppercase mb-2">
-                            ${msg.Nama} 
-                            <span class="text-[9px] opacity-40 float-right">${msg.Status}</span>
-                        </h4>
-                        <p class="text-white/80 text-sm leading-relaxed">${msg.Ucapan}</p>
-                    `;
-                    container.appendChild(el);
-                });
+                allMessages = data || [];
+                currentPage = 1;
+                renderMessages();
             } catch (err) {
                 console.error("Fetch error:", err);
-                container.innerHTML = '<p class="text-blue-200/50 italic text-sm">Gagal memuat ucapan.</p>';
+                document.getElementById('messages-container').innerHTML = '<p class="text-blue-200/50 italic text-sm">Gagal memuat ucapan.</p>';
             }
         }
 
-        // Fungsi Kirim Data (Insert)
+        // Kirim Data Baru
         const rsvpForm = document.getElementById('rsvp-form');
         const submitBtn = document.getElementById('submit-btn');
         const btnText = document.getElementById('btn-text');
@@ -477,12 +548,11 @@
                     
                     rsvpForm.reset();
                     
-                    // Reset tombol setelah 3 detik
                     setTimeout(() => {
                         submitBtn.classList.replace('bg-green-600', 'bg-blue-600');
                         btnText.innerText = "Konfirmasi Kehadiran";
                         submitBtn.disabled = false;
-                        fetchGuestbook(); // Refresh daftar pesan
+                        fetchGuestbook(); 
                     }, 3000);
 
                 } catch (error) {
@@ -494,12 +564,11 @@
             });
         }
 
-        // Jalankan fetch saat sistem siap
         document.addEventListener('DOMContentLoaded', fetchGuestbook);
     </script>
 
     <script>
-        // LOGIKA INTERFACE
+        // LOGIKA INTERFACE UMUM
         let currentImageIndex = 0;
         const galleryImages = [];
         document.querySelectorAll('.gallery-item').forEach(img => { galleryImages.push(img.src); });
@@ -552,7 +621,6 @@
             window.showToast("Nomor rekening berhasil disalin!");
         }
 
-        // Active Link on Scroll
         window.addEventListener('scroll', () => {
             let current = "";
             const sections = document.querySelectorAll('section');
@@ -573,7 +641,6 @@
             });
         });
 
-        // Timer
         const targetDate = new Date("June 6, 2026 09:00:00").getTime();
         setInterval(() => {
             const now = new Date().getTime();
