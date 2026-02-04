@@ -29,9 +29,12 @@ Berikut adalah cuplikan tampilan undangan:
 
 ---
 
-## 🚀 Cara Penggunaan Generator Nama Via Whatsapp
+## 🚀 Cara Penggunaan Generator Nama 
 
-Untuk menyapa tamu secara personal di halaman depan, gunakan format link berikut:
+<p align="center">
+  <img src="img/wa.png" alt="Preview Undangan Ami Ade" width="400">
+</p>
+Untuk Memasukan Nama undangan yang akan di Undang, silahkan gunakan format link berikut:
 
 ```text
 https://ade-ami.github.io/generator.html
