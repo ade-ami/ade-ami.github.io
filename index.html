@@ -301,25 +301,33 @@
                         <label class="block text-xs font-bold text-blue-200 uppercase tracking-widest">Nama Lengkap</label>
                         <input type="text" name="Nama" required class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 focus:outline-none focus:border-blue-400 focus:bg-white/10 transition-all text-white" placeholder="Masukkan nama Anda">
                     </div>
-                    <div class="space-y-2">
-                        <label class="block text-xs font-bold text-blue-200 uppercase tracking-widest">Jumlah Tamu</label>
-                        <select name="Jumlah" class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 focus:outline-none focus:border-blue-400 text-white appearance-none">
-                            <option value="1" class="text-slate-900">1 Orang</option>
-                            <option value="2" class="text-slate-900">2 Orang</option>
-                            <option value="3" class="text-slate-900">3 Orang atau lebih</option>
-                        </select>
-                    </div>
-                    <div class="space-y-4">
-                        <label class="block text-xs font-bold text-blue-200 uppercase tracking-widest">Kehadiran</label>
-                        <div class="flex gap-8">
-                            <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="radio" name="Status" value="Hadir" class="w-5 h-5 accent-blue-500" checked> Hadir
-                            </label>
-                            <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="radio" name="Status" value="Tidak Hadir" class="w-5 h-5 accent-blue-500"> Tidak Hadir
-                            </label>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-blue-200 uppercase tracking-widest">Jumlah Tamu</label>
+                            <select name="Jumlah" class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 focus:outline-none focus:border-blue-400 text-white appearance-none">
+                                <option value="1" class="text-slate-900">1 Orang</option>
+                                <option value="2" class="text-slate-900">2 Orang</option>
+                                <option value="3" class="text-slate-900">3 Orang atau lebih</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-blue-200 uppercase tracking-widest">Kehadiran</label>
+                            <div class="flex items-center h-[58px] gap-8 bg-white/5 border border-white/10 rounded-2xl px-4">
+                                <label class="flex items-center gap-3 cursor-pointer text-sm">
+                                    <input type="radio" name="Status" value="Hadir" class="w-4 h-4 accent-blue-500" checked> Hadir
+                                </label>
+                                <label class="flex items-center gap-3 cursor-pointer text-sm">
+                                    <input type="radio" name="Status" value="Tidak Hadir" class="w-4 h-4 accent-blue-500"> Tidak Hadir
+                                </label>
+                            </div>
                         </div>
                     </div>
+                    <!-- KOLOM BARU: UCAPAN SELAMAT & DOA -->
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-blue-200 uppercase tracking-widest">Ucapan Selamat & Doa</label>
+                        <textarea name="Ucapan" rows="4" required class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 focus:outline-none focus:border-blue-400 focus:bg-white/10 transition-all text-white resize-none" placeholder="Tuliskan ucapan dan doa terbaik Anda untuk mempelai..."></textarea>
+                    </div>
+                    
                     <button type="submit" id="submit-btn" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold hover:bg-blue-500 transition-all shadow-2xl mt-8 uppercase tracking-[0.2em] text-xs">
                         <span id="btn-text">Konfirmasi Kehadiran</span>
                     </button>
@@ -448,7 +456,9 @@
         // Form Submit
         form.addEventListener('submit', e => {
             e.preventDefault();
-            if(scriptURL === 'MASUKKAN_URL_SCRIPT_DI_SINI') {
+            if(scriptURL === 'https://script.google.com/macros/s/AKfycbxKw4O-25G1iyuuy1WM2-QEh4TTQjgPVnBw28VnXSyFOLXaJ1pgXpShrTzAOP4i2jzL/exec') {
+                // Biarkan lanjut jika URL sudah benar
+            } else if(scriptURL === 'MASUKKAN_URL_SCRIPT_DI_SINI') {
                 showToast("Pengaturan: scriptURL belum diatur.");
                 return;
             }
@@ -526,7 +536,7 @@
             const sections = document.querySelectorAll('section');
             sections.forEach(section => {
                 const sectionTop = section.offsetTop;
-                if (pageYOffset >= sectionTop - 250) {
+                if (window.pageYOffset >= sectionTop - 250) {
                     current = section.getAttribute('id');
                 }
             });
@@ -540,8 +550,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
