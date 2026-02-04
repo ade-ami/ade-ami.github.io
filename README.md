@@ -1,45 +1,37 @@
 # 💌 Ami & Ade Digital Wedding Invitation
 
-Sebuah proyek undangan pernikahan digital berbasis web yang modern, responsif, dan interaktif. Proyek ini dikembangkan menggunakan teknologi web standar dan dihosting melalui **GitHub Pages**.
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://ade-ami.github.io/)
+[![GitHub license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/username/nama-repo/blob/master/LICENSE)
+
+Sebuah proyek undangan pernikahan digital yang elegan, responsif, dan interaktif. Dibuat khusus untuk momen bahagia **Ami & Ade**, undangan ini dirancang untuk memberikan pengalaman terbaik bagi para tamu undangan.
+
+---
 
 ## ✨ Fitur Utama
 
-Proyek ini telah dilengkapi dengan berbagai fitur interaktif untuk meningkatkan pengalaman tamu undangan:
+Proyek ini dilengkapi dengan berbagai fitur modern:
 
-* **🎯 Smart Invitation Generator**: Fitur kustomisasi nama tamu secara otomatis melalui URL, memudahkan pengiriman undangan personal via WhatsApp tanpa perlu banyak file HTML.
-* **🎵 Background Music**: Fitur pemutaran musik otomatis (*autoplay*) dengan kontrol *play/pause* untuk membangun suasana romantis saat membuka undangan.
-* **📸 Interactive Gallery**: Galeri foto yang responsif dengan fitur *lightbox/zoom* untuk melihat momen bahagia mempelai dengan lebih jelas.
-* **✍️ Real-time Guestbook**: Buku tamu terintegrasi yang memungkinkan tamu memberikan ucapan dan doa secara langsung (menggunakan integrasi Google Sheets/Real-time Database).
-* **📅 Save the Date**: Integrasi kalender untuk memudahkan tamu menyimpan jadwal acara di perangkat mereka.
+* **🎯 Smart WhatsApp Generator**: Kirim undangan personal tanpa ribet. Nama tamu akan muncul otomatis di halaman depan berdasarkan parameter URL.
+* **🎵 Background Music**: Fitur pemutaran musik otomatis (*autoplay*) untuk memperkuat suasana romantis.
+* **📸 Interactive Gallery**: Galeri foto yang bersih dengan fitur *zoom* dan *lightbox*.
+* **✍️ Real-time Guestbook**: Buku tamu interaktif menggunakan database (Google Sheets API) agar tamu bisa mengirim doa secara langsung.
+* **📅 Save the Date**: Fitur pengingat kalender agar tamu tidak melewatkan hari bahagia ini.
 
-## 🚀 Teknologi yang Digunakan
+---
 
-* **Frontend**: HTML5, CSS3 (Custom Animations), JavaScript (ES6)
-* **Hosting**: GitHub Pages
-* **Database**: Superbase (untuk Guestbook Real-time)
-* **Library**: Animate.css, AOS (Animate on Scroll), SweetAlert2
+## 📸 Preview Tampilan
 
-## 🛠️ Cara Penggunaan Generator Nama (WhatsApp)
+Berikut adalah cuplikan tampilan undangan:
 
-Untuk mengirimkan undangan secara personal, gunakan format URL berikut:
+<p align="center">
+  <img src="img/ss.png" alt="Preview Undangan Ami Ade" width="400">
+</p>
 
-`https://username.github.io/nama-repo/?to=Nama+Tamu`
+---
 
-Contoh: 
-`https://username.github.io/ami-ade-wedding/?to=Susi+dan+Keluarga`
+## 🚀 Cara Penggunaan Generator Nama Via Whatsapp
 
-Nama yang dimasukkan pada parameter `to` akan otomatis muncul di halaman sampul undangan.
+Untuk menyapa tamu secara personal di halaman depan, gunakan format link berikut:
 
-## 📸 Tampilan
-*(Tambahkan screenshot undangan kamu di sini untuk menarik perhatian)*
-![Preview Undangan](https://ade-ami.github.io/)
-
-## 🏗️ Struktur Folder
 ```text
-├── assets/
-│   ├── css/       # Styling & Animasi
-│   ├── js/        # Logika Music, Gallery, & Generator
-│   ├── img/       # Foto Galeri & Aset Visual
-│   └── music/     # File Audio (.mp3)
-├── index.html     # Struktur Utama
-└── README.md      # Dokumentasi
+https://ade-ami.github.io/generator.html
