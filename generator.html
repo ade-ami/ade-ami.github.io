@@ -3,172 +3,317 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    	    <link href="img/flower_circle_frame.png" rel="icon">
-    <title>WhatsApp Blast Generator - Amy & Ade</title>
+    <title>WhatsApp Invitation Generator - Amy & Ade</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --navy: #1a2a44;
-            --blue: #2c5282;
-            --light-blue: #ebf4ff;
-            --white: #ffffff;
+            --primary: #2c5282;
+            --primary-dark: #1a365d;
+            --secondary: #25d366; /* WA Green */
+            --bg-body: #f7fafc;
+            --bg-card: #ffffff;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --border-color: #e2e8f0;
+            --accent-light: #ebf4ff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #f0f4f8;
-            color: var(--navy);
+            background-color: var(--bg-body);
+            color: var(--text-main);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
             padding: 20px;
         }
 
-        .card {
-            background: white;
+        .container {
             width: 100%;
-            max-width: 600px;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 500px;
+            perspective: 1000px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            padding: 40px 30px;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .logo-area {
+            width: 60px;
+            height: 60px;
+            background: var(--accent-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 18px;
+            margin: 0 auto 15px;
+            font-size: 1.5rem;
         }
 
         h1 {
-            text-align: center;
-            font-size: 1.5rem;
-            margin-bottom: 25px;
-            color: var(--blue);
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+            letter-spacing: -0.5px;
         }
 
-        .input-group {
+        p.subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        .form-group {
             margin-bottom: 20px;
         }
 
         label {
             display: block;
+            font-weight: 700;
+            font-size: 0.85rem;
             margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 0.9rem;
+            color: var(--primary-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        input, textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-family: inherit;
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 15px;
+            color: var(--text-muted);
             font-size: 1rem;
-            transition: 0.3s;
         }
 
-        input:focus, textarea:focus {
-            border-color: var(--blue);
+        input {
+            width: 100%;
+            padding: 14px 15px 14px 45px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            color: var(--text-main);
+        }
+
+        input:focus {
+            border-color: var(--primary);
             outline: none;
-            background-color: var(--light-blue);
+            box-shadow: 0 0 0 4px rgba(44, 82, 130, 0.1);
+            background-color: #fff;
         }
 
-        .preview-box {
-            background: #f8fafc;
-            border: 1px dashed #cbd5e0;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 10px;
-            white-space: pre-wrap;
+        /* Preview Box - WhatsApp Style */
+        .preview-label-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .preview-container {
+            background-color: #e5ddd5; /* WhatsApp chat background */
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            padding: 20px;
+            border-radius: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .chat-bubble {
+            background: white;
+            padding: 12px 15px;
+            border-radius: 8px 8px 8px 0;
             font-size: 0.9rem;
-            color: #4a5568;
+            line-height: 1.5;
+            position: relative;
+            box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
 
-        .btn-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 25px;
+        .chat-bubble::before {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: -10px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 10px 10px 0;
+            border-color: transparent white transparent transparent;
         }
 
-        button {
-            padding: 12px;
+        .btn-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
             font-weight: 700;
+            font-size: 1rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            transition: 0.3s;
+            gap: 10px;
+            transition: all 0.3s ease;
         }
 
         .btn-copy {
-            background-color: var(--navy);
+            background-color: var(--primary-dark);
             color: white;
         }
 
         .btn-wa {
-            background-color: #25d366;
+            background-color: var(--secondary);
             color: white;
             text-decoration: none;
         }
 
-        button:hover {
-            opacity: 0.9;
+        .btn:hover {
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            filter: brightness(1.1);
         }
 
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Toast Notification */
         .toast {
             position: fixed;
-            bottom: 20px;
+            bottom: 30px;
             left: 50%;
-            transform: translateX(-50%);
-            background: var(--navy);
+            transform: translateX(-50%) translateY(100px);
+            background: #1a202c;
             color: white;
-            padding: 10px 20px;
-            border-radius: 30px;
-            display: none;
-            z-index: 100;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Custom Scrollbar */
+        .preview-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .preview-container::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 30px 20px;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h1><i class="fas fa-paper-plane"></i> WA Invitation Generator</h1>
-    
-    <div class="input-group">
-        <label>URL Website Undangan Anda:</label>
-        <input type="text" id="baseUrl" placeholder="https://ade-ami.github.io" value="https://ade-ami.github.io">
-    </div>
+<div class="container">
+    <div class="card">
+        <header>
+            <div class="logo-area">
+                <i class="fas fa-envelope-open-text"></i>
+            </div>
+            <h1>Invitation Generator</h1>
+            <p class="subtitle">Buat link undangan pribadi dengan mudah</p>
+        </header>
+        
+        <div class="form-group">
+            <label>URL Website Undangan</label>
+            <div class="input-wrapper">
+                <i class="fas fa-link"></i>
+                <input type="text" id="baseUrl" placeholder="https://ade-ami.github.io" value="https://ade-ami.github.io">
+            </div>
+        </div>
 
-    <div class="input-group">
-        <label>Nama Tamu (Contoh: Susi dan Keluarga):</label>
-        <input type="text" id="guestName" placeholder="Masukkan nama tamu..." oninput="generatePreview()">
-    </div>
+        <div class="form-group">
+            <label>Nama Tamu Undangan</label>
+            <div class="input-wrapper">
+                <i class="fas fa-user-edit"></i>
+                <input type="text" id="guestName" placeholder="Contoh: Bpk. Jajang & Keluarga" oninput="generatePreview()">
+            </div>
+        </div>
 
-    <div class="input-group">
-        <label>Preview Pesan:</label>
-        <div id="messagePreview" class="preview-box"></div>
-    </div>
+        <div class="form-group">
+            <div class="preview-label-container">
+                <label>Preview Pesan</label>
+                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600;">WHATSAPP VIEW</span>
+            </div>
+            <div class="preview-container">
+                <div id="messagePreview" class="chat-bubble"></div>
+            </div>
+        </div>
 
-    <div class="btn-container">
-        <button class="btn-copy" onclick="copyMessage()">
-            <i class="far fa-copy"></i> Salin Pesan
-        </button>
-        <button class="btn-wa" onclick="sendWA()">
-            <i class="fab fa-whatsapp"></i> Kirim ke WA
-        </button>
+        <div class="btn-stack">
+            <button class="btn btn-copy" onclick="copyMessage()">
+                <i class="far fa-copy"></i> Salin Teks Pesan
+            </button>
+            <button class="btn btn-wa" onclick="sendWA()">
+                <i class="fab fa-whatsapp"></i> Kirim Langsung ke WA
+            </button>
+        </div>
     </div>
 </div>
 
-<div id="toast" class="toast">Pesan berhasil disalin!</div>
+<div id="toast" class="toast">
+    <i class="fas fa-check-circle" style="color: #48bb78;"></i> 
+    Pesan berhasil disalin!
+</div>
 
 <script>
     function generatePreview() {
         const baseUrl = document.getElementById('baseUrl').value.trim();
-        const guestName = document.getElementById('guestName').value.trim() || "[Nama Tamu]";
-        const encodedName = encodeURIComponent(guestName);
-        const finalUrl = `${baseUrl}?to=${encodedName}`;
+        const guestInput = document.getElementById('guestName').value.trim();
+        const guestName = guestInput || "[Nama Tamu]";
+        
+        // Encode URL
+        const encodedName = encodeURIComponent(guestInput || "");
+        const finalUrl = guestInput ? `${baseUrl}?to=${encodedName}` : baseUrl;
 
         const message = `Assalamu'alaikum Warahmatullahi Wabarakatuh.
 
@@ -194,23 +339,34 @@ Wassalamu'alaikum Warahmatullahi Wabarakatuh.
         tempInput.value = message;
         document.body.appendChild(tempInput);
         tempInput.select();
-        document.execCommand("copy");
-        document.body.removeChild(tempInput);
         
+        try {
+            document.execCommand("copy");
+            showToast();
+        } catch (err) {
+            console.error('Gagal menyalin', err);
+        }
+        
+        document.body.removeChild(tempInput);
+    }
+
+    function showToast() {
         const toast = document.getElementById("toast");
-        toast.style.display = "block";
-        setTimeout(() => { toast.style.display = "none"; }, 2000);
+        toast.classList.add("show");
+        setTimeout(() => { 
+            toast.classList.remove("show"); 
+        }, 3000);
     }
 
     function sendWA() {
         const message = encodeURIComponent(generatePreview());
-        window.open(`https://wa.me/?text=${message}`, '_blank');
+        // Menggunakan api.whatsapp.com agar kompatibel di berbagai perangkat
+        window.open(`https://api.whatsapp.com/send?text=${message}`, '_blank');
     }
 
-    // Inisialisasi awal
-    generatePreview();
+    // Inisialisasi saat halaman dimuat
+    window.onload = generatePreview;
 </script>
 
 </body>
-
 </html>
