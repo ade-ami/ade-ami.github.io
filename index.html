@@ -20,13 +20,28 @@
         .font-cursive {
             font-family: 'Great Vibes', cursive;
         }
+        
+        /* SLEEK FADE-DOWN ANIMATION */
+        .fade-down-element {
+            opacity: 0;
+            transform: translateY(-40px);
+            transition: opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1), transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: transform, opacity;
+        }
+        .fade-down-element.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Initial fade-in for cover items */
         .fade-in {
-            animation: fadeIn 1.5s ease-in-out;
+            animation: fadeIn 1.5s ease-in-out forwards;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
         #main-content {
             display: none;
         }
@@ -87,16 +102,14 @@
             transform: translateY(-2px);
         }
 
-        /* Lightbox Styles */
         #lightbox {
             transition: opacity 0.3s ease-in-out;
         }
 
-        /* Countdown Glassmorphism */
         .glass-card {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            border: 1px border rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
     </style>
 </head>
@@ -143,11 +156,11 @@
         <section id="sampul" class="h-screen bg-cover bg-center relative flex flex-col items-center justify-center overflow-hidden" style="background-image: url('https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=1920');">
             <div class="absolute inset-0 bg-blue-950/60"></div>
             <div class="relative text-center text-white p-4">
-                <p class="uppercase tracking-[0.5em] text-xs mb-6 text-blue-200">Menuju Hari Bahagia</p>
-                <h2 class="font-cursive text-7xl md:text-9xl mb-8">Ami & Ade</h2>
+                <p class="uppercase tracking-[0.5em] text-xs mb-6 text-blue-200 fade-down-element">Menuju Hari Bahagia</p>
+                <h2 class="font-cursive text-7xl md:text-9xl mb-8 fade-down-element">Ami & Ade</h2>
                 
                 <!-- Countdown Timer -->
-                <div class="flex gap-4 justify-center items-center mt-10">
+                <div class="flex gap-4 justify-center items-center mt-10 fade-down-element">
                     <div class="glass-card p-3 rounded-xl w-16 md:w-20">
                         <span id="days" class="block text-2xl md:text-3xl font-bold">00</span>
                         <span class="text-[10px] uppercase tracking-widest">Hari</span>
@@ -166,27 +179,27 @@
                     </div>
                 </div>
                 
-                <p class="mt-12 text-xl tracking-[0.3em] uppercase text-blue-100 font-light">06 . 06 . 2026</p>
+                <p class="mt-12 text-xl tracking-[0.3em] uppercase text-blue-100 font-light fade-down-element">06 . 06 . 2026</p>
             </div>
         </section>
 
         <!-- BRIDE & GROOM -->
         <section class="py-24 px-6 container mx-auto max-w-4xl text-center">
-            <div class="mb-16">
+            <div class="mb-16 fade-down-element">
                 <h2 class="font-serif text-3xl mb-4 text-blue-900 italic">Assalamu’alaikum Wr. Wb.</h2>
                 <p class="text-slate-600 leading-relaxed max-w-2xl mx-auto">Maha suci Allah yang telah menciptakan mahluk-Nya berpasang-pasangan. Dengan memohon rahmat dan ridho Allah SWT, kami bermaksud mengundang Bapak/Ibu/Saudara/i untuk menghadiri pernikahan kami:</p>
             </div>
 
             <div class="grid md:grid-cols-2 gap-16 items-center">
                 <!-- Mempelai Wanita -->
-                <div class="fade-in">
+                <div class="fade-down-element">
                     <img src="img/wanita.jpeg" alt="Ami Fitriyanti" class="w-56 h-56 rounded-full mx-auto object-cover mb-6 border-8 border-white shadow-2xl transform hover:scale-105 transition-transform duration-500">
                     <h3 class="font-cursive text-5xl mb-3 text-blue-900">Ami Fitriyanti</h3>
                     <p class="text-sm font-semibold mb-1 text-slate-800 uppercase tracking-widest">Putri dari:</p>
                     <p class="text-slate-600 text-base leading-relaxed">Bapak Pelda Talim (purn)<br>& Ibu Maemunah</p>
                 </div>
                 <!-- Mempelai Pria -->
-                <div class="fade-in">
+                <div class="fade-down-element">
                     <img src="img/pria.jpeg" alt="Ade Martadikusumah" class="w-56 h-56 rounded-full mx-auto object-cover mb-6 border-8 border-white shadow-2xl transform hover:scale-105 transition-transform duration-500">
                     <h3 class="font-cursive text-5xl mb-3 text-blue-900">Ade Martadikusumah</h3>
                     <p class="text-sm font-semibold mb-1 text-slate-800 uppercase tracking-widest">Putra dari:</p>
@@ -198,13 +211,13 @@
         <!-- EVENT DETAILS (WAKTU) -->
         <section id="waktu" class="bg-blue-100/30 py-24 px-6 border-y border-blue-100">
             <div class="container mx-auto max-w-5xl">
-                <div class="text-center mb-16">
+                <div class="text-center mb-16 fade-down-element">
                     <h2 class="font-serif text-4xl mb-4 text-blue-950 uppercase tracking-widest">Acara Bahagia</h2>
                     <div class="w-24 h-1 bg-blue-900 mx-auto rounded-full"></div>
                 </div>
                 <div class="grid md:grid-cols-2 gap-8">
                     <!-- Akad -->
-                    <div class="bg-white p-10 rounded-[2rem] shadow-xl border border-blue-100 text-center transform hover:-translate-y-2 transition-all duration-300">
+                    <div class="bg-white p-10 rounded-[2rem] shadow-xl border border-blue-100 text-center transform hover:-translate-y-2 transition-all duration-300 fade-down-element">
                         <i class="fa-solid fa-hand-holding-heart text-5xl text-blue-400 mb-6"></i>
                         <h3 class="font-serif text-2xl mb-2 text-blue-900">Akad Nikah</h3>
                         <p class="font-bold text-blue-700 text-xl mb-1">Sabtu, 06 Juni 2026</p>
@@ -214,7 +227,7 @@
                         <p class="text-slate-500 text-sm leading-relaxed px-4">Kp Awi Mekar Rt 012/006 Desa Bungursari,<br>KAB. PURWAKARTA</p>
                     </div>
                     <!-- Resepsi -->
-                    <div class="bg-white p-10 rounded-[2rem] shadow-xl border border-blue-100 text-center transform hover:-translate-y-2 transition-all duration-300">
+                    <div class="bg-white p-10 rounded-[2rem] shadow-xl border border-blue-100 text-center transform hover:-translate-y-2 transition-all duration-300 fade-down-element">
                         <i class="fa-solid fa-glass-cheers text-5xl text-blue-400 mb-6"></i>
                         <h3 class="font-serif text-2xl mb-2 text-blue-900">Resepsi</h3>
                         <p class="font-bold text-blue-700 text-xl mb-1">Sabtu, 06 Juni 2026</p>
@@ -224,7 +237,7 @@
                         <p class="text-slate-500 text-sm leading-relaxed px-4">Kp Awi Mekar Rt 012/006 Desa Bungursari,<br>KAB. PURWAKARTA</p>
                     </div>
                 </div>
-                <div class="mt-16 text-center">
+                <div class="mt-16 text-center fade-down-element">
                     <a href="https://maps.google.com/maps?ll=-6.477829,107.472541&z=19&t=m&hl=id&gl=ID&mapclient=embed&cid=17834310350738581828" target="_blank" class="inline-flex items-center gap-3 bg-blue-900 text-white px-10 py-4 rounded-full hover:bg-blue-950 transition-all shadow-2xl font-bold uppercase tracking-widest text-xs">
                         <i class="fa-solid fa-location-dot text-lg"></i> Lihat Lokasi di Google Maps
                     </a>
@@ -234,21 +247,21 @@
 
         <!-- GALLERY (GALERI) -->
         <section id="galeri" class="py-24 px-6 container mx-auto max-w-6xl">
-            <div class="text-center mb-16">
+            <div class="text-center mb-16 fade-down-element">
                 <h2 class="font-serif text-4xl mb-4 text-blue-950">Galeri Momen</h2>
                 <p class="text-blue-600 italic font-medium">Potongan kisah perjalanan kami</p>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="aspect-[3/4] overflow-hidden rounded-2xl border-4 border-white shadow-lg group">
+                <div class="aspect-[3/4] overflow-hidden rounded-2xl border-4 border-white shadow-lg group fade-down-element">
                     <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=600" onclick="openLightbox(0)" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 cursor-zoom-in gallery-item" alt="Gallery 1">
                 </div>
-                <div class="aspect-[3/4] overflow-hidden rounded-2xl border-4 border-white shadow-lg group">
+                <div class="aspect-[3/4] overflow-hidden rounded-2xl border-4 border-white shadow-lg group fade-down-element">
                     <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=600" onclick="openLightbox(1)" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 cursor-zoom-in gallery-item" alt="Gallery 2">
                 </div>
-                <div class="aspect-[3/4] overflow-hidden rounded-2xl border-4 border-white shadow-lg group">
+                <div class="aspect-[3/4] overflow-hidden rounded-2xl border-4 border-white shadow-lg group fade-down-element">
                     <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=600" onclick="openLightbox(2)" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 cursor-zoom-in gallery-item" alt="Gallery 3">
                 </div>
-                <div class="aspect-[3/4] overflow-hidden rounded-2xl border-4 border-white shadow-lg group">
+                <div class="aspect-[3/4] overflow-hidden rounded-2xl border-4 border-white shadow-lg group fade-down-element">
                     <img src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80&w=600" onclick="openLightbox(3)" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 cursor-zoom-in gallery-item" alt="Gallery 4">
                 </div>
             </div>
@@ -257,14 +270,14 @@
         <!-- GIFT (HADIAH) -->
         <section id="hadiah" class="py-24 px-6 bg-blue-50">
             <div class="container mx-auto max-w-4xl">
-                <div class="text-center mb-16">
+                <div class="text-center mb-16 fade-down-element">
                     <h2 class="font-serif text-4xl mb-4 text-blue-950">Berbagi Kasih</h2>
                     <p class="text-slate-600 italic">Bagi Bapak/Ibu/Saudara/i yang ingin memberikan tanda kasih,<br>dapat melalui nomor rekening di bawah ini:</p>
                 </div>
                 
                 <div class="grid md:grid-cols-2 gap-8">
                     <!-- Rekening 1: Mandiri -->
-                    <div class="bg-white p-10 rounded-3xl shadow-xl border-t-8 border-blue-800 text-center flex flex-col items-center">
+                    <div class="bg-white p-10 rounded-3xl shadow-xl border-t-8 border-blue-800 text-center flex flex-col items-center fade-down-element">
                         <div class="mb-8">
                             <img src="https://upload.wikimedia.org/wikipedia/id/thumb/f/fa/Bank_Mandiri_logo.svg/1200px-Bank_Mandiri_logo.svg.png" alt="Logo Bank Mandiri" class="h-10 w-auto object-contain">
                         </div>
@@ -276,7 +289,7 @@
                     </div>
 
                     <!-- Rekening 2: BCA -->
-                    <div class="bg-white p-10 rounded-3xl shadow-xl border-t-8 border-blue-800 text-center flex flex-col items-center">
+                    <div class="bg-white p-10 rounded-3xl shadow-xl border-t-8 border-blue-800 text-center flex flex-col items-center fade-down-element">
                         <div class="mb-8">
                             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Bank_Central_Asia.svg/1200px-Bank_Central_Asia.svg.png" alt="Logo Bank BCA" class="h-10 w-auto object-contain">
                         </div>
@@ -293,10 +306,12 @@
         <!-- RSVP (GUESTBOOK) -->
         <section id="guestbook" class="bg-blue-950 text-white py-24 px-6 relative">
             <div class="container mx-auto max-w-2xl text-center">
-                <h2 class="font-serif text-4xl mb-6">Buku Tamu</h2>
-                <p class="text-blue-200 mb-10 italic">Pastikan kehadiran Anda pada hari bahagia kami.</p>
+                <div class="fade-down-element">
+                    <h2 class="font-serif text-4xl mb-6">Buku Tamu</h2>
+                    <p class="text-blue-200 mb-10 italic">Pastikan kehadiran Anda pada hari bahagia kami.</p>
+                </div>
                 
-                <form id="rsvp-form" name="submit-to-google-sheet" class="space-y-6 text-left">
+                <form id="rsvp-form" name="submit-to-google-sheet" class="space-y-6 text-left fade-down-element">
                     <div class="space-y-2">
                         <label class="block text-xs font-bold text-blue-200 uppercase tracking-widest">Nama Lengkap</label>
                         <input type="text" name="Nama" required class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 focus:outline-none focus:border-blue-400 focus:bg-white/10 transition-all text-white" placeholder="Masukkan nama Anda">
@@ -322,7 +337,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- KOLOM BARU: UCAPAN SELAMAT & DOA -->
                     <div class="space-y-2">
                         <label class="block text-xs font-bold text-blue-200 uppercase tracking-widest">Ucapan Selamat & Doa</label>
                         <textarea name="Ucapan" rows="4" required class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 focus:outline-none focus:border-blue-400 focus:bg-white/10 transition-all text-white resize-none" placeholder="Tuliskan ucapan dan doa terbaik Anda untuk mempelai..."></textarea>
@@ -337,7 +351,7 @@
 
         <!-- FOOTER -->
         <footer class="py-24 text-center text-slate-500 border-t bg-white mb-20">
-            <div class="max-w-3xl mx-auto px-6">
+            <div class="max-w-3xl mx-auto px-6 fade-down-element">
                 <p class="font-cursive text-5xl text-blue-950 mb-8">Ami & Ade</p>
                 <div class="w-16 h-0.5 bg-blue-100 mx-auto mb-10"></div>
                 <p class="text-base italic mb-6 leading-relaxed text-slate-600">
@@ -388,12 +402,31 @@
     <input type="text" id="copy-field" style="position: absolute; left: -9999px;">
 
     <script>
-        // MASUKKAN URL GOOGLE SCRIPT DI SINI
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxKw4O-25G1iyuuy1WM2-QEh4TTQjgPVnBw28VnXSyFOLXaJ1pgXpShrTzAOP4i2jzL/exec';
         
         const form = document.forms['submit-to-google-sheet'];
         const submitBtn = document.getElementById('submit-btn');
         const btnText = document.getElementById('btn-text');
+
+        // Animation Trigger Logic (Intersection Observer)
+        const observerOptions = {
+            threshold: 0.15,
+            rootMargin: "0px 0px -50px 0px"
+        };
+
+        const appearanceObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('show');
+                }
+            });
+        }, observerOptions);
+
+        function initAnimations() {
+            document.querySelectorAll('.fade-down-element').forEach(el => {
+                appearanceObserver.observe(el);
+            });
+        }
 
         // Lightbox Logic
         let currentImageIndex = 0;
@@ -456,12 +489,6 @@
         // Form Submit
         form.addEventListener('submit', e => {
             e.preventDefault();
-            if(scriptURL === 'https://script.google.com/macros/s/AKfycbxKw4O-25G1iyuuy1WM2-QEh4TTQjgPVnBw28VnXSyFOLXaJ1pgXpShrTzAOP4i2jzL/exec') {
-                // Biarkan lanjut jika URL sudah benar
-            } else if(scriptURL === 'MASUKKAN_URL_SCRIPT_DI_SINI') {
-                showToast("Pengaturan: scriptURL belum diatur.");
-                return;
-            }
             submitBtn.disabled = true;
             btnText.innerHTML = '<span class="loading-spinner"></span> Menyimpan...';
             fetch(scriptURL, { method: 'POST', body: new FormData(form)})
@@ -497,6 +524,9 @@
                 mainContent.style.display = 'block';
                 musicPlayer.style.display = 'block';
                 audio.play().catch(e => console.log("Music play blocked"));
+                
+                // Initialize animations after opening
+                initAnimations();
             }, 800);
         }
 
