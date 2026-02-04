@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link href="img/flower_circle_frame.png" rel="icon">
+    <link href="img/flower_circle_frame.png" rel="icon">
     <title>Undangan Pernikahan - Ami & Ade</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -33,7 +33,6 @@
             transform: translateY(0);
         }
 
-        /* Initial fade-in for cover items */
         .fade-in {
             animation: fadeIn 1.5s ease-in-out forwards;
         }
@@ -110,6 +109,15 @@
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Custom Scrollbar for Message List */
+        .message-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .message-list::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
         }
     </style>
 </head>
@@ -276,7 +284,6 @@
                 </div>
                 
                 <div class="grid md:grid-cols-2 gap-8">
-                    <!-- Rekening 1: Mandiri -->
                     <div class="bg-white p-10 rounded-3xl shadow-xl border-t-8 border-blue-800 text-center flex flex-col items-center fade-down-element">
                         <div class="mb-8">
                             <img src="https://upload.wikimedia.org/wikipedia/id/thumb/f/fa/Bank_Mandiri_logo.svg/1200px-Bank_Mandiri_logo.svg.png" alt="Logo Bank Mandiri" class="h-10 w-auto object-contain">
@@ -288,7 +295,6 @@
                         </button>
                     </div>
 
-                    <!-- Rekening 2: BCA -->
                     <div class="bg-white p-10 rounded-3xl shadow-xl border-t-8 border-blue-800 text-center flex flex-col items-center fade-down-element">
                         <div class="mb-8">
                             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Bank_Central_Asia.svg/1200px-Bank_Central_Asia.svg.png" alt="Logo Bank BCA" class="h-10 w-auto object-contain">
@@ -314,12 +320,12 @@
                 <form id="rsvp-form" name="submit-to-google-sheet" class="space-y-6 text-left fade-down-element">
                     <div class="space-y-2">
                         <label class="block text-xs font-bold text-blue-200 uppercase tracking-widest">Nama Lengkap</label>
-                        <input type="text" name="Nama" required class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 focus:outline-none focus:border-blue-400 focus:bg-white/10 transition-all text-white" placeholder="Masukkan nama Anda">
+                        <input type="text" name="Nama" id="form-nama" required class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 focus:outline-none focus:border-blue-400 focus:bg-white/10 transition-all text-white" placeholder="Masukkan nama Anda">
                     </div>
                     <div class="grid md:grid-cols-2 gap-6">
                         <div class="space-y-2">
                             <label class="block text-xs font-bold text-blue-200 uppercase tracking-widest">Jumlah Tamu</label>
-                            <select name="Jumlah" class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 focus:outline-none focus:border-blue-400 text-white appearance-none">
+                            <select name="Jumlah" id="form-jumlah" class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 focus:outline-none focus:border-blue-400 text-white appearance-none">
                                 <option value="1" class="text-slate-900">1 Orang</option>
                                 <option value="2" class="text-slate-900">2 Orang</option>
                                 <option value="3" class="text-slate-900">3 Orang atau lebih</option>
@@ -339,13 +345,24 @@
                     </div>
                     <div class="space-y-2">
                         <label class="block text-xs font-bold text-blue-200 uppercase tracking-widest">Ucapan Selamat & Doa</label>
-                        <textarea name="Ucapan" rows="4" required class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 focus:outline-none focus:border-blue-400 focus:bg-white/10 transition-all text-white resize-none" placeholder="Tuliskan ucapan dan doa terbaik Anda untuk mempelai..."></textarea>
+                        <textarea name="Ucapan" id="form-ucapan" rows="4" required class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 focus:outline-none focus:border-blue-400 focus:bg-white/10 transition-all text-white resize-none" placeholder="Tuliskan ucapan dan doa terbaik Anda untuk mempelai..."></textarea>
                     </div>
                     
                     <button type="submit" id="submit-btn" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold hover:bg-blue-500 transition-all shadow-2xl mt-8 uppercase tracking-[0.2em] text-xs">
                         <span id="btn-text">Konfirmasi Kehadiran</span>
                     </button>
                 </form>
+
+                <!-- DAFTAR UCAPAN TERKIRIM (RECORD LIST) -->
+                <div class="mt-20 text-left fade-down-element">
+                    <h3 class="font-serif text-2xl mb-8 text-white border-l-4 border-blue-500 pl-4 uppercase tracking-widest">Ucapan dari Tamu</h3>
+                    <div id="messages-container" class="space-y-4 max-h-[500px] overflow-y-auto pr-2 message-list">
+                        <!-- Pesan akan muncul di sini secara otomatis -->
+                        <div class="bg-white/5 p-6 rounded-2xl border border-white/10 animate-pulse">
+                            <p class="text-blue-200 italic text-sm">Memuat pesan-pesan indah...</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -390,7 +407,7 @@
 
     <!-- MUSIC CONTROLLER -->
     <div id="music-player" class="fixed bottom-28 right-6 z-[80] hidden">
-                <button id="music-btn" onclick="toggleMusic()" class="bg-blue-950 w-14 h-14 flex items-center justify-center rounded-full shadow-2xl music-rotate text-white border-4 border-white active:scale-90 transition-transform">
+        <button id="music-btn" onclick="toggleMusic()" class="bg-blue-950 w-14 h-14 flex items-center justify-center rounded-full shadow-2xl music-rotate text-white border-4 border-white active:scale-90 transition-transform">
             <i id="music-icon" class="fa-solid fa-compact-disc text-2xl"></i>
         </button>
         <audio id="background-music" loop>
@@ -401,33 +418,111 @@
     <!-- INVISIBLE COPY -->
     <input type="text" id="copy-field" style="position: absolute; left: -9999px;">
 
-    <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbxKw4O-25G1iyuuy1WM2-QEh4TTQjgPVnBw28VnXSyFOLXaJ1pgXpShrTzAOP4i2jzL/exec';
-        
-        const form = document.forms['submit-to-google-sheet'];
+    <!-- FIREBASE MODULES -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+        import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+
+        // Initialize Firebase with environment config
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'wedding-ami-ade';
+
+        // Global state for auth
+        let currentUser = null;
+
+        // Authentication logic
+        async function initAuth() {
+            await signInAnonymously(auth);
+            onAuthStateChanged(auth, (user) => {
+                currentUser = user;
+                if (user) {
+                    loadMessages();
+                }
+            });
+        }
+        initAuth();
+
+        // Load messages from database
+        function loadMessages() {
+            if (!currentUser) return;
+            
+            const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', 'guestbook');
+            // Rule 2: Fetch all and handle logic in JS
+            onSnapshot(messagesRef, (snapshot) => {
+                const container = document.getElementById('messages-container');
+                container.innerHTML = '';
+                
+                const messages = [];
+                snapshot.forEach(doc => messages.push(doc.data()));
+                
+                // Sort by date (latest first)
+                messages.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+
+                if (messages.length === 0) {
+                    container.innerHTML = `<p class="text-blue-200/50 italic text-sm">Belum ada ucapan. Jadilah yang pertama!</p>`;
+                    return;
+                }
+
+                messages.forEach(msg => {
+                    const div = document.createElement('div');
+                    div.className = "bg-white/5 p-6 rounded-2xl border border-white/10 fade-in";
+                    div.innerHTML = `
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-blue-400 text-sm uppercase tracking-wider">${msg.Nama}</h4>
+                            <span class="text-[10px] text-white/30 uppercase tracking-tighter">${msg.Status || 'Hadir'}</span>
+                        </div>
+                        <p class="text-white/80 text-sm leading-relaxed">${msg.Ucapan}</p>
+                    `;
+                    container.appendChild(div);
+                });
+            }, (error) => console.error("Error loading messages:", error));
+        }
+
+        // Handle form submission to database
+        const rsvpForm = document.getElementById('rsvp-form');
         const submitBtn = document.getElementById('submit-btn');
         const btnText = document.getElementById('btn-text');
 
-        // Animation Trigger Logic (Intersection Observer)
-        const observerOptions = {
-            threshold: 0.15,
-            rootMargin: "0px 0px -50px 0px"
-        };
+        rsvpForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) {
+                showToast("Sistem sedang bersiap, silakan coba lagi.");
+                return;
+            }
 
-        const appearanceObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('show');
-                }
-            });
-        }, observerOptions);
+            submitBtn.disabled = true;
+            btnText.innerHTML = '<span class="loading-spinner"></span> Menyimpan Pesan...';
 
-        function initAnimations() {
-            document.querySelectorAll('.fade-down-element').forEach(el => {
-                appearanceObserver.observe(el);
-            });
-        }
+            const formData = new FormData(rsvpForm);
+            const data = {
+                Nama: formData.get('Nama'),
+                Jumlah: formData.get('Jumlah'),
+                Status: formData.get('Status'),
+                Ucapan: formData.get('Ucapan'),
+                timestamp: { seconds: Math.floor(Date.now() / 1000) } // Simple timestamp
+            };
 
+            try {
+                const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', 'guestbook');
+                await addDoc(messagesRef, data);
+                
+                showToast("Terima kasih! Pesan Anda telah tersimpan.");
+                rsvpForm.reset();
+            } catch (error) {
+                console.error("Error saving message:", error);
+                showToast("Maaf, gagal menyimpan pesan.");
+            } finally {
+                submitBtn.disabled = false;
+                btnText.innerText = 'Konfirmasi Kehadiran';
+            }
+        });
+    </script>
+
+    <script>
         // Lightbox Logic
         let currentImageIndex = 0;
         const galleryImages = [];
@@ -469,7 +564,6 @@
         const countdownTimer = setInterval(() => {
             const now = new Date().getTime();
             const distance = targetDate - now;
-
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
@@ -486,26 +580,19 @@
             }
         }, 1000);
 
-        // Form Submit
-        form.addEventListener('submit', e => {
-            e.preventDefault();
-            submitBtn.disabled = true;
-            btnText.innerHTML = '<span class="loading-spinner"></span> Menyimpan...';
-            fetch(scriptURL, { method: 'POST', body: new FormData(form)})
-                .then(response => {
-                    showToast("Kehadiran Anda berhasil tercatat!");
-                    form.reset();
-                    submitBtn.disabled = false;
-                    btnText.innerText = 'Konfirmasi Kehadiran';
-                })
-                .catch(error => {
-                    showToast("Maaf, data gagal terkirim.");
-                    submitBtn.disabled = false;
-                    btnText.innerText = 'Konfirmasi Kehadiran';
-                });
-        });
+        // Animation Trigger
+        const observerOptions = { threshold: 0.15, rootMargin: "0px 0px -50px 0px" };
+        const appearanceObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('show');
+            });
+        }, observerOptions);
 
-        // Params
+        function initAnimations() {
+            document.querySelectorAll('.fade-down-element').forEach(el => appearanceObserver.observe(el));
+        }
+
+        // Params & Initial UI
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const guestName = urlParams.get('to');
@@ -524,8 +611,6 @@
                 mainContent.style.display = 'block';
                 musicPlayer.style.display = 'block';
                 audio.play().catch(e => console.log("Music play blocked"));
-                
-                // Initialize animations after opening
                 initAnimations();
             }, 800);
         }
@@ -560,21 +645,16 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-        // Active Nav
         window.addEventListener('scroll', () => {
             let current = "";
             const sections = document.querySelectorAll('section');
             sections.forEach(section => {
                 const sectionTop = section.offsetTop;
-                if (window.pageYOffset >= sectionTop - 250) {
-                    current = section.getAttribute('id');
-                }
+                if (window.pageYOffset >= sectionTop - 250) current = section.getAttribute('id');
             });
             document.querySelectorAll('.nav-link').forEach(a => {
                 a.classList.remove('active');
-                if (a.getAttribute('href').includes(current)) {
-                    a.classList.add('active');
-                }
+                if (a.getAttribute('href').includes(current)) a.classList.add('active');
             });
         });
     </script>
