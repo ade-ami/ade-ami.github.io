@@ -27,7 +27,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap');
         body { font-family: 'Montserrat', sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
-        #auth-section, #admin-section, #settings-view, #generator-view, #sql-view { display: none; }
+        #auth-section, #admin-section, #settings-view, #generator-view, #sql-view, #preview-view { display: none; }
         
         .tab-active {
             color: #2563eb;
@@ -77,6 +77,26 @@
         }
         .dark .wa-chat-bubble::before {
             border-color: transparent #202c33 transparent transparent;
+        }
+
+        /* Phone Frame Preview */
+        .phone-frame {
+            width: 360px;
+            height: 640px;
+            border: 12px solid #1e293b;
+            border-radius: 32px;
+            overflow: hidden;
+            position: relative;
+            background: white;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            margin: 0 auto;
+        }
+        @media (max-width: 400px) {
+            .phone-frame {
+                width: 100%;
+                height: 500px;
+                border-width: 8px;
+            }
         }
 
         /* Custom Dropdown Styling */
@@ -134,6 +154,7 @@
                         <button onclick="switchView('rsvp')" id="nav-rsvp" class="tab-active font-bold pb-1 text-xs md:text-sm">Tamu</button>
                         <button onclick="switchView('settings')" id="nav-settings" class="text-slate-400 font-bold pb-1 text-xs md:text-sm">Pengaturan</button>
                         <button onclick="switchView('generator')" id="nav-generator" class="text-slate-400 font-bold pb-1 text-xs md:text-sm">Generator</button>
+                        <button onclick="switchView('preview')" id="nav-preview" class="text-slate-400 font-bold pb-1 text-xs md:text-sm">Preview</button>
                         <button onclick="switchView('sql')" id="nav-sql" class="text-slate-400 font-bold pb-1 text-xs md:text-sm">SQL Editor</button>
                     </div>
                 </div>
@@ -337,6 +358,29 @@
                 </div>
             </div>
 
+            <!-- WEB PREVIEW VIEW -->
+            <div id="preview-view" class="max-w-5xl mx-auto">
+                <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 p-8 transition-colors">
+                    <div class="flex items-center justify-between mb-8">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-desktop text-blue-600 text-xl"></i>
+                            <h3 class="font-bold text-lg">Live Web Preview</h3>
+                        </div>
+                        <div class="flex gap-2 bg-slate-100 dark:bg-slate-700 p-1 rounded-xl">
+                            <button onclick="setPreviewSize('mobile')" id="btn-size-mobile" class="px-4 py-2 rounded-lg text-xs font-bold bg-white dark:bg-slate-600 shadow-sm transition-all">Mobile</button>
+                            <button onclick="setPreviewSize('desktop')" id="btn-size-desktop" class="px-4 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-slate-600 transition-all">Desktop</button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col items-center">
+                        <div id="preview-container" class="phone-frame border-slate-200 dark:border-slate-700 transition-all duration-500">
+                            <iframe id="web-preview-iframe" src="about:blank" class="w-full h-full border-none"></iframe>
+                        </div>
+                        <p class="mt-6 text-xs text-slate-400 italic">Preview dimuat berdasarkan URL di tab Generator</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- SQL EDITOR VIEW -->
             <div id="sql-view" class="max-w-5xl mx-auto">
                 <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 p-8 transition-colors">
@@ -346,15 +390,15 @@
                     </div>
                     <div class="mb-4 space-y-2">
                         <p class="text-xs text-slate-400 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl">
-                            <b>Instruksi Database:</b> Supabase JS tidak mendukung eksekusi SQL mentah. Gunakan query di bawah ini pada Dashboard Supabase (Menu SQL Editor) untuk mengupdate struktur tabel Anda.
+                            <b>Instruksi Database:</b> Supabase JS tidak mendukung eksekusi SQL mentah secara langsung. Gunakan query di bawah ini pada Dashboard Supabase (Menu SQL Editor) untuk mengupdate struktur tabel Anda.
                         </p>
                         <div class="flex flex-wrap gap-2">
-                            <button onclick="fillSQL('init')" class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-lg text-[10px] font-bold hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors">QUERY TAMBAH BANK</button>
-                            <button onclick="fillSQL('select')" class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-lg text-[10px] font-bold hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors">LIHAT DATA SETTINGS</button>
+                            <button onclick="fillSQL('guestbook')" class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-lg text-[10px] font-bold hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors uppercase">Query Tambah Guestbook</button>
+                            <button onclick="fillSQL('settings')" class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-lg text-[10px] font-bold hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors uppercase">Query Tambah Settings</button>
                         </div>
                     </div>
                     <div class="space-y-4">
-                        <textarea id="sql-input" rows="8" class="w-full p-4 font-mono text-sm bg-slate-900 text-green-400 rounded-2xl border border-slate-700 outline-none focus:ring-2 focus:ring-blue-500" placeholder="-- Tulis query Anda di sini..."></textarea>
+                        <textarea id="sql-input" rows="12" class="w-full p-4 font-mono text-sm bg-slate-900 text-green-400 rounded-2xl border border-slate-700 outline-none focus:ring-2 focus:ring-blue-500" placeholder="-- Tulis query Anda di sini..."></textarea>
                         <div class="flex justify-between items-center">
                             <div class="text-xs font-bold text-slate-500">Hasil Console:</div>
                             <button onclick="runSQL()" class="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 transition-all">Run Query (Simulasi)</button>
@@ -414,6 +458,7 @@
         const rsvpView = document.getElementById('rsvp-view');
         const settingsView = document.getElementById('settings-view');
         const generatorView = document.getElementById('generator-view');
+        const previewView = document.getElementById('preview-view');
         const sqlView = document.getElementById('sql-view');
         const guestTableBody = document.getElementById('guest-table-body');
         const loginForm = document.getElementById('login-form');
@@ -447,9 +492,9 @@
         };
 
         window.switchView = (view) => {
-            const views = { rsvp: rsvpView, settings: settingsView, generator: generatorView, sql: sqlView };
+            const views = { rsvp: rsvpView, settings: settingsView, generator: generatorView, preview: previewView, sql: sqlView };
             Object.keys(views).forEach(v => views[v].style.display = 'none');
-            ['rsvp', 'settings', 'generator', 'sql'].forEach(v => {
+            ['rsvp', 'settings', 'generator', 'preview', 'sql'].forEach(v => {
                 const nav = document.getElementById(`nav-${v}`);
                 if(nav) nav.className = "text-slate-400 font-bold pb-1 text-xs md:text-sm";
             });
@@ -463,6 +508,38 @@
                 initBankDropdowns();
             }
             if (view === 'generator') updateGenPreview();
+            if (view === 'preview') updatePreviewFrame();
+        };
+
+        // --- PREVIEW LOGIC ---
+        window.updatePreviewFrame = () => {
+            const baseUrl = document.getElementById('gen-baseUrl').value.trim();
+            const guestInput = document.getElementById('gen-guestName').value.trim();
+            const finalUrl = guestInput ? `${baseUrl}?to=${encodeURIComponent(guestInput)}` : baseUrl;
+            const iframe = document.getElementById('web-preview-iframe');
+            if(iframe.src !== finalUrl) iframe.src = finalUrl;
+        };
+
+        window.setPreviewSize = (size) => {
+            const container = document.getElementById('preview-container');
+            const btnMobile = document.getElementById('btn-size-mobile');
+            const btnDesktop = document.getElementById('btn-size-desktop');
+
+            if(size === 'mobile') {
+                container.style.width = '360px';
+                container.style.height = '640px';
+                container.style.borderWidth = '12px';
+                container.style.borderRadius = '32px';
+                btnMobile.className = "px-4 py-2 rounded-lg text-xs font-bold bg-white dark:bg-slate-600 shadow-sm transition-all";
+                btnDesktop.className = "px-4 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-slate-600 transition-all";
+            } else {
+                container.style.width = '100%';
+                container.style.height = '640px';
+                container.style.borderWidth = '1px';
+                container.style.borderRadius = '16px';
+                btnDesktop.className = "px-4 py-2 rounded-lg text-xs font-bold bg-white dark:bg-slate-600 shadow-sm transition-all";
+                btnMobile.className = "px-4 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-slate-600 transition-all";
+            }
         };
 
         // --- CUSTOM BANK DROPDOWN LOGIC ---
@@ -473,16 +550,19 @@
             // Close dropdown when clicking outside
             window.addEventListener('click', (e) => {
                 if (!e.target.closest('#btn-bride-bank') && !e.target.closest('#list-bride-bank')) {
-                    document.getElementById('list-bride-bank').classList.remove('show');
+                    const list = document.getElementById('list-bride-bank');
+                    if(list) list.classList.remove('show');
                 }
                 if (!e.target.closest('#btn-groom-bank') && !e.target.closest('#list-groom-bank')) {
-                    document.getElementById('list-groom-bank').classList.remove('show');
+                    const list = document.getElementById('list-groom-bank');
+                    if(list) list.classList.remove('show');
                 }
             });
         }
 
         function renderBankOptions(type) {
             const container = document.getElementById(`list-${type}-bank`);
+            if(!container) return;
             container.innerHTML = BANK_LIST.map(bank => `
                 <div onclick="selectBank('${type}', '${bank.name}', '${bank.logo}')" class="flex items-center gap-3 p-3 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors">
                     <img src="${bank.logo}" alt="${bank.name}" class="h-4 w-auto object-contain grayscale group-hover:grayscale-0">
@@ -642,10 +722,10 @@
         // --- SQL EDITOR HELPERS ---
         window.fillSQL = (type) => {
             const input = document.getElementById('sql-input');
-            if(type === 'init') {
-                input.value = `-- Query untuk menambah kolom bank ke tabel settings\nALTER TABLE settings \nADD COLUMN IF NOT EXISTS bride_bank_name TEXT,\nADD COLUMN IF NOT EXISTS bride_bank_acc TEXT,\nADD COLUMN IF NOT EXISTS groom_bank_name TEXT,\nADD COLUMN IF NOT EXISTS groom_bank_acc TEXT;`;
-            } else if(type === 'select') {
-                input.value = `SELECT * FROM settings WHERE id = 1;`;
+            if(type === 'guestbook') {
+                input.value = `-- Buat tabel guestbook\ncreate table guestbook (\n  id bigint primary key generated always as identity,\n  "Nama" text not null,\n  "Jumlah" int4 not null default 1,\n  "Status" text not null,\n  "Ucapan" text not null,\n  created_at timestamp with time zone default now()\n);\n\n-- Aktifkan Row Level Security (RLS)\nalter table guestbook enable row level security;`;
+            } else if(type === 'settings') {
+                input.value = `-- Buat tabel settings\nCREATE TABLE public.settings (\n  id integer NOT NULL DEFAULT 1,\n  bride_name text,\n  groom_name text,\n  wedding_date timestamp with time zone,\n  location_name text,\n  location_address text,\n  bride_parents text,\n  groom_parents text,\n  maps_url text,\n  bride_bank_name text,\n  bride_bank_acc text,\n  groom_bank_name text,\n  groom_bank_acc text,\n  CONSTRAINT settings_pkey PRIMARY KEY (id)\n);\n\n-- Masukkan data awal (default)\nINSERT INTO public.settings (id) VALUES (1) ON CONFLICT DO NOTHING;`;
             }
         }
 
@@ -655,8 +735,10 @@
             out.innerText = "> Executing...\n";
             
             setTimeout(() => {
-                if(input.includes("alter table settings")) {
-                    out.innerText += `> Success: Perintah ALTER TABLE terdeteksi.\n> Catatan: Gunakan kode ini di SQL Editor Dashboard Supabase Anda agar kolom benar-benar dibuat di database.`;
+                if(input.includes("create table public.settings") || input.includes("create table settings")) {
+                    out.innerText += `> Success: Perintah CREATE TABLE SETTINGS terdeteksi.\n> Catatan: Jalankan query ini di SQL Editor Supabase Dashboard Anda.`;
+                } else if(input.includes("create table guestbook")) {
+                    out.innerText += `> Success: Perintah CREATE TABLE GUESTBOOK terdeteksi.\n> Catatan: Jalankan query ini di SQL Editor Supabase Dashboard Anda.`;
                 } else if(input.includes("select * from guestbook")) {
                     out.innerText += `> Result: Found ${rawData.length} rows in guestbook.\n` + JSON.stringify(rawData.slice(0,2), null, 2);
                 } else if(input.includes("select * from settings")) {
@@ -701,4 +783,3 @@
     </script>
 </body>
 </html>
-
