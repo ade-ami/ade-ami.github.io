@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Ami & Ade</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap');
+        body { font-family: 'Montserrat', sans-serif; }
+        #auth-section, #admin-section, #sql-editor-view { display: none; }
+        
+        .code-editor {
+            font-family: 'Fira Code', monospace;
+            background: #0f172a;
+            color: #38bdf8;
+            line-height: 1.5;
+        }
+        
+        .results-table::-webkit-scrollbar { height: 8px; width: 8px; }
+        .results-table::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        .tab-active {
+            color: #2563eb;
+            border-bottom: 2px solid #2563eb;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+    <!-- LOGIN SECTION -->
+    <div id="auth-section" class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-100">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-3xl mx-auto mb-4 shadow-lg">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-slate-800">Admin Login</h1>
+                <p class="text-slate-500 text-sm">Masuk untuk mengelola database</p>
+            </div>
+            <form id="login-form" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wider">Email Admin</label>
+                    <input type="email" id="email" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-slate-50" placeholder="admin@undangan.com">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wider">Password</label>
+                    <input type="password" id="password" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-slate-50" placeholder="••••••••">
+                </div>
+                <button type="submit" id="login-btn" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg active:scale-[0.98]">
+                    Masuk Sekarang
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADMIN DASHBOARD SECTION -->
+    <div id="admin-section">
+        <!-- Navigation Header -->
+        <nav class="bg-white border-b sticky top-0 z-50 shadow-sm">
+            <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-10">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-md">
+                            <i class="fa-solid fa-database"></i>
+                        </div>
+                        <h2 class="font-bold text-lg text-slate-800 hidden lg:block tracking-tight">Ami & Ade <span class="text-blue-600">DB</span></h2>
+                    </div>
+                    <div class="flex gap-6">
+                        <button onclick="switchView('rsvp')" id="nav-rsvp" class="tab-active font-bold pb-1 text-sm transition-all">Daftar Tamu</button>
+                        <button onclick="switchView('sql')" id="nav-sql" class="text-slate-400 font-bold hover:text-blue-600 pb-1 text-sm transition-all">SQL Console</button>
+                    </div>
+                </div>
+                <button onclick="handleLogout()" class="text-slate-500 font-bold flex items-center gap-2 hover:text-red-500 px-4 py-2 rounded-xl transition-all text-sm">
+                    <i class="fa-solid fa-power-off"></i> <span class="hidden md:inline">Logout</span>
+                </button>
+            </div>
+        </nav>
+
+        <main class="container mx-auto px-4 py-8 max-w-7xl">
+            
+            <!-- RSVP / GUEST LIST VIEW -->
+            <div id="rsvp-view">
+                <!-- Summary Stats -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <p class="text-slate-400 text-[10px] font-bold uppercase mb-1">Total RSVP</p>
+                        <h3 id="stat-total" class="text-2xl font-bold text-slate-800">0</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <p class="text-blue-500 text-[10px] font-bold uppercase mb-1">Hadir</p>
+                        <h3 id="stat-hadir" class="text-2xl font-bold text-slate-800">0</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <p class="text-red-400 text-[10px] font-bold uppercase mb-1">Absen</p>
+                        <h3 id="stat-tidak" class="text-2xl font-bold text-slate-800">0</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <p class="text-green-500 text-[10px] font-bold uppercase mb-1">Pax Datang</p>
+                        <h3 id="stat-pax" class="text-2xl font-bold text-slate-800">0</h3>
+                    </div>
+                </div>
+
+                <!-- CRUD Table Card -->
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-6 border-b bg-white flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div class="relative w-full md:w-72">
+                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                            <input type="text" id="search-input" oninput="filterTable()" placeholder="Cari nama tamu..." class="w-full pl-11 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 text-sm">
+                        </div>
+                        <div class="flex gap-2 w-full md:w-auto">
+                            <button onclick="openModal('add')" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-md transition-all active:scale-95">
+                                <i class="fa-solid fa-plus"></i> Tambah Tamu
+                            </button>
+                            <button onclick="fetchData()" class="bg-slate-100 hover:bg-slate-200 p-2.5 rounded-xl text-slate-600 transition-all">
+                                <i class="fa-solid fa-rotate"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[800px]">
+                            <thead>
+                                <tr class="bg-slate-50/50 text-slate-500 text-[11px] uppercase font-bold tracking-widest">
+                                    <th class="px-6 py-5 border-b">Nama Tamu</th>
+                                    <th class="px-6 py-5 border-b">Konfirmasi</th>
+                                    <th class="px-6 py-5 border-b">Jumlah</th>
+                                    <th class="px-6 py-5 border-b">Pesan/Ucapan</th>
+                                    <th class="px-6 py-5 border-b">Waktu Isi</th>
+                                    <th class="px-6 py-5 border-b text-center">Tindakan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="guest-table-body" class="divide-y divide-slate-50 text-sm">
+                                <!-- Data rows -->
+                            </tbody>
+                        </table>
+                        <div id="no-data" class="hidden py-20 text-center text-slate-400 italic">
+                            Data tamu tidak ditemukan.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SQL CONSOLE VIEW -->
+            <div id="sql-editor-view" class="space-y-6">
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-terminal text-blue-600"></i>
+                            <h3 class="font-bold text-slate-800">PostgreSQL Editor</h3>
+                        </div>
+                        <button onclick="runQuery()" id="run-btn" class="bg-slate-900 hover:bg-black text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-all active:scale-95">
+                            <i class="fa-solid fa-bolt text-yellow-400"></i> Run Execute
+                        </button>
+                    </div>
+                    
+                    <textarea id="sql-input" class="w-full h-40 code-editor p-6 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 resize-none" spellcheck="false">-- Contoh: Hapus semua tamu yang tidak hadir
+-- DELETE FROM guestbook WHERE "Status" = 'Tidak Hadir';
+
+SELECT * FROM guestbook ORDER BY created_at DESC;</textarea>
+                    
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase mr-2 mt-1">Quick Snippets:</span>
+                        <button onclick="setQuery('SELECT')" class="text-[10px] bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded-full font-bold">SELECT ALL</button>
+                        <button onclick="setQuery('COUNT')" class="text-[10px] bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded-full font-bold">COUNT BY STATUS</button>
+                        <button onclick="setQuery('DELETE')" class="text-[10px] bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1 rounded-full font-bold">TRUNCATE TABLE</button>
+                    </div>
+                </div>
+
+                <!-- Query Results -->
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-4 bg-slate-50 border-b flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Console Output</span>
+                        <span id="result-status" class="text-[10px] font-bold px-2 py-1 rounded hidden"></span>
+                    </div>
+                    <div id="query-result-container" class="results-table overflow-x-auto min-h-[150px] p-4 font-mono text-xs">
+                        <div class="flex items-center justify-center h-32 text-slate-300 italic">
+                            Output query Anda akan muncul di sini.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- CRUD MODAL (ADD & EDIT) -->
+    <div id="crud-modal" class="fixed inset-0 bg-slate-900/60 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl border border-white">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="modal-title" class="text-xl font-bold text-slate-800">Tambah Tamu Baru</h3>
+                <button onclick="closeModal()" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <form id="crud-form" class="space-y-5">
+                <input type="hidden" id="entry-id">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2 tracking-widest">Nama Lengkap</label>
+                    <input type="text" id="field-nama" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="Contoh: Budi Santoso">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2 tracking-widest">Kehadiran</label>
+                        <select id="field-status" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20">
+                            <option value="Hadir">Hadir</option>
+                            <option value="Tidak Hadir">Tidak Hadir</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2 tracking-widest">Jumlah Pax</label>
+                        <input type="number" id="field-jumlah" min="1" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="1">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2 tracking-widest">Pesan / Doa</label>
+                    <textarea id="field-ucapan" rows="4" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20 resize-none" placeholder="Tuliskan pesan di sini..."></textarea>
+                </div>
+                
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeModal()" class="flex-1 py-4 bg-slate-100 rounded-2xl font-bold text-slate-500 hover:bg-slate-200 transition-all">Batal</button>
+                    <button type="submit" id="modal-submit-btn" class="flex-1 py-4 bg-blue-600 rounded-2xl font-bold text-white shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-[0.98]">Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://qczzjtraivdxdergbxjy.supabase.co';
+        const supabaseKey = 'sb_publishable_sdf_MeOzRGvsGACogsDBLg_sDMgZOeW';
+        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        const authSection = document.getElementById('auth-section');
+        const adminSection = document.getElementById('admin-section');
+        const rsvpView = document.getElementById('rsvp-view');
+        const sqlView = document.getElementById('sql-editor-view');
+        const guestTableBody = document.getElementById('guest-table-body');
+        const loginForm = document.getElementById('login-form');
+        
+        let rawData = []; // Local cache untuk pencarian
+
+        // Navigation & View
+        window.switchView = (view) => {
+            const btnRsvp = document.getElementById('nav-rsvp');
+            const btnSql = document.getElementById('nav-sql');
+            if (view === 'rsvp') {
+                rsvpView.style.display = 'block';
+                sqlView.style.display = 'none';
+                btnRsvp.className = "tab-active font-bold pb-1 text-sm transition-all";
+                btnSql.className = "text-slate-400 font-bold hover:text-blue-600 pb-1 text-sm transition-all";
+                fetchData();
+            } else {
+                rsvpView.style.display = 'none';
+                sqlView.style.display = 'block';
+                btnSql.className = "tab-active font-bold pb-1 text-sm transition-all";
+                btnRsvp.className = "text-slate-400 font-bold hover:text-blue-600 pb-1 text-sm transition-all";
+            }
+        };
+
+        // Auth Logic
+        async function checkSession() {
+            const { data: { session } } = await _supabase.auth.getSession();
+            if (session) showAdmin(); else showLogin();
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('login-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Validasi...';
+            const { error } = await _supabase.auth.signInWithPassword({ email, password });
+            if (error) { 
+                alert("Login Gagal: " + error.message); 
+                btn.disabled = false; 
+                btn.innerText = 'Masuk Sekarang'; 
+            } else showAdmin();
+        });
+
+        async function handleLogout() { await _supabase.auth.signOut(); showLogin(); }
+        function showLogin() { authSection.style.display = 'flex'; adminSection.style.display = 'none'; }
+        function showAdmin() { authSection.style.display = 'none'; adminSection.style.display = 'block'; fetchData(); }
+
+        // Data Fetching & Rendering
+        async function fetchData() {
+            const { data, error } = await _supabase.from('guestbook').select('*').order('created_at', { ascending: false });
+            if (error) return;
+            rawData = data || [];
+            renderStats(rawData);
+            renderTable(rawData);
+        }
+
+        function renderStats(data) {
+            const total = data.length;
+            const hadir = data.filter(d => d.Status === 'Hadir').length;
+            const tidak = total - hadir;
+            const pax = data.reduce((acc, curr) => acc + (parseInt(curr.Jumlah) || 0), 0);
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-hadir').innerText = hadir;
+            document.getElementById('stat-tidak').innerText = tidak;
+            document.getElementById('stat-pax').innerText = pax;
+        }
+
+        function renderTable(data) {
+            guestTableBody.innerHTML = '';
+            document.getElementById('no-data').classList.toggle('hidden', data.length > 0);
+            
+            data.forEach(item => {
+                const date = new Date(item.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-50 transition-all group";
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-bold text-slate-700">${item.Nama}</td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase ${item.Status === 'Hadir' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">${item.Status}</span></td>
+                    <td class="px-6 py-4 text-slate-500 font-medium">${item.Jumlah} Pax</td>
+                    <td class="px-6 py-4 text-slate-400 text-xs max-w-xs truncate" title="${item.Ucapan || '-'}">${item.Ucapan || '-'}</td>
+                    <td class="px-6 py-4 text-slate-400 text-[11px] font-medium">${date}</td>
+                    <td class="px-6 py-4 text-center">
+                        <div class="flex justify-center gap-1 opacity-20 group-hover:opacity-100 transition-opacity">
+                            <button onclick='openModal("edit", ${JSON.stringify(item)})' class="w-9 h-9 flex items-center justify-center text-blue-500 hover:bg-blue-50 rounded-lg"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteEntry('${item.id}')" class="w-9 h-9 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-lg"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                        </div>
+                    </td>
+                `;
+                guestTableBody.appendChild(row);
+            });
+        }
+
+        window.filterTable = () => {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filtered = rawData.filter(item => item.Nama.toLowerCase().includes(query));
+            renderTable(filtered);
+        };
+
+        // CRUD Actions
+        window.openModal = (mode, item = null) => {
+            const modal = document.getElementById('crud-modal');
+            const title = document.getElementById('modal-title');
+            const form = document.getElementById('crud-form');
+            form.reset();
+            
+            if (mode === 'add') {
+                title.innerText = 'Tambah Tamu Baru';
+                document.getElementById('entry-id').value = '';
+                document.getElementById('field-jumlah').value = 1;
+            } else {
+                title.innerText = 'Edit Data Tamu';
+                document.getElementById('entry-id').value = item.id;
+                document.getElementById('field-nama').value = item.Nama;
+                document.getElementById('field-status').value = item.Status;
+                document.getElementById('field-jumlah').value = item.Jumlah;
+                document.getElementById('field-ucapan').value = item.Ucapan;
+            }
+            modal.classList.remove('hidden');
+        };
+
+        window.closeModal = () => document.getElementById('crud-modal').classList.add('hidden');
+
+        document.getElementById('crud-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('entry-id').value;
+            const btn = document.getElementById('modal-submit-btn');
+            
+            const payload = {
+                Nama: document.getElementById('field-nama').value,
+                Status: document.getElementById('field-status').value,
+                Jumlah: parseInt(document.getElementById('field-jumlah').value),
+                Ucapan: document.getElementById('field-ucapan').value,
+                created_at: new Date().toISOString()
+            };
+
+            btn.disabled = true;
+            btn.innerText = 'Menyimpan...';
+
+            let result;
+            if (id) {
+                delete payload.created_at; // Jangan update timestamp buat edit
+                result = await _supabase.from('guestbook').update(payload).eq('id', id);
+            } else {
+                result = await _supabase.from('guestbook').insert([payload]);
+            }
+
+            if (result.error) {
+                alert("Error: " + result.error.message);
+            } else {
+                closeModal();
+                fetchData();
+            }
+            btn.disabled = false;
+        });
+
+        window.deleteEntry = async (id) => {
+            if (!confirm('Hapus data tamu ini secara permanen?')) return;
+            const { error } = await _supabase.from('guestbook').delete().eq('id', id);
+            if (error) alert(error.message); else fetchData();
+        };
+
+        // SQL CONSOLE LOGIC
+        window.setQuery = (type) => {
+            const input = document.getElementById('sql-input');
+            if (type === 'SELECT') input.value = "SELECT * FROM guestbook ORDER BY created_at DESC;";
+            if (type === 'COUNT') input.value = "SELECT \"Status\", count(*), sum(\"Jumlah\") as total_pax FROM guestbook GROUP BY \"Status\";";
+            if (type === 'DELETE') input.value = "-- Hati-hati!\n-- DELETE FROM guestbook;";
+        };
+
+        window.runQuery = async () => {
+            const query = document.getElementById('sql-input').value;
+            const runBtn = document.getElementById('run-btn');
+            const resultContainer = document.getElementById('query-result-container');
+            const resultStatus = document.getElementById('result-status');
+
+            runBtn.disabled = true;
+            resultContainer.innerHTML = '<div class="flex items-center justify-center h-32"><i class="fa-solid fa-spinner fa-spin text-xl text-blue-500"></i></div>';
+
+            try {
+                // Gunakan RPC exec_sql (Pastikan fungsi ini sudah dibuat di Supabase)
+                const { data, error } = await _supabase.rpc('exec_sql', { query_text: query });
+
+                if (error) throw error;
+                if (data && data.error) throw new Error(data.error);
+
+                resultStatus.innerText = "SUCCESS";
+                resultStatus.className = "text-[10px] font-bold px-2 py-1 rounded bg-green-100 text-green-600";
+                resultStatus.classList.remove('hidden');
+
+                if (!data || data.length === 0) {
+                    resultContainer.innerHTML = '<div class="p-8 text-slate-400 italic text-center">Berhasil, namun tidak ada baris data yang dihasilkan.</div>';
+                } else {
+                    renderQueryResult(data);
+                }
+            } catch (err) {
+                resultStatus.innerText = "QUERY ERROR";
+                resultStatus.className = "text-[10px] font-bold px-2 py-1 rounded bg-red-100 text-red-600";
+                resultStatus.classList.remove('hidden');
+                resultContainer.innerHTML = `<div class="p-4 text-red-500 font-mono text-xs bg-red-50/50 rounded-xl whitespace-pre-wrap">${err.message}</div>`;
+            } finally {
+                runBtn.disabled = false;
+            }
+        };
+
+        function renderQueryResult(data) {
+            const keys = Object.keys(data[0]);
+            let html = `<table class="w-full text-left border-collapse border border-slate-100">
+                <thead><tr class="bg-slate-50">`;
+            keys.forEach(k => html += `<th class="px-3 py-2 border font-bold text-slate-600">${k}</th>`);
+            html += `</tr></thead><tbody>`;
+            data.forEach(row => {
+                html += `<tr>`;
+                keys.forEach(k => html += `<td class="px-3 py-1.5 border text-slate-500 whitespace-nowrap">${row[k] === null ? '<span class="text-slate-200 italic">null</span>' : row[k]}</td>`);
+                html += `</tr>`;
+            });
+            html += `</tbody></table>`;
+            document.getElementById('query-result-container').innerHTML = html;
+        }
+
+        checkSession();
+    </script>
+</body>
+</html>
