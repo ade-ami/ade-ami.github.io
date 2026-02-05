@@ -3,118 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Ami & Ade</title>
+	<link href="img/Setting.png" rel="icon">
+    <title>Dashboard - Ami & Ade</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap');
-        body { font-family: 'Montserrat', sans-serif; }
-        #auth-section, #admin-section, #sql-editor-view { display: none; }
-        
-        .code-editor {
-            font-family: 'Fira Code', monospace;
-            background: #0f172a;
-            color: #38bdf8;
-            line-height: 1.5;
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#0f172a',
+                            card: '#1e293b',
+                            border: '#334155'
+                        }
+                    }
+                }
+            }
         }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap');
+        body { font-family: 'Montserrat', sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
+        #auth-section, #admin-section, #settings-view, #generator-view, #sql-view { display: none; }
         
-        .results-table::-webkit-scrollbar { height: 8px; width: 8px; }
-        .results-table::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-
         .tab-active {
             color: #2563eb;
             border-bottom: 2px solid #2563eb;
         }
+        .dark .tab-active {
+            color: #60a5fa;
+            border-bottom-color: #60a5fa;
+        }
+
+        .wa-preview-container {
+            background-color: #e5ddd5;
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            background-blend-mode: overlay;
+            transition: filter 0.3s ease;
+        }
+        .dark .wa-preview-container {
+            background-color: #0b141a;
+            filter: brightness(0.8);
+        }
+        .wa-chat-bubble {
+            background: #ffffff;
+            color: #111b21;
+            padding: 12px 15px;
+            border-radius: 8px 8px 8px 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            position: relative;
+            box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .dark .wa-chat-bubble {
+            background: #202c33;
+            color: #e9edef;
+        }
+        .wa-chat-bubble::before {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: -10px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 10px 10px 0;
+            border-color: transparent #ffffff transparent transparent;
+        }
+        .dark .wa-chat-bubble::before {
+            border-color: transparent #202c33 transparent transparent;
+        }
+
+        /* Custom Dropdown Styling */
+        .bank-dropdown-list {
+            display: none;
+            position: absolute;
+            width: 100%;
+            z-index: 50;
+            top: 100%;
+            left: 0;
+            margin-top: 5px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .bank-dropdown-list.show { display: block; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body class="bg-slate-50 dark:bg-slate-900 min-h-screen text-slate-800 dark:text-slate-200">
 
     <!-- LOGIN SECTION -->
     <div id="auth-section" class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-100">
+        <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-100 dark:border-slate-700">
             <div class="text-center mb-8">
                 <div class="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-3xl mx-auto mb-4 shadow-lg">
                     <i class="fa-solid fa-shield-halved"></i>
                 </div>
-                <h1 class="text-2xl font-bold text-slate-800">Admin Login</h1>
-                <p class="text-slate-500 text-sm">Masuk untuk mengelola database</p>
+                <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Admin Login</h1>
             </div>
             <form id="login-form" class="space-y-5">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wider">Email Admin</label>
-                    <input type="email" id="email" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-slate-50" placeholder="admin@undangan.com">
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Email Admin</label>
+                    <input type="email" id="email" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-900 dark:text-white">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wider">Password</label>
-                    <input type="password" id="password" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-slate-50" placeholder="••••••••">
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Password</label>
+                    <input type="password" id="password" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-900 dark:text-white">
                 </div>
-                <button type="submit" id="login-btn" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg active:scale-[0.98]">
-                    Masuk Sekarang
-                </button>
+                <button type="submit" id="login-btn" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 shadow-lg transition-all">Masuk</button>
             </form>
         </div>
     </div>
 
     <!-- ADMIN DASHBOARD SECTION -->
     <div id="admin-section">
-        <!-- Navigation Header -->
-        <nav class="bg-white border-b sticky top-0 z-50 shadow-sm">
+        <nav class="bg-white dark:bg-slate-800 border-b dark:border-slate-700 sticky top-0 z-50 shadow-sm">
             <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-                <div class="flex items-center gap-10">
+                <div class="flex items-center gap-6">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-md">
                             <i class="fa-solid fa-database"></i>
                         </div>
-                        <h2 class="font-bold text-lg text-slate-800 hidden lg:block tracking-tight">Ami & Ade <span class="text-blue-600">DB</span></h2>
+                        <h2 class="font-bold text-lg text-slate-800 dark:text-white hidden lg:block">Ami & Ade <span class="text-blue-600">Admin</span></h2>
                     </div>
-                    <div class="flex gap-6">
-                        <button onclick="switchView('rsvp')" id="nav-rsvp" class="tab-active font-bold pb-1 text-sm transition-all">Daftar Tamu</button>
-                        <button onclick="switchView('sql')" id="nav-sql" class="text-slate-400 font-bold hover:text-blue-600 pb-1 text-sm transition-all">SQL Console</button>
+                    <div class="flex gap-4">
+                        <button onclick="switchView('rsvp')" id="nav-rsvp" class="tab-active font-bold pb-1 text-xs md:text-sm">Tamu</button>
+                        <button onclick="switchView('settings')" id="nav-settings" class="text-slate-400 font-bold pb-1 text-xs md:text-sm">Pengaturan</button>
+                        <button onclick="switchView('generator')" id="nav-generator" class="text-slate-400 font-bold pb-1 text-xs md:text-sm">Generator</button>
+                        <button onclick="switchView('sql')" id="nav-sql" class="text-slate-400 font-bold pb-1 text-xs md:text-sm">SQL Editor</button>
                     </div>
                 </div>
-                <button onclick="handleLogout()" class="text-slate-500 font-bold flex items-center gap-2 hover:text-red-500 px-4 py-2 rounded-xl transition-all text-sm">
-                    <i class="fa-solid fa-power-off"></i> <span class="hidden md:inline">Logout</span>
-                </button>
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleTheme()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-all">
+                        <i id="theme-icon" class="fa-solid fa-moon"></i>
+                    </button>
+                    <button onclick="handleLogout()" class="text-slate-500 font-bold flex items-center gap-2 hover:text-red-500 px-4 py-2 text-sm">
+                        <i class="fa-solid fa-power-off"></i> <span class="hidden md:inline">Logout</span>
+                    </button>
+                </div>
             </div>
         </nav>
 
         <main class="container mx-auto px-4 py-8 max-w-7xl">
             
-            <!-- RSVP / GUEST LIST VIEW -->
+            <!-- RSVP VIEW -->
             <div id="rsvp-view">
-                <!-- Summary Stats -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
                         <p class="text-slate-400 text-[10px] font-bold uppercase mb-1">Total RSVP</p>
-                        <h3 id="stat-total" class="text-2xl font-bold text-slate-800">0</h3>
+                        <h3 id="stat-total" class="text-2xl font-bold">0</h3>
                     </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
                         <p class="text-blue-500 text-[10px] font-bold uppercase mb-1">Hadir</p>
-                        <h3 id="stat-hadir" class="text-2xl font-bold text-slate-800">0</h3>
+                        <h3 id="stat-hadir" class="text-2xl font-bold">0</h3>
                     </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
                         <p class="text-red-400 text-[10px] font-bold uppercase mb-1">Absen</p>
-                        <h3 id="stat-tidak" class="text-2xl font-bold text-slate-800">0</h3>
+                        <h3 id="stat-tidak" class="text-2xl font-bold">0</h3>
                     </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
                         <p class="text-green-500 text-[10px] font-bold uppercase mb-1">Pax Datang</p>
-                        <h3 id="stat-pax" class="text-2xl font-bold text-slate-800">0</h3>
+                        <h3 id="stat-pax" class="text-2xl font-bold">0</h3>
                     </div>
                 </div>
 
-                <!-- CRUD Table Card -->
-                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div class="p-6 border-b bg-white flex flex-col md:flex-row justify-between items-center gap-4">
-                        <div class="relative w-full md:w-72">
-                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                            <input type="text" id="search-input" oninput="filterTable()" placeholder="Cari nama tamu..." class="w-full pl-11 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 text-sm">
-                        </div>
+                <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
+                    <div class="p-6 border-b dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <input type="text" id="search-input" oninput="filterTable()" placeholder="Cari nama tamu..." class="w-full md:w-72 px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-sm transition-all">
                         <div class="flex gap-2 w-full md:w-auto">
-                            <button onclick="openModal('add')" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-md transition-all active:scale-95">
+                            <button onclick="openModal('add')" class="flex-1 md:flex-none bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-plus"></i> Tambah Tamu
                             </button>
-                            <button onclick="fetchData()" class="bg-slate-100 hover:bg-slate-200 p-2.5 rounded-xl text-slate-600 transition-all">
+                            <button onclick="fetchData()" class="bg-slate-100 dark:bg-slate-700 p-2.5 rounded-xl text-slate-600 dark:text-slate-300">
                                 <i class="fa-solid fa-rotate"></i>
                             </button>
                         </div>
@@ -122,61 +186,181 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse min-w-[800px]">
                             <thead>
-                                <tr class="bg-slate-50/50 text-slate-500 text-[11px] uppercase font-bold tracking-widest">
-                                    <th class="px-6 py-5 border-b">Nama Tamu</th>
-                                    <th class="px-6 py-5 border-b">Konfirmasi</th>
-                                    <th class="px-6 py-5 border-b">Jumlah</th>
-                                    <th class="px-6 py-5 border-b">Pesan/Ucapan</th>
-                                    <th class="px-6 py-5 border-b">Waktu Isi</th>
-                                    <th class="px-6 py-5 border-b text-center">Tindakan</th>
+                                <tr class="bg-slate-50/50 dark:bg-slate-900/50 text-slate-500 text-[11px] uppercase font-bold tracking-widest">
+                                    <th class="px-6 py-5 border-b dark:border-slate-700">Nama Tamu</th>
+                                    <th class="px-6 py-5 border-b dark:border-slate-700">Konfirmasi</th>
+                                    <th class="px-6 py-5 border-b dark:border-slate-700">Jumlah</th>
+                                    <th class="px-6 py-5 border-b dark:border-slate-700">Pesan</th>
+                                    <th class="px-6 py-5 border-b dark:border-slate-700 text-center">Tindakan</th>
                                 </tr>
                             </thead>
-                            <tbody id="guest-table-body" class="divide-y divide-slate-50 text-sm">
-                                <!-- Data rows -->
-                            </tbody>
+                            <tbody id="guest-table-body" class="divide-y divide-slate-50 dark:divide-slate-700 text-sm"></tbody>
                         </table>
-                        <div id="no-data" class="hidden py-20 text-center text-slate-400 italic">
-                            Data tamu tidak ditemukan.
+                    </div>
+                </div>
+            </div>
+
+            <!-- SETTINGS VIEW -->
+            <div id="settings-view" class="max-w-4xl mx-auto">
+                <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 p-8 transition-colors">
+                    <div class="flex items-center gap-3 mb-8">
+                        <i class="fa-solid fa-gear text-blue-600 text-xl"></i>
+                        <h3 class="font-bold text-lg">Pengaturan Data Undangan</h3>
+                    </div>
+                    
+                    <form id="settings-form" class="space-y-8">
+                        <!-- Mempelai Wanita -->
+                        <div class="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-700">
+                            <h4 class="font-bold text-blue-900 dark:text-blue-400 mb-4 flex items-center gap-2"><i class="fa-solid fa-venus"></i> Mempelai Wanita</h4>
+                            <div class="grid md:grid-cols-2 gap-6 mb-4">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Nama Lengkap</label>
+                                    <input type="text" id="set-bride" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Orang Tua</label>
+                                    <input type="text" id="set-bride-parents" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none">
+                                </div>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Bank Mempelai Wanita</label>
+                                    <div class="relative">
+                                        <button type="button" onclick="toggleBankList('bride')" id="btn-bride-bank" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none flex items-center justify-between">
+                                            <span id="label-bride-bank">Pilih Bank</span>
+                                            <i class="fa-solid fa-chevron-down text-xs text-slate-400"></i>
+                                        </button>
+                                        <input type="hidden" id="set-bride-bank">
+                                        <div id="list-bride-bank" class="bank-dropdown-list bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl">
+                                            <!-- Items generated by JS -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">No. Rekening</label>
+                                    <input type="text" id="set-bride-acc" placeholder="Nomor Rekening" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mempelai Pria -->
+                        <div class="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-700">
+                            <h4 class="font-bold text-blue-900 dark:text-blue-400 mb-4 flex items-center gap-2"><i class="fa-solid fa-mars"></i> Mempelai Pria</h4>
+                            <div class="grid md:grid-cols-2 gap-6 mb-4">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Nama Lengkap</label>
+                                    <input type="text" id="set-groom" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Orang Tua</label>
+                                    <input type="text" id="set-groom-parents" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none">
+                                </div>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Bank Mempelai Pria</label>
+                                    <div class="relative">
+                                        <button type="button" onclick="toggleBankList('groom')" id="btn-groom-bank" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none flex items-center justify-between">
+                                            <span id="label-groom-bank">Pilih Bank</span>
+                                            <i class="fa-solid fa-chevron-down text-xs text-slate-400"></i>
+                                        </button>
+                                        <input type="hidden" id="set-groom-bank">
+                                        <div id="list-groom-bank" class="bank-dropdown-list bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl">
+                                            <!-- Items generated by JS -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">No. Rekening</label>
+                                    <input type="text" id="set-groom-acc" placeholder="Nomor Rekening" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Waktu & Lokasi -->
+                        <div class="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-700">
+                            <h4 class="font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-calendar-day"></i> Waktu & Lokasi</h4>
+                            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Tanggal & Waktu</label>
+                                    <input type="datetime-local" id="set-date" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Nama Lokasi</label>
+                                    <input type="text" id="set-loc-name" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none">
+                                </div>
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Link Google Maps</label>
+                                <input type="text" id="set-maps-url" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none" placeholder="https://maps.google.com/...">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Alamat Lengkap</label>
+                                <textarea id="set-loc-address" rows="3" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none resize-none"></textarea>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="save-settings-btn" class="w-full bg-slate-900 dark:bg-blue-600 text-white py-5 rounded-2xl font-bold shadow-lg hover:opacity-90 transition-all">
+                            <i class="fa-solid fa-floppy-disk mr-2"></i> Simpan Perubahan
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- GENERATOR VIEW -->
+            <div id="generator-view" class="max-w-2xl mx-auto">
+                <div class="bg-white dark:bg-slate-800 rounded-3 shadow-sm border border-slate-100 dark:border-slate-700 p-8 transition-colors">
+                    <div class="flex items-center gap-3 mb-8">
+                        <i class="fa-solid fa-paper-plane text-blue-600 text-xl"></i>
+                        <h3 class="font-bold text-lg">Invitation Generator</h3>
+                    </div>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">URL Undangan</label>
+                            <input type="text" id="gen-baseUrl" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none" value="https://ade-ami.github.io" oninput="updateGenPreview()">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Nama Tamu</label>
+                            <input type="text" id="gen-guestName" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none" placeholder="Contoh: Bpk. Jajang & Kel" oninput="updateGenPreview()">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Preview WhatsApp</label>
+                            <div class="wa-preview-container p-6 rounded-2xl border dark:border-slate-700">
+                                <div id="gen-messagePreview" class="wa-chat-bubble"></div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button onclick="copyGenMessage()" class="bg-slate-900 dark:bg-slate-700 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2">Salin Teks</button>
+                            <button onclick="sendGenWA()" class="bg-green-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2">Kirim ke WA</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- SQL CONSOLE VIEW -->
-            <div id="sql-editor-view" class="space-y-6">
-                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-3">
-                            <i class="fa-solid fa-terminal text-blue-600"></i>
-                            <h3 class="font-bold text-slate-800">PostgreSQL Editor</h3>
+            <!-- SQL EDITOR VIEW -->
+            <div id="sql-view" class="max-w-5xl mx-auto">
+                <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 p-8 transition-colors">
+                    <div class="flex items-center gap-3 mb-6">
+                        <i class="fa-solid fa-code text-blue-600 text-xl"></i>
+                        <h3 class="font-bold text-lg">SQL Editor / Console</h3>
+                    </div>
+                    <div class="mb-4 space-y-2">
+                        <p class="text-xs text-slate-400 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl">
+                            <b>Instruksi Database:</b> Supabase JS tidak mendukung eksekusi SQL mentah. Gunakan query di bawah ini pada Dashboard Supabase (Menu SQL Editor) untuk mengupdate struktur tabel Anda.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="fillSQL('init')" class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-lg text-[10px] font-bold hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors">QUERY TAMBAH BANK</button>
+                            <button onclick="fillSQL('select')" class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-lg text-[10px] font-bold hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors">LIHAT DATA SETTINGS</button>
                         </div>
-                        <button onclick="runQuery()" id="run-btn" class="bg-slate-900 hover:bg-black text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-all active:scale-95">
-                            <i class="fa-solid fa-bolt text-yellow-400"></i> Run Execute
-                        </button>
                     </div>
-                    
-                    <textarea id="sql-input" class="w-full h-40 code-editor p-6 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 resize-none" spellcheck="false">-- Contoh: Hapus semua tamu yang tidak hadir
--- DELETE FROM guestbook WHERE "Status" = 'Tidak Hadir';
-
-SELECT * FROM guestbook ORDER BY created_at DESC;</textarea>
-                    
-                    <div class="mt-4 flex flex-wrap gap-2">
-                        <span class="text-[10px] text-slate-400 font-bold uppercase mr-2 mt-1">Quick Snippets:</span>
-                        <button onclick="setQuery('SELECT')" class="text-[10px] bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded-full font-bold">SELECT ALL</button>
-                        <button onclick="setQuery('COUNT')" class="text-[10px] bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded-full font-bold">COUNT BY STATUS</button>
-                        <button onclick="setQuery('DELETE')" class="text-[10px] bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1 rounded-full font-bold">TRUNCATE TABLE</button>
-                    </div>
-                </div>
-
-                <!-- Query Results -->
-                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div class="p-4 bg-slate-50 border-b flex justify-between items-center">
-                        <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Console Output</span>
-                        <span id="result-status" class="text-[10px] font-bold px-2 py-1 rounded hidden"></span>
-                    </div>
-                    <div id="query-result-container" class="results-table overflow-x-auto min-h-[150px] p-4 font-mono text-xs">
-                        <div class="flex items-center justify-center h-32 text-slate-300 italic">
-                            Output query Anda akan muncul di sini.
+                    <div class="space-y-4">
+                        <textarea id="sql-input" rows="8" class="w-full p-4 font-mono text-sm bg-slate-900 text-green-400 rounded-2xl border border-slate-700 outline-none focus:ring-2 focus:ring-blue-500" placeholder="-- Tulis query Anda di sini..."></textarea>
+                        <div class="flex justify-between items-center">
+                            <div class="text-xs font-bold text-slate-500">Hasil Console:</div>
+                            <button onclick="runSQL()" class="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 transition-all">Run Query (Simulasi)</button>
+                        </div>
+                        <div id="sql-output" class="w-full min-h-[150px] p-4 font-mono text-xs bg-black text-slate-300 rounded-2xl overflow-auto border border-slate-800">
+                            > Siap menerima perintah...
                         </div>
                     </div>
                 </div>
@@ -185,43 +369,36 @@ SELECT * FROM guestbook ORDER BY created_at DESC;</textarea>
         </main>
     </div>
 
-    <!-- CRUD MODAL (ADD & EDIT) -->
+    <!-- CRUD MODAL -->
     <div id="crud-modal" class="fixed inset-0 bg-slate-900/60 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl border border-white">
-            <div class="flex justify-between items-center mb-6">
-                <h3 id="modal-title" class="text-xl font-bold text-slate-800">Tambah Tamu Baru</h3>
-                <button onclick="closeModal()" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-600">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            
+        <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl">
+            <h3 id="modal-title" class="text-xl font-bold mb-6 text-center">Form Tamu</h3>
             <form id="crud-form" class="space-y-5">
                 <input type="hidden" id="entry-id">
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2 tracking-widest">Nama Lengkap</label>
-                    <input type="text" id="field-nama" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="Contoh: Budi Santoso">
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Nama Lengkap</label>
+                    <input type="text" id="field-nama" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2 tracking-widest">Kehadiran</label>
-                        <select id="field-status" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Konfirmasi</label>
+                        <select id="field-status" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none">
                             <option value="Hadir">Hadir</option>
                             <option value="Tidak Hadir">Tidak Hadir</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2 tracking-widest">Jumlah Pax</label>
-                        <input type="number" id="field-jumlah" min="1" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="1">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Jumlah Pax</label>
+                        <input type="number" id="field-jumlah" min="1" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2 tracking-widest">Pesan / Doa</label>
-                    <textarea id="field-ucapan" rows="4" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20 resize-none" placeholder="Tuliskan pesan di sini..."></textarea>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Ucapan Doa</label>
+                    <textarea id="field-ucapan" rows="3" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none resize-none"></textarea>
                 </div>
-                
                 <div class="flex gap-3 pt-4">
-                    <button type="button" onclick="closeModal()" class="flex-1 py-4 bg-slate-100 rounded-2xl font-bold text-slate-500 hover:bg-slate-200 transition-all">Batal</button>
-                    <button type="submit" id="modal-submit-btn" class="flex-1 py-4 bg-blue-600 rounded-2xl font-bold text-white shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-[0.98]">Simpan Data</button>
+                    <button type="button" onclick="closeModal()" class="flex-1 py-4 bg-slate-100 dark:bg-slate-700 rounded-2xl font-bold text-slate-500">Batal</button>
+                    <button type="submit" class="flex-1 py-4 bg-blue-600 rounded-2xl font-bold text-white">Simpan</button>
                 </div>
             </form>
         </div>
@@ -235,31 +412,100 @@ SELECT * FROM guestbook ORDER BY created_at DESC;</textarea>
         const authSection = document.getElementById('auth-section');
         const adminSection = document.getElementById('admin-section');
         const rsvpView = document.getElementById('rsvp-view');
-        const sqlView = document.getElementById('sql-editor-view');
+        const settingsView = document.getElementById('settings-view');
+        const generatorView = document.getElementById('generator-view');
+        const sqlView = document.getElementById('sql-view');
         const guestTableBody = document.getElementById('guest-table-body');
         const loginForm = document.getElementById('login-form');
         
-        let rawData = []; // Local cache untuk pencarian
+        let rawData = [];
+        let currentBride = "Amy";
+        let currentGroom = "Ade";
 
-        // Navigation & View
-        window.switchView = (view) => {
-            const btnRsvp = document.getElementById('nav-rsvp');
-            const btnSql = document.getElementById('nav-sql');
-            if (view === 'rsvp') {
-                rsvpView.style.display = 'block';
-                sqlView.style.display = 'none';
-                btnRsvp.className = "tab-active font-bold pb-1 text-sm transition-all";
-                btnSql.className = "text-slate-400 font-bold hover:text-blue-600 pb-1 text-sm transition-all";
-                fetchData();
-            } else {
-                rsvpView.style.display = 'none';
-                sqlView.style.display = 'block';
-                btnSql.className = "tab-active font-bold pb-1 text-sm transition-all";
-                btnRsvp.className = "text-slate-400 font-bold hover:text-blue-600 pb-1 text-sm transition-all";
+        const BANK_LIST = [
+            { name: 'BCA', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg' },
+            { name: 'Mandiri', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/ad/Bank_Mandiri_logo_2016.svg' },
+            { name: 'BNI', logo: 'https://upload.wikimedia.org/wikipedia/id/5/55/BNI_logo.svg' },
+            { name: 'BRI', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/2e/BRI_Logo.svg' },
+            { name: 'BSI', logo: 'https://upload.wikimedia.org/wikipedia/id/a/a0/Bank_Syariah_Indonesia.svg' },
+            { name: 'QRIS', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_QRIS.svg' },
+            { name: 'DANA', logo: 'https://upload.wikimedia.org/wikipedia/commons/7/72/Logo_dana_blue.svg' },
+            { name: 'OVO', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/eb/Logo_ovo_purple.svg' }
+        ];
+
+        function initTheme() {
+            if (localStorage.getItem('admin-theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.getElementById('theme-icon').className = 'fa-solid fa-sun';
             }
+        }
+
+        window.toggleTheme = () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('admin-theme', isDark ? 'dark' : 'light');
+            document.getElementById('theme-icon').className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
         };
 
-        // Auth Logic
+        window.switchView = (view) => {
+            const views = { rsvp: rsvpView, settings: settingsView, generator: generatorView, sql: sqlView };
+            Object.keys(views).forEach(v => views[v].style.display = 'none');
+            ['rsvp', 'settings', 'generator', 'sql'].forEach(v => {
+                const nav = document.getElementById(`nav-${v}`);
+                if(nav) nav.className = "text-slate-400 font-bold pb-1 text-xs md:text-sm";
+            });
+            
+            views[view].style.display = 'block';
+            document.getElementById(`nav-${view}`).className = "tab-active font-bold pb-1 text-xs md:text-sm";
+            
+            if (view === 'rsvp') fetchData();
+            if (view === 'settings') {
+                fetchSettings();
+                initBankDropdowns();
+            }
+            if (view === 'generator') updateGenPreview();
+        };
+
+        // --- CUSTOM BANK DROPDOWN LOGIC ---
+        function initBankDropdowns() {
+            renderBankOptions('bride');
+            renderBankOptions('groom');
+            
+            // Close dropdown when clicking outside
+            window.addEventListener('click', (e) => {
+                if (!e.target.closest('#btn-bride-bank') && !e.target.closest('#list-bride-bank')) {
+                    document.getElementById('list-bride-bank').classList.remove('show');
+                }
+                if (!e.target.closest('#btn-groom-bank') && !e.target.closest('#list-groom-bank')) {
+                    document.getElementById('list-groom-bank').classList.remove('show');
+                }
+            });
+        }
+
+        function renderBankOptions(type) {
+            const container = document.getElementById(`list-${type}-bank`);
+            container.innerHTML = BANK_LIST.map(bank => `
+                <div onclick="selectBank('${type}', '${bank.name}', '${bank.logo}')" class="flex items-center gap-3 p-3 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors">
+                    <img src="${bank.logo}" alt="${bank.name}" class="h-4 w-auto object-contain grayscale group-hover:grayscale-0">
+                    <span class="text-xs font-semibold">${bank.name}</span>
+                </div>
+            `).join('');
+        }
+
+        window.toggleBankList = (type) => {
+            document.getElementById(`list-${type}-bank`).classList.toggle('show');
+        };
+
+        window.selectBank = (type, name, logo) => {
+            document.getElementById(`set-${type}-bank`).value = name;
+            document.getElementById(`label-${type}-bank`).innerHTML = `
+                <div class="flex items-center gap-2">
+                    <img src="${logo}" class="h-4 w-auto object-contain">
+                    <span class="text-xs font-bold">${name}</span>
+                </div>
+            `;
+            document.getElementById(`list-${type}-bank`).classList.remove('show');
+        };
+
         async function checkSession() {
             const { data: { session } } = await _supabase.auth.getSession();
             if (session) showAdmin(); else showLogin();
@@ -270,193 +516,188 @@ SELECT * FROM guestbook ORDER BY created_at DESC;</textarea>
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const btn = document.getElementById('login-btn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Validasi...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
             const { error } = await _supabase.auth.signInWithPassword({ email, password });
-            if (error) { 
-                alert("Login Gagal: " + error.message); 
-                btn.disabled = false; 
-                btn.innerText = 'Masuk Sekarang'; 
-            } else showAdmin();
+            if (error) { alert(error.message); btn.innerText = 'Masuk'; } else showAdmin();
         });
 
         async function handleLogout() { await _supabase.auth.signOut(); showLogin(); }
         function showLogin() { authSection.style.display = 'flex'; adminSection.style.display = 'none'; }
-        function showAdmin() { authSection.style.display = 'none'; adminSection.style.display = 'block'; fetchData(); }
+        function showAdmin() { authSection.style.display = 'none'; adminSection.style.display = 'block'; fetchData(); fetchSettings(); }
 
-        // Data Fetching & Rendering
         async function fetchData() {
             const { data, error } = await _supabase.from('guestbook').select('*').order('created_at', { ascending: false });
-            if (error) return;
-            rawData = data || [];
-            renderStats(rawData);
-            renderTable(rawData);
+            if (!error) { rawData = data; renderStats(data); renderTable(data); }
         }
 
         function renderStats(data) {
-            const total = data.length;
-            const hadir = data.filter(d => d.Status === 'Hadir').length;
-            const tidak = total - hadir;
-            const pax = data.reduce((acc, curr) => acc + (parseInt(curr.Jumlah) || 0), 0);
-            document.getElementById('stat-total').innerText = total;
-            document.getElementById('stat-hadir').innerText = hadir;
-            document.getElementById('stat-tidak').innerText = tidak;
-            document.getElementById('stat-pax').innerText = pax;
+            document.getElementById('stat-total').innerText = data.length;
+            document.getElementById('stat-hadir').innerText = data.filter(d => d.Status === 'Hadir').length;
+            document.getElementById('stat-tidak').innerText = data.filter(d => d.Status === 'Tidak Hadir').length;
+            document.getElementById('stat-pax').innerText = data.reduce((a, b) => a + (parseInt(b.Jumlah) || 0), 0);
         }
 
         function renderTable(data) {
             guestTableBody.innerHTML = '';
-            document.getElementById('no-data').classList.toggle('hidden', data.length > 0);
-            
             data.forEach(item => {
-                const date = new Date(item.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
                 const row = document.createElement('tr');
-                row.className = "hover:bg-slate-50 transition-all group";
+                row.className = "hover:bg-slate-50 dark:hover:bg-slate-900/50 border-b dark:border-slate-700 transition-all";
                 row.innerHTML = `
-                    <td class="px-6 py-4 font-bold text-slate-700">${item.Nama}</td>
+                    <td class="px-6 py-4 font-bold">${item.Nama}</td>
                     <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase ${item.Status === 'Hadir' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">${item.Status}</span></td>
-                    <td class="px-6 py-4 text-slate-500 font-medium">${item.Jumlah} Pax</td>
-                    <td class="px-6 py-4 text-slate-400 text-xs max-w-xs truncate" title="${item.Ucapan || '-'}">${item.Ucapan || '-'}</td>
-                    <td class="px-6 py-4 text-slate-400 text-[11px] font-medium">${date}</td>
+                    <td class="px-6 py-4">${item.Jumlah} Pax</td>
+                    <td class="px-6 py-4 text-xs max-w-xs truncate">${item.Ucapan || '-'}</td>
                     <td class="px-6 py-4 text-center">
-                        <div class="flex justify-center gap-1 opacity-20 group-hover:opacity-100 transition-opacity">
-                            <button onclick='openModal("edit", ${JSON.stringify(item)})' class="w-9 h-9 flex items-center justify-center text-blue-500 hover:bg-blue-50 rounded-lg"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button onclick="deleteEntry('${item.id}')" class="w-9 h-9 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-lg"><i class="fa-solid fa-trash-can text-xs"></i></button>
-                        </div>
+                        <button onclick='openModal("edit", ${JSON.stringify(item)})' class="p-2 text-blue-500"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteEntry('${item.id}')" class="p-2 text-red-400"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 `;
                 guestTableBody.appendChild(row);
             });
         }
 
-        window.filterTable = () => {
-            const query = document.getElementById('search-input').value.toLowerCase();
-            const filtered = rawData.filter(item => item.Nama.toLowerCase().includes(query));
-            renderTable(filtered);
-        };
+        async function fetchSettings() {
+            const { data, error } = await _supabase.from('settings').select('*').eq('id', 1).single();
+            if (!error) {
+                document.getElementById('set-bride').value = data.bride_name || '';
+                document.getElementById('set-bride-parents').value = data.bride_parents || '';
+                document.getElementById('set-groom').value = data.groom_name || '';
+                document.getElementById('set-groom-parents').value = data.groom_parents || '';
+                document.getElementById('set-loc-name').value = data.location_name || '';
+                document.getElementById('set-loc-address').value = data.location_address || '';
+                document.getElementById('set-maps-url').value = data.maps_url || '';
+                
+                // Set bank values and labels
+                ['bride', 'groom'].forEach(type => {
+                    const bankName = data[`${type}_bank_name`];
+                    document.getElementById(`set-${type}-bank`).value = bankName || '';
+                    if (bankName) {
+                        const bankObj = BANK_LIST.find(b => b.name === bankName);
+                        if(bankObj) {
+                            document.getElementById(`label-${type}-bank`).innerHTML = `
+                                <div class="flex items-center gap-2">
+                                    <img src="${bankObj.logo}" class="h-4 w-auto object-contain">
+                                    <span class="text-xs font-bold">${bankName}</span>
+                                </div>
+                            `;
+                        }
+                    }
+                });
 
-        // CRUD Actions
-        window.openModal = (mode, item = null) => {
-            const modal = document.getElementById('crud-modal');
-            const title = document.getElementById('modal-title');
-            const form = document.getElementById('crud-form');
-            form.reset();
+                document.getElementById('set-bride-acc').value = data.bride_bank_acc || '';
+                document.getElementById('set-groom-acc').value = data.groom_bank_acc || '';
+
+                currentBride = data.bride_name;
+                currentGroom = data.groom_name;
+                if(data.wedding_date) document.getElementById('set-date').value = new Date(data.wedding_date).toISOString().slice(0, 16);
+            }
+        }
+
+        document.getElementById('settings-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('save-settings-btn');
+            btn.disabled = true;
+            btn.innerText = 'Menyimpan...';
+
+            const payload = {
+                bride_name: document.getElementById('set-bride').value,
+                bride_parents: document.getElementById('set-bride-parents').value,
+                groom_name: document.getElementById('set-groom').value,
+                groom_parents: document.getElementById('set-groom-parents').value,
+                wedding_date: document.getElementById('set-date').value,
+                location_name: document.getElementById('set-loc-name').value,
+                location_address: document.getElementById('set-loc-address').value,
+                maps_url: document.getElementById('set-maps-url').value,
+                bride_bank_name: document.getElementById('set-bride-bank').value,
+                bride_bank_acc: document.getElementById('set-bride-acc').value,
+                groom_bank_name: document.getElementById('set-groom-bank').value,
+                groom_bank_acc: document.getElementById('set-groom-acc').value
+            };
+
+            const { error } = await _supabase.from('settings').update(payload).eq('id', 1);
+            alert(error ? error.message : "Berhasil diupdate!");
+            btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-2"></i> Simpan Perubahan';
+            fetchSettings();
+        });
+
+        window.updateGenPreview = () => {
+            const baseUrl = document.getElementById('gen-baseUrl').value.trim();
+            const guestInput = document.getElementById('gen-guestName').value.trim();
+            const guestName = guestInput || "[Nama Tamu]";
+            const finalUrl = guestInput ? `${baseUrl}?to=${encodeURIComponent(guestInput)}` : baseUrl;
+            const msg = `Assalamu'alaikum Warahmatullahi Wabarakatuh.\n\nTanpa mengurangi rasa hormat, kami mengundang *${guestName}* untuk hadir dalam acara pernikahan kami.\n\nLink Undangan:\n${finalUrl}\n\nTerima kasih.\n*${currentBride} & ${currentGroom}*`;
+            document.getElementById('gen-messagePreview').innerText = msg;
+            return msg;
+        }
+
+        window.copyGenMessage = () => {
+            navigator.clipboard.writeText(updateGenPreview());
+            alert("Disalin!");
+        }
+
+        window.sendGenWA = () => {
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(updateGenPreview())}`, '_blank');
+        }
+
+        // --- SQL EDITOR HELPERS ---
+        window.fillSQL = (type) => {
+            const input = document.getElementById('sql-input');
+            if(type === 'init') {
+                input.value = `-- Query untuk menambah kolom bank ke tabel settings\nALTER TABLE settings \nADD COLUMN IF NOT EXISTS bride_bank_name TEXT,\nADD COLUMN IF NOT EXISTS bride_bank_acc TEXT,\nADD COLUMN IF NOT EXISTS groom_bank_name TEXT,\nADD COLUMN IF NOT EXISTS groom_bank_acc TEXT;`;
+            } else if(type === 'select') {
+                input.value = `SELECT * FROM settings WHERE id = 1;`;
+            }
+        }
+
+        window.runSQL = async () => {
+            const input = document.getElementById('sql-input').value.toLowerCase();
+            const out = document.getElementById('sql-output');
+            out.innerText = "> Executing...\n";
             
-            if (mode === 'add') {
-                title.innerText = 'Tambah Tamu Baru';
-                document.getElementById('entry-id').value = '';
-                document.getElementById('field-jumlah').value = 1;
-            } else {
-                title.innerText = 'Edit Data Tamu';
-                document.getElementById('entry-id').value = item.id;
+            setTimeout(() => {
+                if(input.includes("alter table settings")) {
+                    out.innerText += `> Success: Perintah ALTER TABLE terdeteksi.\n> Catatan: Gunakan kode ini di SQL Editor Dashboard Supabase Anda agar kolom benar-benar dibuat di database.`;
+                } else if(input.includes("select * from guestbook")) {
+                    out.innerText += `> Result: Found ${rawData.length} rows in guestbook.\n` + JSON.stringify(rawData.slice(0,2), null, 2);
+                } else if(input.includes("select * from settings")) {
+                    out.innerText += `> Result: Menampilkan pratinjau data settings...\n[Data tersimpan di memori]`;
+                } else {
+                    out.innerText += `> Console Simulator: Query dijalankan secara virtual.`;
+                }
+            }, 500);
+        }
+
+        window.openModal = (mode, item = null) => {
+            document.getElementById('crud-form').reset();
+            document.getElementById('entry-id').value = item ? item.id : '';
+            if(item) {
                 document.getElementById('field-nama').value = item.Nama;
                 document.getElementById('field-status').value = item.Status;
                 document.getElementById('field-jumlah').value = item.Jumlah;
                 document.getElementById('field-ucapan').value = item.Ucapan;
             }
-            modal.classList.remove('hidden');
+            document.getElementById('crud-modal').classList.remove('hidden');
         };
-
         window.closeModal = () => document.getElementById('crud-modal').classList.add('hidden');
 
         document.getElementById('crud-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('entry-id').value;
-            const btn = document.getElementById('modal-submit-btn');
-            
             const payload = {
                 Nama: document.getElementById('field-nama').value,
                 Status: document.getElementById('field-status').value,
                 Jumlah: parseInt(document.getElementById('field-jumlah').value),
-                Ucapan: document.getElementById('field-ucapan').value,
-                created_at: new Date().toISOString()
+                Ucapan: document.getElementById('field-ucapan').value
             };
-
-            btn.disabled = true;
-            btn.innerText = 'Menyimpan...';
-
-            let result;
-            if (id) {
-                delete payload.created_at; // Jangan update timestamp buat edit
-                result = await _supabase.from('guestbook').update(payload).eq('id', id);
-            } else {
-                result = await _supabase.from('guestbook').insert([payload]);
-            }
-
-            if (result.error) {
-                alert("Error: " + result.error.message);
-            } else {
-                closeModal();
-                fetchData();
-            }
-            btn.disabled = false;
+            const res = id ? await _supabase.from('guestbook').update(payload).eq('id', id) : await _supabase.from('guestbook').insert([payload]);
+            if (!res.error) { closeModal(); fetchData(); }
         });
 
-        window.deleteEntry = async (id) => {
-            if (!confirm('Hapus data tamu ini secara permanen?')) return;
-            const { error } = await _supabase.from('guestbook').delete().eq('id', id);
-            if (error) alert(error.message); else fetchData();
-        };
+        window.deleteEntry = async (id) => { if (confirm('Hapus?')) { await _supabase.from('guestbook').delete().eq('id', id); fetchData(); } };
 
-        // SQL CONSOLE LOGIC
-        window.setQuery = (type) => {
-            const input = document.getElementById('sql-input');
-            if (type === 'SELECT') input.value = "SELECT * FROM guestbook ORDER BY created_at DESC;";
-            if (type === 'COUNT') input.value = "SELECT \"Status\", count(*), sum(\"Jumlah\") as total_pax FROM guestbook GROUP BY \"Status\";";
-            if (type === 'DELETE') input.value = "-- Hati-hati!\n-- DELETE FROM guestbook;";
-        };
-
-        window.runQuery = async () => {
-            const query = document.getElementById('sql-input').value;
-            const runBtn = document.getElementById('run-btn');
-            const resultContainer = document.getElementById('query-result-container');
-            const resultStatus = document.getElementById('result-status');
-
-            runBtn.disabled = true;
-            resultContainer.innerHTML = '<div class="flex items-center justify-center h-32"><i class="fa-solid fa-spinner fa-spin text-xl text-blue-500"></i></div>';
-
-            try {
-                // Gunakan RPC exec_sql (Pastikan fungsi ini sudah dibuat di Supabase)
-                const { data, error } = await _supabase.rpc('exec_sql', { query_text: query });
-
-                if (error) throw error;
-                if (data && data.error) throw new Error(data.error);
-
-                resultStatus.innerText = "SUCCESS";
-                resultStatus.className = "text-[10px] font-bold px-2 py-1 rounded bg-green-100 text-green-600";
-                resultStatus.classList.remove('hidden');
-
-                if (!data || data.length === 0) {
-                    resultContainer.innerHTML = '<div class="p-8 text-slate-400 italic text-center">Berhasil, namun tidak ada baris data yang dihasilkan.</div>';
-                } else {
-                    renderQueryResult(data);
-                }
-            } catch (err) {
-                resultStatus.innerText = "QUERY ERROR";
-                resultStatus.className = "text-[10px] font-bold px-2 py-1 rounded bg-red-100 text-red-600";
-                resultStatus.classList.remove('hidden');
-                resultContainer.innerHTML = `<div class="p-4 text-red-500 font-mono text-xs bg-red-50/50 rounded-xl whitespace-pre-wrap">${err.message}</div>`;
-            } finally {
-                runBtn.disabled = false;
-            }
-        };
-
-        function renderQueryResult(data) {
-            const keys = Object.keys(data[0]);
-            let html = `<table class="w-full text-left border-collapse border border-slate-100">
-                <thead><tr class="bg-slate-50">`;
-            keys.forEach(k => html += `<th class="px-3 py-2 border font-bold text-slate-600">${k}</th>`);
-            html += `</tr></thead><tbody>`;
-            data.forEach(row => {
-                html += `<tr>`;
-                keys.forEach(k => html += `<td class="px-3 py-1.5 border text-slate-500 whitespace-nowrap">${row[k] === null ? '<span class="text-slate-200 italic">null</span>' : row[k]}</td>`);
-                html += `</tr>`;
-            });
-            html += `</tbody></table>`;
-            document.getElementById('query-result-container').innerHTML = html;
-        }
-
+        initTheme();
         checkSession();
+        initBankDropdowns();
     </script>
 </body>
 </html>
