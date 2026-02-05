@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
+            /* Light Theme Variables */
             --primary: #2c5282;
             --primary-dark: #1a365d;
             --secondary: #25d366; /* WA Green */
@@ -17,12 +18,38 @@
             --text-muted: #718096;
             --border-color: #e2e8f0;
             --accent-light: #ebf4ff;
+            --input-bg: #ffffff;
+            
+            /* WhatsApp Preview Light */
+            --wa-bg: #e5ddd5;
+            --wa-bubble: #ffffff;
+            --wa-text: #111b21;
+        }
+
+        [data-theme="dark"] {
+            /* Dark Theme Variables */
+            --primary: #63b3ed;
+            --primary-dark: #90cdf4;
+            --secondary: #25d366;
+            --bg-body: #1a202c;
+            --bg-card: #2d3748;
+            --text-main: #f7fafc;
+            --text-muted: #a0aec0;
+            --border-color: #4a5568;
+            --accent-light: #2a4365;
+            --input-bg: #1a202c;
+
+            /* WhatsApp Preview Dark */
+            --wa-bg: #0b141a;
+            --wa-bubble: #202c33;
+            --wa-text: #e9edef;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
 
         body {
@@ -46,8 +73,27 @@
             background: var(--bg-card);
             padding: 40px 30px;
             border-radius: 24px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--accent-light);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
         }
 
         header {
@@ -71,7 +117,7 @@
         h1 {
             font-size: 1.4rem;
             font-weight: 800;
-            color: var(--primary-dark);
+            color: var(--text-main);
             letter-spacing: -0.5px;
         }
 
@@ -90,9 +136,10 @@
             font-weight: 700;
             font-size: 0.85rem;
             margin-bottom: 8px;
-            color: var(--primary-dark);
+            color: var(--text-main);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            opacity: 0.8;
         }
 
         .input-wrapper {
@@ -115,18 +162,16 @@
             border-radius: 12px;
             font-family: inherit;
             font-size: 0.95rem;
-            transition: all 0.2s ease;
             color: var(--text-main);
+            background-color: var(--input-bg);
         }
 
         input:focus {
             border-color: var(--primary);
             outline: none;
             box-shadow: 0 0 0 4px rgba(44, 82, 130, 0.1);
-            background-color: #fff;
         }
 
-        /* Preview Box - WhatsApp Style */
         .preview-label-container {
             display: flex;
             justify-content: space-between;
@@ -135,8 +180,10 @@
         }
 
         .preview-container {
-            background-color: #e5ddd5; /* WhatsApp chat background */
+            background-color: var(--wa-bg);
             background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            /* Filter untuk wallpaper WA di dark mode agar tidak terlalu terang */
+            background-blend-mode: overlay;
             padding: 20px;
             border-radius: 15px;
             max-height: 300px;
@@ -144,8 +191,14 @@
             position: relative;
         }
 
+        [data-theme="dark"] .preview-container {
+            background-color: #0b141a;
+            opacity: 0.9;
+        }
+
         .chat-bubble {
-            background: white;
+            background: var(--wa-bubble);
+            color: var(--wa-text);
             padding: 12px 15px;
             border-radius: 8px 8px 8px 0;
             font-size: 0.9rem;
@@ -165,7 +218,7 @@
             height: 0;
             border-style: solid;
             border-width: 0 10px 10px 0;
-            border-color: transparent white transparent transparent;
+            border-color: transparent var(--wa-bubble) transparent transparent;
         }
 
         .btn-stack {
@@ -203,7 +256,7 @@
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             filter: brightness(1.1);
         }
 
@@ -211,7 +264,6 @@
             transform: translateY(0);
         }
 
-        /* Toast Notification */
         .toast {
             position: fixed;
             bottom: 30px;
@@ -231,11 +283,15 @@
             gap: 8px;
         }
 
+        [data-theme="dark"] .toast {
+            background: #f7fafc;
+            color: #1a202c;
+        }
+
         .toast.show {
             transform: translateX(-50%) translateY(0);
         }
 
-        /* Custom Scrollbar */
         .preview-container::-webkit-scrollbar {
             width: 6px;
         }
@@ -255,6 +311,11 @@
 
 <div class="container">
     <div class="card">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" id="themeToggle" title="Ganti Tema">
+            <i class="fas fa-moon" id="themeIcon"></i>
+        </button>
+
         <header>
             <div class="logo-area">
                 <i class="fas fa-envelope-open-text"></i>
@@ -306,12 +367,41 @@
 </div>
 
 <script>
+    // Theme logic
+    const html = document.documentElement;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    html.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = html.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        
+        html.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeIcon(newTheme);
+    });
+
+    function updateThemeIcon(theme) {
+        if (theme === 'dark') {
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+        } else {
+            themeIcon.classList.remove('fa-sun');
+            themeIcon.classList.add('fa-moon');
+        }
+    }
+
+    // Generator logic
     function generatePreview() {
         const baseUrl = document.getElementById('baseUrl').value.trim();
         const guestInput = document.getElementById('guestName').value.trim();
         const guestName = guestInput || "[Nama Tamu]";
         
-        // Encode URL
         const encodedName = encodeURIComponent(guestInput || "");
         const finalUrl = guestInput ? `${baseUrl}?to=${encodedName}` : baseUrl;
 
@@ -360,11 +450,9 @@ Wassalamu'alaikum Warahmatullahi Wabarakatuh.
 
     function sendWA() {
         const message = encodeURIComponent(generatePreview());
-        // Menggunakan api.whatsapp.com agar kompatibel di berbagai perangkat
         window.open(`https://api.whatsapp.com/send?text=${message}`, '_blank');
     }
 
-    // Inisialisasi saat halaman dimuat
     window.onload = generatePreview;
 </script>
 
