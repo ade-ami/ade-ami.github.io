@@ -112,6 +112,14 @@
             overflow-y: auto;
         }
         .bank-dropdown-list.show { display: block; }
+
+        /* Auto-hide Navigation Style */
+        #main-nav {
+            transition: transform 0.3s ease-in-out;
+        }
+        .nav-hidden {
+            transform: translateY(-100%);
+        }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 min-h-screen text-slate-800 dark:text-slate-200">
@@ -141,7 +149,7 @@
 
     <!-- ADMIN DASHBOARD SECTION -->
     <div id="admin-section">
-        <nav class="bg-white dark:bg-slate-800 border-b dark:border-slate-700 sticky top-0 z-50 shadow-sm">
+        <nav id="main-nav" class="bg-white dark:bg-slate-800 border-b dark:border-slate-700 sticky top-0 z-50 shadow-sm">
             <div class="container mx-auto px-6 py-4 flex justify-between items-center">
                 <div class="flex items-center gap-6">
                     <div class="flex items-center gap-3">
@@ -243,6 +251,10 @@
                                     <input type="text" id="set-bride-parents" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none">
                                 </div>
                             </div>
+                            <div class="mb-4">
+                                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Foto Mempelai Wanita (URL)</label>
+                                <input type="text" id="set-bride-img" placeholder="https://link-gambar.jpg" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none">
+                            </div>
                             <div class="grid md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Bank Mempelai Wanita</label>
@@ -276,6 +288,10 @@
                                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Orang Tua</label>
                                     <input type="text" id="set-groom-parents" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none">
                                 </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Foto Mempelai Pria (URL)</label>
+                                <input type="text" id="set-groom-img" placeholder="https://link-gambar.jpg" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none">
                             </div>
                             <div class="grid md:grid-cols-2 gap-6">
                                 <div>
@@ -318,6 +334,41 @@
                             <div>
                                 <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Alamat Lengkap</label>
                                 <textarea id="set-loc-address" rows="3" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none resize-none"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Media & Galeri -->
+                        <div class="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-700">
+                            <h4 class="font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-photo-film"></i> Media & Galeri</h4>
+                            <div class="mb-6">
+                                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Musik Latar (URL Audio)</label>
+                                <input type="text" id="set-music" placeholder="https://link-audio.mp3" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none">
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Galeri Foto 1 (URL)</label>
+                                    <input type="text" id="set-gal-1" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Galeri Foto 2 (URL)</label>
+                                    <input type="text" id="set-gal-2" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Galeri Foto 3 (URL)</label>
+                                    <input type="text" id="set-gal-3" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Galeri Foto 4 (URL)</label>
+                                    <input type="text" id="set-gal-4" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Galeri Foto 5 (URL)</label>
+                                    <input type="text" id="set-gal-5" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Galeri Foto 6 (URL)</label>
+                                    <input type="text" id="set-gal-6" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-xs">
+                                </div>
                             </div>
                         </div>
 
@@ -462,10 +513,12 @@
         const sqlView = document.getElementById('sql-view');
         const guestTableBody = document.getElementById('guest-table-body');
         const loginForm = document.getElementById('login-form');
+        const mainNav = document.getElementById('main-nav');
         
         let rawData = [];
         let currentBride = "Amy";
         let currentGroom = "Ade";
+        let lastScrollY = window.scrollY;
 
         const BANK_LIST = [
             { name: 'BCA', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg' },
@@ -477,6 +530,20 @@
             { name: 'DANA', logo: 'https://upload.wikimedia.org/wikipedia/commons/7/72/Logo_dana_blue.svg' },
             { name: 'OVO', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/eb/Logo_ovo_purple.svg' }
         ];
+
+        // --- SCROLL AUTO-HIDE LOGIC ---
+        window.addEventListener('scroll', () => {
+            if (authSection.style.display === 'flex') return; // Jangan sembunyikan jika sedang di login
+            
+            if (window.scrollY > lastScrollY && window.scrollY > 100) {
+                // Scroll Ke Bawah -> Sembunyikan Nav
+                mainNav.classList.add('nav-hidden');
+            } else {
+                // Scroll Ke Atas -> Tampilkan Nav
+                mainNav.classList.remove('nav-hidden');
+            }
+            lastScrollY = window.scrollY;
+        });
 
         function initTheme() {
             if (localStorage.getItem('admin-theme') === 'dark') {
@@ -641,8 +708,10 @@
             if (!error) {
                 document.getElementById('set-bride').value = data.bride_name || '';
                 document.getElementById('set-bride-parents').value = data.bride_parents || '';
+                document.getElementById('set-bride-img').value = data.bride_image || '';
                 document.getElementById('set-groom').value = data.groom_name || '';
                 document.getElementById('set-groom-parents').value = data.groom_parents || '';
+                document.getElementById('set-groom-img').value = data.groom_image || '';
                 document.getElementById('set-loc-name').value = data.location_name || '';
                 document.getElementById('set-loc-address').value = data.location_address || '';
                 document.getElementById('set-maps-url').value = data.maps_url || '';
@@ -666,6 +735,12 @@
 
                 document.getElementById('set-bride-acc').value = data.bride_bank_acc || '';
                 document.getElementById('set-groom-acc').value = data.groom_bank_acc || '';
+                
+                // Set Media & Galeri
+                document.getElementById('set-music').value = data.bg_music || '';
+                for(let i=1; i<=6; i++) {
+                    document.getElementById(`set-gal-${i}`).value = data[`gallery_${i}`] || '';
+                }
 
                 currentBride = data.bride_name;
                 currentGroom = data.groom_name;
@@ -682,8 +757,10 @@
             const payload = {
                 bride_name: document.getElementById('set-bride').value,
                 bride_parents: document.getElementById('set-bride-parents').value,
+                bride_image: document.getElementById('set-bride-img').value,
                 groom_name: document.getElementById('set-groom').value,
                 groom_parents: document.getElementById('set-groom-parents').value,
+                groom_image: document.getElementById('set-groom-img').value,
                 wedding_date: document.getElementById('set-date').value,
                 location_name: document.getElementById('set-loc-name').value,
                 location_address: document.getElementById('set-loc-address').value,
@@ -691,7 +768,14 @@
                 bride_bank_name: document.getElementById('set-bride-bank').value,
                 bride_bank_acc: document.getElementById('set-bride-acc').value,
                 groom_bank_name: document.getElementById('set-groom-bank').value,
-                groom_bank_acc: document.getElementById('set-groom-acc').value
+                groom_bank_acc: document.getElementById('set-groom-acc').value,
+                bg_music: document.getElementById('set-music').value,
+                gallery_1: document.getElementById('set-gal-1').value,
+                gallery_2: document.getElementById('set-gal-2').value,
+                gallery_3: document.getElementById('set-gal-3').value,
+                gallery_4: document.getElementById('set-gal-4').value,
+                gallery_5: document.getElementById('set-gal-5').value,
+                gallery_6: document.getElementById('set-gal-6').value
             };
 
             const { error } = await _supabase.from('settings').update(payload).eq('id', 1);
@@ -725,7 +809,7 @@
             if(type === 'guestbook') {
                 input.value = `-- Buat tabel guestbook\ncreate table guestbook (\n  id bigint primary key generated always as identity,\n  "Nama" text not null,\n  "Jumlah" int4 not null default 1,\n  "Status" text not null,\n  "Ucapan" text not null,\n  created_at timestamp with time zone default now()\n);\n\n-- Aktifkan Row Level Security (RLS)\nalter table guestbook enable row level security;`;
             } else if(type === 'settings') {
-                input.value = `-- Buat tabel settings\nCREATE TABLE public.settings (\n  id integer NOT NULL DEFAULT 1,\n  bride_name text,\n  groom_name text,\n  wedding_date timestamp with time zone,\n  location_name text,\n  location_address text,\n  bride_parents text,\n  groom_parents text,\n  maps_url text,\n  bride_bank_name text,\n  bride_bank_acc text,\n  groom_bank_name text,\n  groom_bank_acc text,\n  CONSTRAINT settings_pkey PRIMARY KEY (id)\n);\n\n-- Masukkan data awal (default)\nINSERT INTO public.settings (id) VALUES (1) ON CONFLICT DO NOTHING;`;
+                input.value = `-- 1. Buat tabel settings jika belum ada\nCREATE TABLE IF NOT EXISTS public.settings (\n  id integer NOT NULL DEFAULT 1,\n  bride_name text,\n  bride_image text,\n  groom_name text,\n  groom_image text,\n  wedding_date timestamp with time zone,\n  location_name text,\n  location_address text,\n  bride_parents text,\n  groom_parents text,\n  maps_url text,\n  bride_bank_name text,\n  bride_bank_acc text,\n  groom_bank_name text,\n  groom_bank_acc text,\n  bg_music text,\n  gallery_1 text,\n  gallery_2 text,\n  gallery_3 text,\n  gallery_4 text,\n  gallery_5 text,\n  gallery_6 text,\n  CONSTRAINT settings_pkey PRIMARY KEY (id)\n);\n\n-- 2. Jalankan ALTER untuk memastikan kolom baru ada (jika tabel sudah ada sebelumnya)\nALTER TABLE public.settings \nADD COLUMN IF NOT EXISTS bride_image text,\nADD COLUMN IF NOT EXISTS groom_image text,\nADD COLUMN IF NOT EXISTS bg_music text,\nADD COLUMN IF NOT EXISTS gallery_1 text,\nADD COLUMN IF NOT EXISTS gallery_2 text,\nADD COLUMN IF NOT EXISTS gallery_3 text,\nADD COLUMN IF NOT EXISTS gallery_4 text,\nADD COLUMN IF NOT EXISTS gallery_5 text,\nADD COLUMN IF NOT EXISTS gallery_6 text;\n\n-- 3. Masukkan data awal (default)\nINSERT INTO public.settings (id) VALUES (1) ON CONFLICT DO NOTHING;`;
             }
         }
 
@@ -735,7 +819,9 @@
             out.innerText = "> Executing...\n";
             
             setTimeout(() => {
-                if(input.includes("create table public.settings") || input.includes("create table settings")) {
+                if(input.includes("alter table settings")) {
+                    out.innerText += `> Success: Perintah ALTER TABLE terdeteksi untuk memperbarui kolom settings.\n> Catatan: Gunakan kode ini di SQL Editor Dashboard Supabase Anda.`;
+                } else if(input.includes("create table public.settings") || input.includes("create table settings")) {
                     out.innerText += `> Success: Perintah CREATE TABLE SETTINGS terdeteksi.\n> Catatan: Jalankan query ini di SQL Editor Supabase Dashboard Anda.`;
                 } else if(input.includes("create table guestbook")) {
                     out.innerText += `> Success: Perintah CREATE TABLE GUESTBOOK terdeteksi.\n> Catatan: Jalankan query ini di SQL Editor Supabase Dashboard Anda.`;
