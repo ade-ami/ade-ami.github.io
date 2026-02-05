@@ -92,7 +92,7 @@
             display: inline-block;
         }
         @keyframes spin {
-            0 = { transform: rotate(0deg); }
+            0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
 
@@ -234,14 +234,14 @@
             <div class="grid md:grid-cols-2 gap-16 items-center">
                 <!-- Wanita -->
                 <div class="fade-down-element">
-                    <img src="img/wanita.jpeg" onerror="this.src='https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=500'" class="w-56 h-56 rounded-full mx-auto object-cover mb-6 border-8 border-white shadow-2xl transform hover:scale-105 transition-transform duration-500">
+                    <img id="display-bride-photo" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=500" class="w-56 h-56 rounded-full mx-auto object-cover mb-6 border-8 border-white shadow-2xl transform hover:scale-105 transition-transform duration-500">
                     <h3 class="font-cursive text-5xl mb-3 text-blue-900 display-bride-full">Nama Wanita</h3>
                     <p class="text-sm font-semibold mb-1 text-slate-800 uppercase tracking-widest text-xs">Putri dari:</p>
                     <p class="text-slate-600 text-base leading-relaxed display-bride-parents">Nama Orang Tua</p>
                 </div>
                 <!-- Pria -->
                 <div class="fade-down-element">
-                    <img src="img/pria.jpeg" onerror="this.src='https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500'" class="w-56 h-56 rounded-full mx-auto object-cover mb-6 border-8 border-white shadow-2xl transform hover:scale-105 transition-transform duration-500">
+                    <img id="display-groom-photo" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500" class="w-56 h-56 rounded-full mx-auto object-cover mb-6 border-8 border-white shadow-2xl transform hover:scale-105 transition-transform duration-500">
                     <h3 class="font-cursive text-5xl mb-3 text-blue-900 display-groom-full">Nama Pria</h3>
                     <p class="text-sm font-semibold mb-1 text-slate-800 uppercase tracking-widest text-xs">Putra dari:</p>
                     <p class="text-slate-600 text-base leading-relaxed display-groom-parents">Nama Orang Tua</p>
@@ -284,6 +284,20 @@
                         <i class="fa-solid fa-map-location-dot text-lg"></i>
                         <span class="uppercase tracking-widest text-sm">Buka Maps</span>
                     </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- GALERI -->
+        <section id="galeri" class="py-24 px-6 bg-white">
+            <div class="container mx-auto max-w-5xl">
+                <div class="text-center mb-16 fade-down-element">
+                    <h2 class="font-serif text-4xl mb-4 text-blue-950 uppercase tracking-widest">Galeri Kebahagiaan</h2>
+                    <div class="w-24 h-1 bg-blue-900 mx-auto rounded-full"></div>
+                </div>
+                <!-- Container Galeri Dinamis -->
+                <div id="gallery-container" class="grid grid-cols-2 md:grid-cols-4 gap-4 fade-down-element">
+                    <!-- Akan diisi otomatis oleh JS -->
                 </div>
             </div>
         </section>
@@ -397,6 +411,10 @@
             <i class="fa-solid fa-calendar-check text-lg"></i>
             <span>Waktu</span>
         </a>
+        <a href="#galeri" class="nav-link flex flex-col items-center gap-1 text-[10px] font-bold uppercase tracking-tighter">
+            <i class="fa-solid fa-images text-lg"></i>
+            <span>Galeri</span>
+        </a>
         <a href="#hadiah" class="nav-link flex flex-col items-center gap-1 text-[10px] font-bold uppercase tracking-tighter">
             <i class="fa-solid fa-gift text-lg"></i>
             <span>Hadiah</span>
@@ -412,7 +430,8 @@
         <button id="music-btn" onclick="toggleMusic()" class="bg-blue-950 w-12 h-12 flex items-center justify-center rounded-full music-rotate text-white border-2 border-white shadow-lg">
             <i id="music-icon" class="fa-solid fa-compact-disc text-xl"></i>
         </button>
-        <audio id="background-music" loop><source src="img/music.mp3" type="audio/mpeg"></audio>
+        <!-- Audio Source Dinamis -->
+        <audio id="background-music" loop><source src="" type="audio/mpeg"></audio>
     </div>
 
     <script>
@@ -425,6 +444,7 @@
         const messagesPerPage = 5;
         let targetDateMs = 0;
         let settingsData = {};
+        let galleryImages = [];
 
         // Helper untuk mendapatkan Logo Bank
         function getBankLogoHtml(bankName) {
@@ -467,6 +487,17 @@
                     document.querySelectorAll('.display-bride-parents').forEach(el => el.innerText = data.bride_parents || "");
                     document.querySelectorAll('.display-groom-parents').forEach(el => el.innerText = data.groom_parents || "");
 
+                    // Update Foto Mempelai (Disesuaikan dengan admin.html)
+                    if (data.bride_image) document.getElementById('display-bride-photo').src = data.bride_image;
+                    if (data.groom_image) document.getElementById('display-groom-photo').src = data.groom_image;
+
+                    // Update Musik Dinamis (Disesuaikan dengan admin.html)
+                    if (data.bg_music) {
+                        const audio = document.getElementById('background-music');
+                        audio.src = data.bg_music;
+                        audio.load(); 
+                    }
+
                     const d = new Date(data.wedding_date);
                     const simpleDate = d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, ' . ');
                     const fullDate = d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -482,6 +513,17 @@
                     document.getElementById('display-groom-bank').innerHTML = getBankLogoHtml(data.groom_bank_name);
                     document.getElementById('display-groom-acc').innerText = data.groom_bank_acc || '-';
 
+                    // Update Galeri Dinamis (Disesuaikan dengan admin.html yang menggunakan kolom gallery_1 - gallery_6)
+                    galleryImages = [];
+                    for(let i = 1; i <= 6; i++) {
+                        if(data[`gallery_${i}`]) {
+                            galleryImages.push(data[`gallery_${i}`]);
+                        }
+                    }
+                    if (galleryImages.length > 0) {
+                        renderGallery();
+                    }
+
                     if (data.maps_url) {
                         document.querySelectorAll('.display-maps-btn').forEach(el => el.href = data.maps_url);
                     }
@@ -494,18 +536,48 @@
             }
         }
 
+        function renderGallery() {
+            const container = document.getElementById('gallery-container');
+            container.innerHTML = '';
+            
+            // Hanya tunjukkan 4 gambar pertama di grid
+            const visibleCount = 4;
+            const imagesToShow = galleryImages.slice(0, visibleCount);
+            
+            imagesToShow.forEach((url, index) => {
+                const div = document.createElement('div');
+                div.className = "relative overflow-hidden rounded-2xl cursor-pointer shadow-lg group";
+                div.onclick = () => openLightbox(index);
+                
+                let extraOverlay = '';
+                // Jika ini adalah gambar ke-4 dan terdapat baki gambar
+                if (index === 3 && galleryImages.length > visibleCount) {
+                    const remaining = galleryImages.length - (visibleCount - 1);
+                    extraOverlay = `
+                        <div class="absolute inset-0 bg-black/60 flex items-center justify-center pointer-events-none">
+                            <span class="text-white text-3xl font-bold font-serif">+${remaining}</span>
+                        </div>
+                    `;
+                }
+
+                div.innerHTML = `
+                    <img src="${url.trim()}" class="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-500" alt="Galeri ${index + 1}">
+                    ${extraOverlay}
+                `;
+                container.appendChild(div);
+            });
+        }
+
         // 2. Hitung Mundur
         function startCountdown() {
             setInterval(() => {
                 const now = new Date().getTime();
                 const diff = targetDateMs - now;
                 if (diff < 0) return;
-                
                 const d = Math.floor(diff / (1000 * 60 * 60 * 24));
                 const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                 const s = Math.floor((diff % (1000 * 60)) / 1000);
-
                 document.getElementById("days").innerText = d < 10 ? "0"+d : d;
                 document.getElementById("hours").innerText = h < 10 ? "0"+h : h;
                 document.getElementById("minutes").innerText = m < 10 ? "0"+m : m;
@@ -564,7 +636,6 @@
             const txt = document.getElementById('btn-text');
             btn.disabled = true;
             txt.innerHTML = '<span class="loading-spinner"></span> Mengirim...';
-            
             const formData = new FormData(e.target);
             const entry = {
                 Nama: formData.get('Nama'),
@@ -572,7 +643,6 @@
                 Status: formData.get('Status'),
                 Ucapan: formData.get('Ucapan')
             };
-
             const { error } = await _supabase.from('guestbook').insert([entry]);
             if (!error) {
                 window.showToast("Terima kasih atas konfirmasinya!");
@@ -592,7 +662,11 @@
                 document.getElementById('main-content').style.display = 'block';
                 document.getElementById('bottom-nav').style.display = 'flex';
                 document.getElementById('music-player').style.display = 'block';
-                document.getElementById('background-music').play().catch(() => {});
+                // Mulai musik saat undangan dibuka
+                const audio = document.getElementById('background-music');
+                audio.play().catch(() => {
+                    console.log("Autoplay dicegah browser, butuh interaksi pengguna.");
+                });
                 
                 const observer = new IntersectionObserver((entries) => {
                     entries.forEach(e => {
@@ -619,49 +693,24 @@
             else { a.pause(); b.classList.remove('music-rotate'); i.classList.replace('fa-compact-disc', 'fa-play'); }
         }
 
-        // PERBAIKAN FUNGSI SALIN REKENING
         function copyAcc(who) {
             const val = who === 'bride' ? settingsData.bride_bank_acc : settingsData.groom_bank_acc;
-            if (!val) {
-                window.showToast("Nomor rekening tidak ditemukan.");
-                return;
-            }
-
-            // Fallback manual karena navigator.clipboard sering gagal di iframe
+            if (!val) { window.showToast("Nomor rekening tidak ditemukan."); return; }
             const textArea = document.createElement("textarea");
             textArea.value = val;
-            
-            // Sembunyikan textarea
             textArea.style.position = "fixed";
             textArea.style.left = "-9999px";
             textArea.style.top = "0";
             document.body.appendChild(textArea);
-            
             textArea.focus();
             textArea.select();
-            textArea.setSelectionRange(0, 99999); // Untuk mobile
-
+            textArea.setSelectionRange(0, 99999);
             try {
                 const successful = document.execCommand('copy');
-                if (successful) {
-                    window.showToast("Nomor rekening berhasil disalin!");
-                } else {
-                    throw new Error('Copy command failed');
-                }
+                if (successful) window.showToast("Nomor rekening berhasil disalin!");
             } catch (err) {
-                console.error('Gagal menyalin:', err);
-                // Percobaan terakhir menggunakan navigator.clipboard jika tersedia
-                if (navigator.clipboard) {
-                    navigator.clipboard.writeText(val).then(() => {
-                        window.showToast("Nomor rekening berhasil disalin!");
-                    }).catch(() => {
-                        window.showToast("Gagal menyalin. Silakan salin manual.");
-                    });
-                } else {
-                    window.showToast("Gagal menyalin. Silakan salin manual.");
-                }
+                if (navigator.clipboard) navigator.clipboard.writeText(val).then(() => window.showToast("Nomor rekening berhasil disalin!"));
             }
-
             document.body.removeChild(textArea);
         }
 
@@ -682,11 +731,10 @@
 
         // UI Helpers for Lightbox
         let currentImageIndex = 0;
-        const galleryImages = ["https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=600", "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=600", "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=600", "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80&w=600"];
-
         function openLightbox(index) {
+            if (!galleryImages[index]) return;
             currentImageIndex = index;
-            document.getElementById('lightbox-img').src = galleryImages[currentImageIndex];
+            document.getElementById('lightbox-img').src = galleryImages[currentImageIndex].trim();
             document.getElementById('lightbox').classList.replace('hidden', 'flex');
             document.body.style.overflow = 'hidden';
         }
@@ -694,8 +742,14 @@
             document.getElementById('lightbox').classList.replace('flex', 'hidden');
             document.body.style.overflow = 'auto';
         }
-        function nextImage() { currentImageIndex = (currentImageIndex + 1) % galleryImages.length; document.getElementById('lightbox-img').src = galleryImages[currentImageIndex]; }
-        function prevImage() { currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length; document.getElementById('lightbox-img').src = galleryImages[currentImageIndex]; }
+        function nextImage() { 
+            currentImageIndex = (currentImageIndex + 1) % galleryImages.length; 
+            document.getElementById('lightbox-img').src = galleryImages[currentImageIndex].trim(); 
+        }
+        function prevImage() { 
+            currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length; 
+            document.getElementById('lightbox-img').src = galleryImages[currentImageIndex].trim(); 
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
             fetchSettings();
