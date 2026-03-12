@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+     <link href="img/logo.png" rel="icon">
+    <title>Scanner Tamu - Ami & Ade</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #reader {
+            width: 100% !important;
+            border: none !important;
+            border-radius: 1.5rem;
+            overflow: hidden;
+        }
+
+        #reader__scan_region {
+            background: #000 !important;
+        }
+
+        video {
+            object-fit: cover !important;
+        }
+
+        .scan-overlay {
+            position: relative;
+        }
+
+        .scan-overlay::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border: 2px solid rgba(59, 130, 246, 0.5);
+            border-radius: 20px;
+            box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+        }
+
+        .pulse-border {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { border-color: rgba(59, 130, 246, 0.5); }
+            50% { border-color: rgba(59, 130, 246, 1); }
+            100% { border-color: rgba(59, 130, 246, 0.5); }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white dark:bg-slate-900 border-b dark:border-slate-800 sticky top-0 z-50">
+        <div class="max-w-md mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-qrcode"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-sm">Scanner Tamu</h1>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-wider">Ami & Ade Wedding</p>
+                </div>
+            </div>
+            <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                <i id="theme-icon" class="fa-solid fa-moon text-slate-500"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto p-4 space-y-6">
+        
+        <!-- Scanner Section -->
+        <section class="space-y-4">
+            <div class="relative rounded-[2rem] overflow-hidden shadow-2xl bg-black aspect-square flex items-center justify-center border-4 border-white dark:border-slate-800">
+                <div id="reader"></div>
+                <!-- Scanner UI Decoration -->
+                <div id="scanner-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 p-8 text-center">
+                    <i class="fa-solid fa-camera text-4xl mb-4 opacity-20"></i>
+                    <p class="text-sm font-medium">Kamera belum aktif</p>
+                    <button onclick="startScanner()" class="mt-4 bg-blue-600 text-white px-6 py-2 rounded-full font-bold text-sm shadow-lg shadow-blue-500/20">
+                        Buka Kamera
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flex gap-2">
+                <button id="btn-stop" onclick="stopScanner()" class="hidden flex-1 bg-red-100 dark:bg-red-900/30 text-red-600 py-3 rounded-2xl font-bold text-sm">
+                    <i class="fa-solid fa-stop mr-2"></i> Berhenti
+                </button>
+                <button onclick="showManualInput()" class="flex-1 bg-slate-200 dark:bg-slate-800 py-3 rounded-2xl font-bold text-sm">
+                    <i class="fa-solid fa-keyboard mr-2"></i> Input Manual
+                </button>
+            </div>
+        </section>
+
+        <!-- Stats Brief -->
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border dark:border-slate-800 shadow-sm">
+                <p class="text-[10px] font-bold text-slate-400 uppercase">Total Hadir</p>
+                <h2 id="stat-hadir" class="text-2xl font-bold text-blue-600">0</h2>
+            </div>
+            <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border dark:border-slate-800 shadow-sm overflow-hidden">
+                <p class="text-[10px] font-bold text-slate-400 uppercase">Terakhir Scan</p>
+                <p id="last-guest" class="text-sm font-bold truncate mt-1 text-green-600 dark:text-green-400 italic">Belum ada</p>
+            </div>
+        </div>
+
+        <!-- Recent Check-ins -->
+        <section class="space-y-3">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-sm px-1 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-blue-500"></i>
+                    Antrean Kehadiran
+                </h3>
+                <button onclick="fetchHistory()" class="text-blue-500 text-[10px] font-bold bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-full uppercase tracking-wider">
+                    <i class="fa-solid fa-sync-alt mr-1"></i> Refresh
+                </button>
+            </div>
+            <div id="history-list" class="space-y-2">
+                <!-- Data akan masuk di sini -->
+                <div class="bg-white dark:bg-slate-900 p-8 rounded-2xl border dark:border-slate-800 text-center text-slate-400 text-xs py-10">
+                    Memuat data...
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Result -->
+    <div id="modal-result" class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm hidden">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl transform transition-all translate-y-full opacity-0" id="modal-content">
+            <div id="modal-icon" class="w-20 h-20 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-full mx-auto flex items-center justify-center text-3xl mb-6">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h2 class="text-center text-2xl font-bold mb-2" id="modal-title">Berhasil!</h2>
+            <div class="text-center text-slate-500 mb-8" id="modal-body">
+                Selamat datang, <br>
+                <span class="font-bold text-xl text-slate-900 dark:text-white" id="guest-name-result">Nama Tamu</span>
+            </div>
+            <button onclick="closeModal()" class="w-full bg-slate-900 dark:bg-white dark:text-slate-950 text-white py-4 rounded-2xl font-bold active:scale-95 transition-transform">
+                Lanjut Scan
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Manual Input -->
+    <div id="modal-manual" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm hidden">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl">
+            <h2 class="text-xl font-bold mb-4">Check-in Manual</h2>
+            <div class="space-y-4">
+                <input type="text" id="manual-guest-name" placeholder="Ketik nama tamu..." class="w-full px-5 py-4 bg-slate-100 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                <div class="flex gap-2">
+                    <button onclick="closeManual()" class="flex-1 bg-slate-100 dark:bg-slate-800 py-4 rounded-2xl font-bold text-slate-500">Batal</button>
+                    <button onclick="processManual()" class="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-500/30">Check-in</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Konfigurasi Supabase
+        const supabaseUrl = 'https://qczzjtraivdxdergbxjy.supabase.co';
+        const supabaseKey = 'sb_publishable_sdf_MeOzRGvsGACogsDBLg_sDMgZOeW';
+        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        let html5QrCode = null;
+        const beepSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+
+        // Dark Mode Logic
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            const themeIcon = document.getElementById('theme-icon');
+            if (themeIcon) {
+                themeIcon.className = isDark ? 'fa-solid fa-sun text-yellow-400' : 'fa-solid fa-moon text-slate-500';
+            }
+            localStorage.setItem('scanner-theme', isDark ? 'dark' : 'light');
+        }
+
+        if (localStorage.getItem('scanner-theme') === 'dark' || 
+            (!('scanner-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+
+        // Scanner Logic
+        function startScanner() {
+            document.getElementById('scanner-placeholder').classList.add('hidden');
+            document.getElementById('btn-stop').classList.remove('hidden');
+            
+            html5QrCode = new Html5Qrcode("reader");
+            const config = { 
+                fps: 20, 
+                qrbox: { width: 250, height: 250 },
+                aspectRatio: 1.0
+            };
+
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                config, 
+                onScanSuccess,
+                onScanFailure
+            ).catch(err => {
+                alert("Izin kamera ditolak atau gagal: " + err);
+                stopScanner();
+            });
+        }
+
+        function stopScanner() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('scanner-placeholder').classList.remove('hidden');
+                    document.getElementById('btn-stop').classList.add('hidden');
+                    html5QrCode = null;
+                }).catch(err => console.error("Gagal stop scanner", err));
+            }
+        }
+
+        async function onScanSuccess(decodedText) {
+            if (window.isProcessing) return;
+            window.isProcessing = true;
+            
+            beepSound.play().catch(() => {});
+            if (navigator.vibrate) navigator.vibrate(200);
+
+            const cleanName = decodedText.trim();
+            await handleCheckIn(cleanName);
+            
+            setTimeout(() => { window.isProcessing = false; }, 3000); // Jeda 3 detik antar scan
+        }
+
+        function onScanFailure(error) {}
+
+        // Data Logic
+        async function handleCheckIn(guestName) {
+            // Cari tamu berdasarkan nama
+            const { data: guest, error: findError } = await _supabase
+                .from('invitation_list')
+                .select('*')
+                .ilike('guest_name', guestName)
+                .maybeSingle();
+
+            if (findError) {
+                showResult('error', 'Error Database', 'Gagal mencari data tamu.');
+                return;
+            }
+
+            if (!guest) {
+                showResult('warning', 'Tidak Terdaftar', `Nama "${guestName}" tidak ditemukan di database.`);
+                return;
+            }
+
+            const now = new Date().toISOString();
+
+            if (guest.is_scanned) {
+                showResult('warning', 'Sudah Hadir', `Tamu <b>${guest.guest_name}</b> sudah melakukan scan sebelumnya.`);
+            } else {
+                // Update ke database
+                const { error: updateError } = await _supabase
+                    .from('invitation_list')
+                    .update({ 
+                        is_scanned: true,
+                        scanned_at: now 
+                    })
+                    .eq('id', guest.id);
+
+                if (!updateError) {
+                    showResult('success', 'Berhasil!', `Selamat datang, <br><b>${guest.guest_name}</b>.`);
+                    fetchHistory(); // Langsung refresh daftar
+                } else {
+                    // Jika kolom scanned_at belum ada, fallback update tanpa scanned_at
+                    console.warn("Update gagal, mencoba tanpa scanned_at...");
+                    const { error: fallbackError } = await _supabase
+                        .from('invitation_list')
+                        .update({ is_scanned: true })
+                        .eq('id', guest.id);
+                    
+                    if(!fallbackError) {
+                        showResult('success', 'Berhasil!', `Selamat datang, <b>${guest.guest_name}</b>.<br><small class="text-xs text-amber-500">Catatan: Kolom scanned_at belum aktif di SQL.</small>`);
+                        fetchHistory();
+                    } else {
+                        showResult('error', 'Update Gagal', updateError.message);
+                    }
+                }
+            }
+        }
+
+        async function fetchHistory() {
+            // Kita coba urutkan berdasarkan scanned_at. Jika NULL (karena kolom baru), gunakan created_at sebagai cadangan.
+            const { data, error } = await _supabase
+                .from('invitation_list')
+                .select('*')
+                .eq('is_scanned', true)
+                .order('scanned_at', { ascending: false, nullsFirst: false })
+                .order('created_at', { ascending: false })
+                .limit(10);
+
+            if (!error) {
+                const list = document.getElementById('history-list');
+                const statHadir = document.getElementById('stat-hadir');
+                const lastGuestDisplay = document.getElementById('last-guest');
+                
+                const { count } = await _supabase
+                    .from('invitation_list')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('is_scanned', true);
+                
+                if (statHadir) statHadir.innerText = count || 0;
+
+                if (data && data.length > 0) {
+                    if (lastGuestDisplay) lastGuestDisplay.innerText = data[0].guest_name;
+                    
+                    list.innerHTML = data.map((item, index) => {
+                        const scanTime = item.scanned_at ? new Date(item.scanned_at) : (item.created_at ? new Date(item.created_at) : new Date());
+                        const isLatest = index === 0;
+                        
+                        return `
+                            <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border ${isLatest ? 'border-blue-500 ring-1 ring-blue-500/20' : 'dark:border-slate-800'} flex justify-between items-center animate-fadeIn shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 ${isLatest ? 'bg-blue-600 text-white' : 'bg-green-100 dark:bg-green-900/30 text-green-600'} rounded-xl flex items-center justify-center text-sm shadow-sm">
+                                        <i class="fa-solid ${isLatest ? 'fa-user-clock' : 'fa-user-check'}"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-xs ${isLatest ? 'text-blue-600 dark:text-blue-400' : ''}">${item.guest_name}</p>
+                                        <p class="text-[10px] text-slate-500">
+                                            ${scanTime.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit', second:'2-digit'})}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[9px] font-bold ${isLatest ? 'bg-blue-600 text-white' : 'text-green-500'} px-2 py-1 rounded-full uppercase tracking-tighter">
+                                        ${isLatest ? 'Baru Saja' : 'Hadir'}
+                                    </span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    list.innerHTML = `<div class="bg-white dark:bg-slate-900 p-8 rounded-2xl border dark:border-slate-800 text-center text-slate-400 text-xs py-10">Belum ada data check-in.</div>`;
+                }
+            }
+        }
+
+        // UI Modals
+        function showResult(type, title, message) {
+            const modal = document.getElementById('modal-result');
+            const content = document.getElementById('modal-content');
+            const icon = document.getElementById('modal-icon');
+            const titleEl = document.getElementById('modal-title');
+
+            if (type === 'success') {
+                icon.className = "w-20 h-20 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-full mx-auto flex items-center justify-center text-3xl mb-6 shadow-sm";
+                icon.innerHTML = '<i class="fa-solid fa-check"></i>';
+            } else if (type === 'warning') {
+                icon.className = "w-20 h-20 bg-amber-100 dark:bg-amber-900/30 text-amber-500 rounded-full mx-auto flex items-center justify-center text-3xl mb-6 shadow-sm";
+                icon.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i>';
+            } else {
+                icon.className = "w-20 h-20 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full mx-auto flex items-center justify-center text-3xl mb-6 shadow-sm";
+                icon.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+            }
+
+            titleEl.innerText = title;
+            document.getElementById('modal-body').innerHTML = message;
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('translate-y-full', 'opacity-0');
+            }, 10);
+        }
+
+        function closeModal() {
+            const content = document.getElementById('modal-content');
+            content.classList.add('translate-y-full', 'opacity-0');
+            setTimeout(() => {
+                document.getElementById('modal-result').classList.add('hidden');
+            }, 300);
+        }
+
+        function showManualInput() {
+            document.getElementById('modal-manual').classList.remove('hidden');
+            document.getElementById('manual-guest-name').focus();
+        }
+
+        function closeManual() {
+            document.getElementById('modal-manual').classList.add('hidden');
+            document.getElementById('manual-guest-name').value = '';
+        }
+
+        async function processManual() {
+            const name = document.getElementById('manual-guest-name').value.trim();
+            if (!name) return;
+            closeManual();
+            await handleCheckIn(name);
+        }
+
+        // Init
+        window.onload = () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            const themeIcon = document.getElementById('theme-icon');
+            if (themeIcon) {
+                themeIcon.className = isDark ? 'fa-solid fa-sun text-yellow-400' : 'fa-solid fa-moon text-slate-500';
+            }
+            fetchHistory();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="img/logo.png" rel="icon">
+    <title>WhatsApp Invitation Generator - Undangan Digital</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Import Supabase Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #2c5282;
+            --primary-dark: #1a365d;
+            --secondary: #25d366; 
+            --bg-body: #f7fafc;
+            --bg-card: #ffffff;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --border-color: #e2e8f0;
+            --accent-light: #ebf4ff;
+            --input-bg: #ffffff;
+            --wa-bg: #e5ddd5;
+            --wa-bubble: #ffffff;
+            --wa-text: #111b21;
+        }
+
+        [data-theme="dark"] {
+            --primary: #63b3ed;
+            --primary-dark: #90cdf4;
+            --secondary: #25d366;
+            --bg-body: #1a202c;
+            --bg-card: #2d3748;
+            --text-main: #f7fafc;
+            --text-muted: #a0aec0;
+            --border-color: #4a5568;
+            --accent-light: #2a4365;
+            --input-bg: #1a202c;
+            --wa-bg: #0b141a;
+            --wa-bubble: #202c33;
+            --wa-text: #e9edef;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            padding: 40px 30px;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--accent-light);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .logo-area {
+            width: 60px;
+            height: 60px;
+            background: var(--accent-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 18px;
+            margin: 0 auto 15px;
+            font-size: 1.5rem;
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+
+        p.subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.8;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 15px;
+            color: var(--text-muted);
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 15px 14px 45px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-family: inherit;
+            background-color: var(--input-bg);
+            color: var(--text-main);
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .preview-container {
+            background-color: var(--wa-bg);
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            padding: 20px;
+            border-radius: 15px;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        .chat-bubble {
+            background: var(--wa-bubble);
+            color: var(--wa-text);
+            padding: 12px 15px;
+            border-radius: 8px 8px 8px 0;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            position: relative;
+            white-space: pre-wrap;
+        }
+
+        .btn-wa {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            background-color: var(--secondary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-wa:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .btn-wa:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading-spinner {
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 2px solid #fff;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <button class="theme-toggle" id="themeToggle">
+            <i class="fas fa-moon" id="themeIcon"></i>
+        </button>
+
+        <header>
+            <div class="logo-area"><i class="fas fa-paper-plane"></i></div>
+            <h1>WA Link Generator</h1>
+            <p class="subtitle">Simpan data otomatis & kirim undangan</p>
+        </header>
+        
+        <div class="form-group">
+            <label>URL Undangan</label>
+            <div class="input-wrapper">
+                <i class="fas fa-link"></i>
+                <input type="text" id="baseUrl" value="https://ade-ami.github.io" placeholder="https://link-anda.com">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Nama Tamu</label>
+            <div class="input-wrapper">
+                <i class="fas fa-user"></i>
+                <input type="text" id="guestName" placeholder="Contoh: Ami Fitriyanti" oninput="updatePreview()">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Preview Pesan</label>
+            <div class="preview-container">
+                <div id="messagePreview" class="chat-bubble"></div>
+            </div>
+        </div>
+
+        <button class="btn-wa" id="btnKirim" onclick="handleKirim()">
+            <i class="fab fa-whatsapp"></i> <span id="btnText">Kirim & Simpan</span>
+        </button>
+    </div>
+</div>
+
+<script>
+    // Konfigurasi Supabase
+    const supabaseUrl = 'https://qczzjtraivdxdergbxjy.supabase.co';
+    const supabaseKey = 'sb_publishable_sdf_MeOzRGvsGACogsDBLg_sDMgZOeW';
+    const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    const html = document.documentElement;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+
+    // Theme Logic
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    html.setAttribute('data-theme', savedTheme);
+    if(savedTheme === 'dark') themeIcon.classList.replace('fa-moon', 'fa-sun');
+
+    themeToggle.addEventListener('click', () => {
+        const isDark = html.getAttribute('data-theme') === 'dark';
+        const newTheme = isDark ? 'light' : 'dark';
+        html.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        themeIcon.classList.toggle('fa-moon');
+        themeIcon.classList.toggle('fa-sun');
+    });
+
+    // Message Logic - Format Estetik Sesuai Permintaan
+    function getMessage() {
+        const baseUrl = document.getElementById('baseUrl').value.trim();
+        const guestInput = document.getElementById('guestName').value.trim();
+        const guestName = guestInput || "[Nama Tamu]";
+        const encodedName = encodeURIComponent(guestInput);
+        const finalUrl = guestInput ? `${baseUrl}?to=${encodedName}` : baseUrl;
+
+        return `Assalamu'alaikum Warahmatullahi Wabarakatuh.
+
+Tanpa mengurangi rasa hormat, kami mengundang *${guestName}* untuk hadir dalam acara pernikahan kami.
+
+Link Undangan:
+${finalUrl}
+
+Terima kasih.
+*Ami Fitriyanti & Ade Martadikusumah*`;
+    }
+
+    function updatePreview() {
+        document.getElementById('messagePreview').innerText = getMessage();
+    }
+
+    async function handleKirim() {
+        const guestName = document.getElementById('guestName').value.trim();
+        const btn = document.getElementById('btnKirim');
+        const btnText = document.getElementById('btnText');
+
+        if (!guestName) {
+            alert("Harap masukkan nama tamu!");
+            return;
+        }
+
+        btn.disabled = true;
+        btnText.innerHTML = '<div class="loading-spinner"></div> Menyimpan...';
+
+        try {
+            // 1. Simpan ke Supabase (Tabel invitation_list)
+            const { error } = await _supabase
+                .from('invitation_list')
+                .insert([{ guest_name: guestName }]);
+
+            if (error) throw error;
+
+            // 2. Buka WhatsApp
+            const message = encodeURIComponent(getMessage());
+            window.open(`https://api.whatsapp.com/send?text=${message}`, '_blank');
+
+        } catch (err) {
+            console.error("Gagal menyimpan:", err);
+            // Tetap buka WA meski gagal simpan ke DB
+            const message = encodeURIComponent(getMessage());
+            window.open(`https://api.whatsapp.com/send?text=${message}`, '_blank');
+        } finally {
+            btn.disabled = false;
+            btnText.innerText = "Kirim & Simpan";
+        }
+    }
+
+    window.onload = updatePreview;
+</script>
+
+</body>
+</html>
+
+
