@@ -6,21 +6,24 @@
     <link href="img/logo.png" rel="icon">
     
     <!-- PRIMARY META TAGS -->
-    <title id="site-title">Undangan Pernikahan Ade & Ami</title>
+    <title id="site-title">Undangan Pernikahan</title>
     <meta name="title" content="Undangan Pernikahan Digital">
+    <meta name="description" content="Kami mengundang Anda untuk menghadiri hari bahagia pernikahan kami. Klik untuk melihat detail acara.">
 
     <!-- OPEN GRAPH / FACEBOOK / WHATSAPP -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://uleman.ac.id/"> <!-- Ganti dengan URL website Anda -->
-    <meta property="og:title" content="The Wedding of Ami & Ade">
-    <meta property="og:image" content="https://raw.githubusercontent.com/ade-ami/ade-ami.github.io/refs/heads/main/img/aa.jpg?auto=format&fit=crop&q=80&w=600"> 
+    <meta property="og:url" content="https://domain-anda.com/"> <!-- Ganti dengan URL website Anda -->
+    <meta property="og:title" content="The Wedding of Wanita & Pria">
+    <meta property="og:description" content="Tanpa mengurangi rasa hormat, kami bermaksud mengundang Bapak/Ibu/Saudara/i ke acara pernikahan kami.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=600"> 
     <!-- PENTING: Gunakan URL gambar absolut untuk og:image -->
 
     <!-- TWITTER -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://uleman.ac.id/">
-    <meta property="twitter:title" content="The Wedding of Ami & Ade">
-    <meta property="twitter:image" content="https://raw.githubusercontent.com/ade-ami/ade-ami.github.io/refs/heads/main/img/aa.jpg?auto=format&fit=crop&q=80&w=600">
+    <meta property="twitter:url" content="https://domain-anda.com/">
+    <meta property="twitter:title" content="The Wedding of Wanita & Pria">
+    <meta property="twitter:description" content="Tanpa mengurangi rasa hormat, kami bermaksud mengundang Bapak/Ibu/Saudara/i ke acara pernikahan kami.">
+    <meta property="twitter:image" content="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=600">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -165,12 +168,10 @@
             object-fit: contain;
         }
 
-        /* Fullscreen styles to ensure clean background */
         :fullscreen body {
             background-color: #f8fafc;
         }
 
-        /* Trik CSS untuk menyembunyikan header/footer bawaan Google Map */
         .map-container {
             position: relative;
             overflow: hidden;
@@ -181,10 +182,37 @@
         }
         .map-container iframe {
             position: absolute;
-            top: -65px; /* Sembunyikan bar atas Google */
+            top: -65px;
             left: 0;
             width: 100%;
-            height: 530px; /* Kompensasi pemotongan */
+            height: 530px;
+        }
+
+        /* Styling QR Code */
+        #qrcode, #qrcode-payment {
+            background: white;
+            padding: 10px;
+            border-radius: 12px;
+            display: inline-block;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            min-width: 140px;
+            min-height: 140px;
+            text-align: center;
+        }
+        
+        #qrcode-payment {
+            min-width: 200px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #qrcode img, #qrcode-payment img {
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+            display: block;
         }
     </style>
 </head>
@@ -204,7 +232,7 @@
         <button onclick="prevImage()" class="absolute left-4 md:left-8 text-white text-4xl z-[210]">
             <i class="fa-solid fa-chevron-left"></i>
         </button>
-        <button onclick="nextImage()" class="absolute right-4 md:right-8 text-white text-4xl z-[210]">
+        <button onclick="prevImage()" class="absolute right-4 md:right-8 text-white text-4xl z-[210]">
             <i class="fa-solid fa-chevron-right"></i>
         </button>
         <div class="relative max-w-5xl w-full flex justify-center items-center">
@@ -222,17 +250,18 @@
             </h1>
             <p class="mb-8 italic text-blue-100 font-light">Kepada Yth. Bapak/Ibu/Saudara/i</p>
             <div id="guest-name-container" class="mb-10">
-                <h2 id="guest-name" class="text-3xl font-bold bg-white/10 inline-block px-8 py-3 rounded-2xl backdrop-blur-md border border-white/20 shadow-2xl">Tamu Undangan</h2>
+                <h2 id="guest-name" class="text-3xl font-italic bg-white/10 inline-block px-7 py-3 rounded-2xl backdrop-blur-md border border-white/20 shadow-2xl">Tamu Undangan</h2>
             </div>
-            <button onclick="openInvitation()" class="bg-blue-600 text-white px-10 py-4 rounded-full font-bold hover:bg-blue-500 transition-all shadow-lg flex items-center gap-3 mx-auto uppercase tracking-widest text-sm active:scale-95 mb-8">
-                <i class="fa-solid fa-envelope-open"></i> Buka Undangan
-            </button>
+            
+            <div class="flex flex-col items-center gap-6">
+                <button onclick="openInvitation()" class="bg-blue-600 text-white px-10 py-4 rounded-full font-bold hover:bg-blue-500 transition-all shadow-lg flex items-center gap-3 mx-auto uppercase tracking-widest text-sm active:scale-95">
+                    <i class="fa-solid fa-envelope-open"></i> Buka Undangan
+                </button>
 
-            <!-- QR Code Section -->
-            <div id="qr-container" class="hidden opacity-0 scale-90 transition-all duration-700 delay-500">
-                <div class="bg-white/10 p-4 rounded-3xl backdrop-blur-md border border-white/20 inline-block shadow-2xl">
-                    <img id="guest-qr" src="" alt="Guest QR Code" class="w-32 h-32 md:w-40 md:h-40 rounded-xl bg-white p-2">
-                    <p class="text-[10px] uppercase tracking-widest mt-3 text-blue-200 font-bold">QR Undangan Digital</p>
+                <!-- QR CODE CONTAINER -->
+                <div id="qrcode-wrapper" class="hidden">
+                    <div id="qrcode" class="mt-5"></div>
+                    <p class="text-[10px] uppercase tracking-widest mt-2 text-blue-200 opacity-70">QR Code Tamu</p>
                 </div>
             </div>
         </div>
@@ -249,7 +278,6 @@
                     <span class="display-bride-short">Wanita</span> & <span class="display-groom-short">Pria</span>
                 </h2>
                 
-                <!-- Countdown -->
                 <div class="flex gap-4 justify-center items-center mt-10 fade-down-element">
                     <div class="glass-card p-3 rounded-xl w-16 md:w-20">
                         <span id="days" class="block text-2xl md:text-3xl font-bold">00</span>
@@ -276,17 +304,15 @@
         <section id="mempelai" class="py-24 px-6 container mx-auto max-w-4xl text-center">
             <div class="mb-16 fade-down-element">
                 <h2 class="font-serif text-3xl mb-4 text-blue-900 italic">Assalamu’alaikum Wr. Wb.</h2>
-                <p class="text-slate-600 leading-relaxed max-w-2xl mx-auto">Maha suci Allah yang telah menciptakan mahluk-Nya berpasang-pasangan. Dengan memohon rahmat dan ridho Allah SWT, kami bermaksud mengundang Bapak/Ibu/Saudara/i untuk menghadiri pernikahan kami:</p>
+                <p class="text-slate-600 leading-relaxed max-w-2xl mx-auto">Dengan memohon rahmat dan ridho Allah SWT, kami bermaksud mengundang Bapak/Ibu/Saudara/i untuk menghadiri pernikahan kami:</p>
             </div>
             <div class="grid md:grid-cols-2 gap-16 items-center">
-                <!-- Wanita -->
                 <div class="fade-down-element">
                     <img id="display-bride-photo" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=500" class="w-56 h-56 rounded-full mx-auto object-cover mb-6 border-8 border-white shadow-2xl transform hover:scale-105 transition-transform duration-500">
                     <h3 class="font-cursive text-5xl mb-3 text-blue-900 display-bride-full">Nama Wanita</h3>
                     <p class="text-sm font-semibold mb-1 text-slate-800 uppercase tracking-widest text-xs">Putri dari:</p>
                     <p class="text-slate-600 text-base leading-relaxed display-bride-parents">Nama Orang Tua</p>
                 </div>
-                <!-- Pria -->
                 <div class="fade-down-element">
                     <img id="display-groom-photo" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500" class="w-56 h-56 rounded-full mx-auto object-cover mb-6 border-8 border-white shadow-2xl transform hover:scale-105 transition-transform duration-500">
                     <h3 class="font-cursive text-5xl mb-3 text-blue-900 display-groom-full">Nama Pria</h3>
@@ -300,11 +326,11 @@
         <section id="waktu" class="bg-blue-100/30 py-24 px-6 border-y border-blue-100">
             <div class="container mx-auto max-w-5xl">
                 <div class="text-center mb-16 fade-down-element">
-                    <h2 class="font-serif text-4xl mb-4 text-blue-950 uppercase tracking-widest">Acara Bahagia</h2>
+                <h2 class="font-serif text-3xl mb-4 text-blue-900 italic">Acara Bahagia</h2>
+                     <p class="text-base italic mb-6 leading-relaxed text-slate-600">"Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu agar kamu merasa tenteram kepadanya..." (QS. Ar-Rum: 21)</p>
                     <div class="w-24 h-1 bg-blue-900 mx-auto rounded-full"></div>
                 </div>
                 <div class="grid md:grid-cols-2 gap-8 mb-12">
-                    <!-- Akad Nikah -->
                     <div class="bg-white p-10 rounded-[2rem] shadow-xl text-center fade-down-element">
                         <i class="fa-solid fa-hand-holding-heart text-5xl text-blue-400 mb-6"></i>
                         <h3 class="font-serif text-2xl mb-2 text-blue-900">Akad Nikah</h3>
@@ -314,7 +340,6 @@
                         <p class="font-semibold text-slate-800 mb-1 display-location-name">Lokasi Acara</p>
                         <p class="text-slate-500 text-sm leading-relaxed display-location-address">Alamat Lengkap</p>
                     </div>
-                    <!-- Resepsi -->
                     <div class="bg-white p-10 rounded-[2rem] shadow-xl text-center fade-down-element">
                         <i class="fa-solid fa-glass-cheers text-5xl text-blue-400 mb-6"></i>
                         <h3 class="font-serif text-2xl mb-2 text-blue-900">Resepsi</h3>
@@ -326,10 +351,8 @@
                     </div>
                 </div>
 
-                <!-- Bagian Peta Interaktif -->
                 <div class="w-full max-w-5xl mx-auto mb-8 fade-down-element">
                     <div class="map-container">
-                        <!-- Peta dimuat dengan posisi yang sudah disesuaikan agar bersih dari teks/link header -->
                         <iframe 
                             src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d991.086417159245!2d107.472541!3d-6.477829!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e690d567c20ff65%3A0xf78032c615d86944!2sKp%20awi%20mekar!5e0!3m2!1sid!2sid!4v1773193736042!5m2!1sid!2sid" 
                             allowfullscreen="" 
@@ -342,7 +365,7 @@
                 <div class="text-center fade-down-element">
                     <a href="#" target="_blank" class="display-maps-btn inline-flex items-center gap-3 bg-blue-600 text-white px-10 py-4 rounded-full font-bold shadow-lg hover:bg-blue-700 transition-all active:scale-95">
                         <i class="fa-solid fa-map-location-dot text-lg"></i>
-                        <span class="uppercase tracking-widest text-sm">Buka Navigasi Maps</span>
+                        <span class="uppercase tracking-widest text-sm">Buka Maps</span>
                     </a>
                 </div>
             </div>
@@ -352,37 +375,64 @@
         <section id="galeri" class="py-24 px-6 bg-white">
             <div class="container mx-auto max-w-5xl">
                 <div class="text-center mb-16 fade-down-element">
-                    <h2 class="font-serif text-4xl mb-4 text-blue-950 uppercase tracking-widest">Galeri Kebahagiaan</h2>
+                    <h2 class="font-serif text-3xl mb-4 text-blue-900 italic">Galeri Mempelai</h2>
                     <div class="w-24 h-1 bg-blue-900 mx-auto rounded-full"></div>
                 </div>
-                <!-- Container Galeri Dinamis -->
-                <div id="gallery-container" class="grid grid-cols-2 md:grid-cols-4 gap-4 fade-down-element">
-                    <!-- Akan diisi otomatis oleh JS -->
-                </div>
+                <div id="gallery-container" class="grid grid-cols-2 md:grid-cols-4 gap-4 fade-down-element"></div>
             </div>
         </section>
 
         <!-- HADIAH -->
         <section id="hadiah" class="py-24 px-6 bg-blue-50">
-            <div class="container mx-auto max-w-4xl text-center">
+            <div class="container mx-auto max-w-5xl text-center">
                 <div class="mb-16 fade-down-element">
-                    <h2 class="font-serif text-4xl mb-4 text-blue-950 uppercase tracking-widest">Berbagi Kasih</h2>
-                    <p class="text-slate-600 italic">Bagi Bapak/Ibu/Saudara/i yang ingin memberikan tanda kasih,<br>dapat melalui nomor rekening di bawah ini:</p>
+                 <h2 class="font-serif text-3xl mb-4 text-blue-900 italic">Kirim Hadiah</h2>
+                    <p class="text-slate-600 italic">Bagi Bapak/Ibu/Saudara/i yang ingin memberikan tanda kasih,<br>dapat melalui nomor rekening atau alamat di bawah ini:</p>
                 </div>
                 <div class="grid md:grid-cols-2 gap-8">
-                    <!-- Rekening Wanita -->
+                    <!-- REKENING WANITA -->
                     <div class="bg-white p-10 rounded-3xl shadow-xl border-t-8 border-blue-800 text-center flex flex-col items-center fade-down-element">
                         <div id="display-bride-bank" class="bank-logo-container">BANK</div>
                         <p class="text-2xl font-serif tracking-widest text-slate-700 mb-2 font-bold" id="display-bride-acc">0000000000</p>
                         <p class="text-xs text-slate-500 uppercase mb-8 font-bold tracking-widest">a.n <span class="display-bride-full">NAMA MEMPELAI</span></p>
                         <button onclick="copyAcc('bride')" class="bg-blue-900 text-white px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest active:scale-95 transition-transform">Salin Rekening</button>
                     </div>
-                    <!-- Rekening Pria -->
+
+                    <!-- REKENING PRIA -->
                     <div class="bg-white p-10 rounded-3xl shadow-xl border-t-8 border-blue-800 text-center flex flex-col items-center fade-down-element">
                         <div id="display-groom-bank" class="bank-logo-container">BANK</div>
                         <p class="text-2xl font-serif tracking-widest text-slate-700 mb-2 font-bold" id="display-groom-acc">0000000000</p>
                         <p class="text-xs text-slate-500 uppercase mb-8 font-bold tracking-widest">a.n <span class="display-groom-full">NAMA MEMPELAI</span></p>
                         <button onclick="copyAcc('groom')" class="bg-blue-900 text-white px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest active:scale-95 transition-transform">Salin Rekening</button>
+                    </div>
+
+                    <!-- QRIS PAYMENT -->
+                    <div class="bg-white p-10 rounded-3xl shadow-xl border-t-8 border-blue-400 text-center flex flex-col items-center fade-down-element">
+                        <div class="bank-logo-container">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_QRIS.svg" alt="QRIS" class="h-8">
+                        </div>
+                        <div id="qrcode-payment" class="mb-4">
+                            <p class="text-xs text-slate-400">Memuat Barcode...</p>
+                        </div>
+                        <p class="text-xs text-slate-500 uppercase mb-6 font-bold tracking-widest">Scan QRIS untuk Kirim Hadiah</p>
+                        <button onclick="downloadQR()" class="bg-blue-400 text-white px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest active:scale-95 transition-transform">
+                            <i class="fa-solid fa-download mr-2"></i> Download QR
+                        </button>
+                    </div>
+
+                    <!-- ALAMAT PENGIRIMAN -->
+                    <div class="bg-white p-10 rounded-3xl shadow-xl border-t-8 border-slate-400 text-center flex flex-col items-center fade-down-element">
+                        <div class="bank-logo-container">
+                            <i class="fa-solid fa-truck-fast text-3xl text-slate-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-700 mb-2">Kirim Kado </h3>
+                        <h2 class="text-sm font-bold text-blue-900 mb-1">Ami Fitriyanti</h2>
+                        <p class="text-xs text-slate-500 leading-relaxed mb-6 italic" id="physical-address">
+                            Kp Awi Mekar Rt 012/006 Desa Bungursari, KAB. PURWAKARTA
+                        </p>
+                        <button onclick="copyAddress()" class="bg-slate-700 text-white px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest active:scale-95 transition-transform">
+                            Salin Alamat
+                        </button>
                     </div>
                 </div>
             </div>
@@ -392,7 +442,7 @@
         <section id="guestbook" class="bg-blue-950 text-white py-24 px-6 relative">
             <div class="container mx-auto max-w-2xl text-center">
                 <div class="fade-down-element">
-                    <h2 class="font-serif text-4xl mb-6">Buku Tamu</h2>
+                    <h2 class="font-serif text-3xl mb-4 text-white-200 italic">Kirim Ucapan RSVP</h2>
                     <p class="text-blue-200 mb-10 italic">Pastikan kehadiran Anda pada hari bahagia kami.</p>
                 </div>
                 <form id="rsvp-form" class="space-y-6 text-left fade-down-element">
@@ -422,16 +472,15 @@
                         </div>
                     </div>
                     <div class="space-y-2">
-                        <label class="block text-xs font-bold text-blue-200 uppercase tracking-widest">Ucapan Selamat & Doa</label>
+                        <label class="block text-xs font-bold text-blue-200 uppercase tracking-widest">Komentar atau Ucapan</label>
                         <textarea name="Ucapan" rows="4" required class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-blue-300/30 resize-none" placeholder="Tuliskan doa terbaik Anda..."></textarea>
                     </div>
                     <button type="submit" id="submit-btn" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold transition-all uppercase tracking-widest text-xs hover:bg-blue-500 active:scale-95">
-                        <span id="btn-text">Konfirmasi Kehadiran</span>
+                        <span id="btn-text">Kirim Ucapan</span>
                     </button>
                 </form>
-
                 <div class="mt-20 text-left fade-down-element">
-                    <h3 class="font-serif text-2xl mb-8 border-l-4 border-blue-500 pl-4 uppercase tracking-widest">Ucapan dari Tamu</h3>
+                    <h3 class="font-serif text-2xl mb-8 border-l-4 border-blue-500 text-white pl-4 uppercase tracking-widest">Ucapan RSVP</h3>
                     <div id="messages-container" class="space-y-4 pr-2">
                         <p class="text-blue-200/50 italic text-sm text-center">Memuat daftar ucapan...</p>
                     </div>
@@ -451,8 +500,14 @@
         <!-- FOOTER -->
         <footer class="py-24 text-center text-slate-500 border-t bg-white">
             <div class="max-w-3xl mx-auto px-6 fade-down-element">
+                 <p class="text-base italic mb-6 leading-relaxed text-slate-600">Merupakan suatu kehormatan dan
+kebahagiaan bagi kami apabila
+Bapak/Ibu/Saudara/i berkenan hadir
+untuk memberikan do’a.
+Atas kehadiran dan do’anya
+kami ucapkan terima kasih.
+Kami yang berbahagia</p>
                 <p class="font-cursive text-5xl text-blue-950 mb-8"><span class="display-bride-short">Wanita</span> & <span class="display-groom-short">Pria</span></p>
-                <p class="text-base italic mb-6 leading-relaxed text-slate-600">"Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu agar kamu merasa tenteram kepadanya..." (QS. Ar-Rum: 21)</p>
             </div>
         </footer>
     </main>
@@ -490,7 +545,6 @@
         <button id="music-btn" onclick="toggleMusic()" class="bg-blue-950 w-12 h-12 flex items-center justify-center rounded-full music-rotate text-white border-2 border-white shadow-lg">
             <i id="music-icon" class="fa-solid fa-compact-disc text-xl"></i>
         </button>
-        <!-- Audio Source Dinamis -->
         <audio id="background-music" loop><source src="" type="audio/mpeg"></audio>
     </div>
 
@@ -499,6 +553,8 @@
         const supabaseKey = 'sb_publishable_sdf_MeOzRGvsGACogsDBLg_sDMgZOeW';
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
+        const qrisString = "00020101021126610014COM.GO-JEK.WWW01189360091438752903430210G8752903430303UMI51440014ID.CO.QRIS.WWW0215ID10254199419150303UMI5204581253033605802ID5925Dhe Kusuma, Makanan & Min6008KARAWANG61054131162070703A01630432D9";
+
         let allMessages = [];
         let currentPage = 1;
         const messagesPerPage = 5;
@@ -506,7 +562,6 @@
         let settingsData = {};
         let galleryImages = [];
 
-        // Helper untuk mendapatkan Logo Bank
         function getBankLogoHtml(bankName) {
             if (!bankName) return 'BANK';
             const name = bankName.toLowerCase();
@@ -522,13 +577,10 @@
             else if (name.includes('dana')) logoUrl = 'https://upload.wikimedia.org/wikipedia/commons/7/72/Logo_danain_horizontal.png';
             else if (name.includes('ovo')) logoUrl = 'https://upload.wikimedia.org/wikipedia/commons/e/eb/Logo_ovo_purple.svg';
             
-            if (logoUrl) {
-                return `<img src="${logoUrl}" alt="${bankName}" title="${bankName}">`;
-            }
+            if (logoUrl) return `<img src="${logoUrl}" alt="${bankName}" title="${bankName}">`;
             return `<span class="text-blue-900 font-bold uppercase tracking-widest text-xs">${bankName}</span>`;
         }
 
-        // 1. Ambil Pengaturan dari Database
         async function fetchSettings() {
             try {
                 const { data, error } = await _supabase.from('settings').select('*').eq('id', 1).single();
@@ -536,92 +588,56 @@
                 if (data) {
                     settingsData = data;
                     document.getElementById('site-title').innerText = `Pernikahan ${data.bride_name} & ${data.groom_name}`;
-                    
                     const bShort = data.bride_name.split(' ')[0];
                     const gShort = data.groom_name.split(' ')[0];
                     document.querySelectorAll('.display-bride-short').forEach(el => el.innerText = bShort);
                     document.querySelectorAll('.display-groom-short').forEach(el => el.innerText = gShort);
                     document.querySelectorAll('.display-bride-full').forEach(el => el.innerText = data.bride_name);
                     document.querySelectorAll('.display-groom-full').forEach(el => el.innerText = data.groom_name);
-                    
                     document.querySelectorAll('.display-bride-parents').forEach(el => el.innerText = data.bride_parents || "");
                     document.querySelectorAll('.display-groom-parents').forEach(el => el.innerText = data.groom_parents || "");
-
                     if (data.bride_image) document.getElementById('display-bride-photo').src = data.bride_image;
                     if (data.groom_image) document.getElementById('display-groom-photo').src = data.groom_image;
-
-                    if (data.bg_music) {
-                        const audio = document.getElementById('background-music');
-                        audio.src = data.bg_music;
-                        audio.load(); 
-                    }
-
+                    if (data.bg_music) { const audio = document.getElementById('background-music'); audio.src = data.bg_music; audio.load(); }
                     const d = new Date(data.wedding_date);
                     const simpleDate = d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, ' . ');
                     const fullDate = d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-                    
                     document.getElementById('display-date-simple').innerText = simpleDate;
                     document.querySelectorAll('.display-date-full').forEach(el => el.innerText = fullDate);
                     document.querySelectorAll('.display-location-name').forEach(el => el.innerText = data.location_name);
                     document.querySelectorAll('.display-location-address').forEach(el => el.innerText = data.location_address);
-
                     document.getElementById('display-bride-bank').innerHTML = getBankLogoHtml(data.bride_bank_name);
                     document.getElementById('display-bride-acc').innerText = data.bride_bank_acc || '-';
                     document.getElementById('display-groom-bank').innerHTML = getBankLogoHtml(data.groom_bank_name);
                     document.getElementById('display-groom-acc').innerText = data.groom_bank_acc || '-';
-
                     galleryImages = [];
-                    for(let i = 1; i <= 6; i++) {
-                        if(data[`gallery_${i}`]) {
-                            galleryImages.push(data[`gallery_${i}`]);
-                        }
-                    }
-                    if (galleryImages.length > 0) {
-                        renderGallery();
-                    }
-
-                    if (data.maps_url) {
-                        document.querySelectorAll('.display-maps-btn').forEach(el => el.href = data.maps_url);
-                    }
-
+                    for(let i = 1; i <= 6; i++) { if(data[`gallery_${i}`]) galleryImages.push(data[`gallery_${i}`]); }
+                    if (galleryImages.length > 0) renderGallery();
+                    if (data.maps_url) document.querySelectorAll('.display-maps-btn').forEach(el => el.href = data.maps_url);
                     targetDateMs = d.getTime();
                     startCountdown();
                 }
-            } catch (err) {
-                console.error("Gagal memuat pengaturan:", err);
-            }
+            } catch (err) { console.error("Gagal memuat pengaturan:", err); }
         }
 
         function renderGallery() {
             const container = document.getElementById('gallery-container');
             container.innerHTML = '';
-            const visibleCount = 4;
-            const imagesToShow = galleryImages.slice(0, visibleCount);
-            
+            const imagesToShow = galleryImages.slice(0, 4);
             imagesToShow.forEach((url, index) => {
                 const div = document.createElement('div');
                 div.className = "relative overflow-hidden rounded-2xl cursor-pointer shadow-lg group";
                 div.onclick = () => openLightbox(index);
-                
                 let extraOverlay = '';
-                if (index === 3 && galleryImages.length > visibleCount) {
-                    const remaining = galleryImages.length - (visibleCount - 1);
-                    extraOverlay = `
-                        <div class="absolute inset-0 bg-black/60 flex items-center justify-center pointer-events-none">
-                            <span class="text-white text-3xl font-bold font-serif">+${remaining}</span>
-                        </div>
-                    `;
+                if (index === 3 && galleryImages.length > 4) {
+                    const remaining = galleryImages.length - 3;
+                    extraOverlay = `<div class="absolute inset-0 bg-black/60 flex items-center justify-center pointer-events-none"><span class="text-white text-3xl font-bold font-serif">+${remaining}</span></div>`;
                 }
-
-                div.innerHTML = `
-                    <img src="${url.trim()}" class="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-500" alt="Galeri ${index + 1}">
-                    ${extraOverlay}
-                `;
+                div.innerHTML = `<img src="${url.trim()}" class="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-500" alt="Galeri ${index + 1}">${extraOverlay}`;
                 container.appendChild(div);
             });
         }
 
-        // 2. Hitung Mundur
         function startCountdown() {
             setInterval(() => {
                 const now = new Date().getTime();
@@ -638,13 +654,9 @@
             }, 1000);
         }
 
-        // 3. Guestbook Logic
         async function fetchGuestbook() {
             const { data, error } = await _supabase.from('guestbook').select('*').order('created_at', { ascending: false });
-            if (!error) {
-                allMessages = data || [];
-                renderMessages();
-            }
+            if (!error) { allMessages = data || []; renderMessages(); }
         }
 
         function renderMessages() {
@@ -661,20 +673,13 @@
             displayed.forEach((msg, i) => {
                 const el = document.createElement('div');
                 el.className = "bg-white/5 p-5 rounded-2xl border border-white/10 mb-4 fade-in";
-                el.innerHTML = `
-                    <h4 class="font-bold text-blue-400 text-xs uppercase mb-2">
-                        <span class="bg-blue-600 text-white px-2 py-1 rounded-md mr-2">#${startIndex + i + 1}</span>
-                        ${msg.Nama} 
-                        <span class="text-[9px] opacity-40 float-right">${msg.Status}</span>
-                    </h4>
-                    <p class="text-white/80 text-sm leading-relaxed">${msg.Ucapan}</p>
-                `;
+                el.innerHTML = `<h4 class="font-bold text-blue-400 text-xs uppercase mb-2"><span class="bg-blue-600 text-white px-2 py-1 rounded-md mr-2">#${startIndex + i + 1}</span>${msg.Nama} <span class="text-[9px] opacity-40 float-right">${msg.Status}</span></h4><p class="text-white/80 text-sm leading-relaxed">${msg.Ucapan}</p>`;
                 container.appendChild(el);
             });
             const totalPages = Math.ceil(allMessages.length / messagesPerPage);
             document.getElementById('page-info').innerText = `Halaman ${currentPage} / ${totalPages}`;
             document.getElementById('prev-page').disabled = (currentPage === 1);
-            document.getElementById('next-page').disabled = (totalPages === 0 || currentPage === totalPages);
+            document.getElementById('next-page').disabled = (currentPage === totalPages);
         }
 
         window.changePage = (dir) => {
@@ -690,48 +695,26 @@
             btn.disabled = true;
             txt.innerHTML = '<span class="loading-spinner"></span> Mengirim...';
             const formData = new FormData(e.target);
-            const entry = {
-                Nama: formData.get('Nama'),
-                Jumlah: parseInt(formData.get('Jumlah')),
-                Status: formData.get('Status'),
-                Ucapan: formData.get('Ucapan')
-            };
+            const entry = { Nama: formData.get('Nama'), Jumlah: parseInt(formData.get('Jumlah')), Status: formData.get('Status'), Ucapan: formData.get('Ucapan') };
             const { error } = await _supabase.from('guestbook').insert([entry]);
-            if (!error) {
-                window.showToast("Terima kasih atas konfirmasinya!");
-                e.target.reset();
-                fetchGuestbook();
-            }
+            if (!error) { window.showToast("Terima kasih atas konfirmasinya!"); e.target.reset(); fetchGuestbook(); }
             btn.disabled = false;
             txt.innerText = "Konfirmasi Kehadiran";
         });
 
-        // 4. UI Functions & FULLSCREEN Logic
         function openInvitation() {
-            // Aktifkan Mode Fullscreen
             const elem = document.documentElement;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen().catch(err => console.log("Gagal Fullscreen: ", err));
-            } else if (elem.webkitRequestFullscreen) { /* Safari */
-                elem.webkitRequestFullscreen();
-            } else if (elem.msRequestFullscreen) { /* IE11 */
-                elem.msRequestFullscreen();
-            }
-
+            if (elem.requestFullscreen) elem.requestFullscreen().catch(err => console.log(err));
             const cover = document.getElementById('cover');
             cover.classList.add('opacity-0', '-translate-y-full');
-            
             setTimeout(() => {
                 cover.style.display = 'none';
                 document.getElementById('main-content').style.display = 'block';
                 document.getElementById('bottom-nav').style.display = 'flex';
                 document.getElementById('music-player').style.display = 'block';
-                
                 const audio = document.getElementById('background-music');
-                audio.play().catch(() => {
-                    console.log("Autoplay dicegah browser, butuh interaksi pengguna.");
-                });
-                
+                audio.play().catch(() => {});
+                generateQRIS();
                 const observer = new IntersectionObserver((entries) => {
                     entries.forEach(e => {
                         if (e.isIntersecting) e.target.classList.add('show');
@@ -760,21 +743,24 @@
         function copyAcc(who) {
             const val = who === 'bride' ? settingsData.bride_bank_acc : settingsData.groom_bank_acc;
             if (!val) { window.showToast("Nomor rekening tidak ditemukan."); return; }
+            copyToClipboard(val, "Nomor rekening disalin!");
+        }
+
+        function copyAddress() {
+            const addr = document.getElementById('physical-address').innerText;
+            copyToClipboard(addr, "Alamat pengiriman disalin!");
+        }
+
+        function copyToClipboard(text, successMsg) {
             const textArea = document.createElement("textarea");
-            textArea.value = val;
+            textArea.value = text;
             textArea.style.position = "fixed";
             textArea.style.left = "-9999px";
             textArea.style.top = "0";
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
-            textArea.setSelectionRange(0, 99999);
-            try {
-                const successful = document.execCommand('copy');
-                if (successful) window.showToast("Nomor rekening berhasil disalin!");
-            } catch (err) {
-                if (navigator.clipboard) navigator.clipboard.writeText(val).then(() => window.showToast("Nomor rekening berhasil disalin!"));
-            }
+            try { document.execCommand('copy'); window.showToast(successMsg); } catch (err) {}
             document.body.removeChild(textArea);
         }
 
@@ -782,14 +768,8 @@
             let current = "";
             const sections = document.querySelectorAll('section');
             const navLinks = document.querySelectorAll('.nav-link');
-            sections.forEach(section => {
-                const sectionTop = section.offsetTop;
-                if (window.pageYOffset >= sectionTop - 350) current = section.getAttribute('id');
-            });
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href').includes(current)) link.classList.add('active');
-            });
+            sections.forEach(section => { if (window.pageYOffset >= section.offsetTop - 350) current = section.getAttribute('id'); });
+            navLinks.forEach(link => { link.classList.remove('active'); if (link.getAttribute('href').includes(current)) link.classList.add('active'); });
         });
 
         let currentImageIndex = 0;
@@ -800,44 +780,117 @@
             document.getElementById('lightbox').classList.replace('hidden', 'flex');
             document.body.style.overflow = 'hidden';
         }
-        function closeLightbox() {
-            document.getElementById('lightbox').classList.replace('flex', 'hidden');
-            document.body.style.overflow = 'auto';
+        function closeLightbox() { document.getElementById('lightbox').classList.replace('flex', 'hidden'); document.body.style.overflow = 'auto'; }
+        function nextImage() { currentImageIndex = (currentImageIndex + 1) % galleryImages.length; document.getElementById('lightbox-img').src = galleryImages[currentImageIndex].trim(); }
+        function prevImage() { currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length; document.getElementById('lightbox-img').src = galleryImages[currentImageIndex].trim(); }
+
+        function generateQRCode(guestName) {
+            const qrcodeContainer = document.getElementById('qrcode');
+            const wrapper = document.getElementById('qrcode-wrapper');
+            if (!guestName || guestName === "Tamu Undangan") { wrapper.classList.add('hidden'); return; }
+            wrapper.classList.remove('hidden');
+            qrcodeContainer.innerHTML = ''; 
+            new QRCode(qrcodeContainer, { text: guestName, width: 140, height: 140, colorDark : "#1e3a8a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
         }
-        function nextImage() { 
-            currentImageIndex = (currentImageIndex + 1) % galleryImages.length; 
-            document.getElementById('lightbox-img').src = galleryImages[currentImageIndex].trim(); 
+
+        function generateQRIS() {
+            const container = document.getElementById('qrcode-payment');
+            if (!container) return;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(qrisString)}`;
+            container.innerHTML = `<img id="qris-img" src="${qrUrl}" alt="Barcode QRIS" class="mx-auto" crossorigin="anonymous">`;
+            const img = document.getElementById('qris-img');
+            img.onload = () => { console.log("QRIS Barcode dimuat."); };
+            img.onerror = () => { container.innerHTML = '<p class="text-xs text-red-500">Gagal memuat barcode.</p>'; };
         }
-        function prevImage() { 
-            currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length; 
-            document.getElementById('lightbox-img').src = galleryImages[currentImageIndex].trim(); 
+
+        /**
+         * FUNGSI UNDUH QR TERBARU
+         * Membuat canvas yang menggabungkan Logo QRIS, Kode QR, dan Teks instruksi
+         * agar hasilnya persis seperti gambar yang Anda unggah.
+         */
+        function downloadQR() {
+            const qrImg = document.getElementById('qris-img');
+            if (!qrImg || !qrImg.src) {
+                window.showToast("Barcode belum siap.");
+                return;
+            }
+
+            window.showToast("Menyiapkan unduhan...");
+
+            // Konfigurasi Canvas (Ukuran hasil unduhan)
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const w = 600;
+            const h = 750;
+            canvas.width = w;
+            canvas.height = h;
+
+            // 1. Gambar Latar Belakang Putih
+            ctx.fillStyle = "#FFFFFF";
+            ctx.fillRect(0, 0, w, h);
+
+            // 2. Muat Logo QRIS (Bagian Atas)
+            const logoQRIS = new Image();
+            logoQRIS.crossOrigin = "anonymous";
+            logoQRIS.src = "https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_QRIS.svg";
+
+            logoQRIS.onload = function() {
+                // Gambar Logo (Tengah Atas)
+                const logoW = 120;
+                const logoH = 40;
+                ctx.drawImage(logoQRIS, (w - logoW) / 2, 40, logoW, logoH);
+
+                // 3. Muat & Gambar Kode QR (Bagian Tengah)
+                const tempQR = new Image();
+                tempQR.crossOrigin = "anonymous";
+                tempQR.src = qrImg.src;
+
+                tempQR.onload = function() {
+                    const qrSize = 480;
+                    ctx.drawImage(tempQR, (w - qrSize) / 2, 100, qrSize, qrSize);
+
+                    // 4. Gambar Teks (Bagian Bawah)
+                    ctx.fillStyle = "#475569"; // Warna text slate-600
+                    ctx.font = "bold 20px Montserrat, sans-serif";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText("SCAN QRIS UNTUK KIRIM HADIAH", w / 2, h - 70);
+
+                    // 5. Eksekusi Unduh
+                    const link = document.createElement('a');
+                    link.href = canvas.toDataURL("image/png");
+                    link.download = 'QRIS-Pembayaran.png';
+                    link.click();
+                    window.showToast("Berhasil diunduh!");
+                };
+            };
+            
+            logoQRIS.onerror = function() {
+                // Jika logo gagal muat, tetap unduh QR saja
+                const tempQR = new Image();
+                tempQR.crossOrigin = "anonymous";
+                tempQR.src = qrImg.src;
+                tempQR.onload = function() {
+                    ctx.drawImage(tempQR, 50, 100, 500, 500);
+                    const link = document.createElement('a');
+                    link.href = canvas.toDataURL("image/png");
+                    link.download = 'QRIS-Pembayaran.png';
+                    link.click();
+                };
+            };
         }
 
         window.addEventListener('DOMContentLoaded', () => {
             fetchSettings();
             fetchGuestbook();
+            generateQRIS();
             const p = new URLSearchParams(window.location.search);
             const to = p.get('to');
             if (to) {
                 document.getElementById('guest-name').innerText = to;
-                
-                // Membuat QR Code berdasarkan nama tamu
-                const qrImg = document.getElementById('guest-qr');
-                const qrContainer = document.getElementById('qr-container');
-                if (qrImg && qrContainer) {
-                    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(to)}`;
-                    qrContainer.classList.remove('hidden');
-                    // Trigger animasi masuk
-                    setTimeout(() => {
-                        qrContainer.classList.remove('opacity-0', 'scale-90');
-                        qrContainer.classList.add('opacity-100', 'scale-100');
-                    }, 100);
-                }
+                generateQRCode(to);
             }
         });
     </script>
 </body>
 </html>
-
-
-
