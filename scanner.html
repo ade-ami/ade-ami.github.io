@@ -89,9 +89,14 @@
                     <p class="text-[10px] text-slate-500 uppercase tracking-wider">Ami & Ade Wedding</p>
                 </div>
             </div>
-            <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                <i id="theme-icon" class="fa-solid fa-moon text-slate-500"></i>
-            </button>
+            <div class="flex gap-2">
+                <button onclick="toggleFullScreen()" class="w-10 h-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center justify-center">
+                    <i id="fs-icon" class="fa-solid fa-expand text-slate-500"></i>
+                </button>
+                <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <i id="theme-icon" class="fa-solid fa-moon text-slate-500"></i>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -106,7 +111,7 @@
                     <i class="fa-solid fa-camera text-4xl mb-4 opacity-20"></i>
                     <p class="text-sm font-medium">Kamera belum aktif</p>
                     <button onclick="startScanner()" class="mt-4 bg-blue-600 text-white px-6 py-2 rounded-full font-bold text-sm shadow-lg shadow-blue-500/20">
-                        Buka Kamera
+                        Buka Kamera & Full Screen
                     </button>
                 </div>
             </div>
@@ -193,6 +198,32 @@
         let html5QrCode = null;
         const beepSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
 
+        // Full Screen Logic
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.documentElement.webkitRequestFullscreen) { /* Safari */
+                    document.documentElement.webkitRequestFullscreen();
+                } else if (document.documentElement.msRequestFullscreen) { /* IE11 */
+                    document.documentElement.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            const icon = document.getElementById('fs-icon');
+            if (document.fullscreenElement) {
+                icon.className = 'fa-solid fa-compress text-blue-500';
+            } else {
+                icon.className = 'fa-solid fa-expand text-slate-500';
+            }
+        });
+
         // Dark Mode Logic
         function toggleDarkMode() {
             const isDark = document.documentElement.classList.toggle('dark');
@@ -210,6 +241,11 @@
 
         // Scanner Logic
         function startScanner() {
+            // Minta Full Screen saat tombol ditekan (Interaksi Pengguna)
+            if (!document.fullscreenElement) {
+                toggleFullScreen();
+            }
+
             document.getElementById('scanner-placeholder').classList.add('hidden');
             document.getElementById('btn-stop').classList.remove('hidden');
             
@@ -258,7 +294,6 @@
 
         // Data Logic
         async function handleCheckIn(guestName) {
-            // Cari tamu berdasarkan nama
             const { data: guest, error: findError } = await _supabase
                 .from('invitation_list')
                 .select('*')
@@ -280,7 +315,6 @@
             if (guest.is_scanned) {
                 showResult('warning', 'Sudah Hadir', `Tamu <b>${guest.guest_name}</b> sudah melakukan scan sebelumnya.`);
             } else {
-                // Update ke database
                 const { error: updateError } = await _supabase
                     .from('invitation_list')
                     .update({ 
@@ -291,9 +325,8 @@
 
                 if (!updateError) {
                     showResult('success', 'Berhasil!', `Selamat datang, <br><b>${guest.guest_name}</b>.`);
-                    fetchHistory(); // Langsung refresh daftar
+                    fetchHistory();
                 } else {
-                    // Jika kolom scanned_at belum ada, fallback update tanpa scanned_at
                     console.warn("Update gagal, mencoba tanpa scanned_at...");
                     const { error: fallbackError } = await _supabase
                         .from('invitation_list')
@@ -301,7 +334,7 @@
                         .eq('id', guest.id);
                     
                     if(!fallbackError) {
-                        showResult('success', 'Berhasil!', `Selamat datang, <b>${guest.guest_name}</b>.<br><small class="text-xs text-amber-500">Catatan: Kolom scanned_at belum aktif di SQL.</small>`);
+                        showResult('success', 'Berhasil!', `Selamat datang, <b>${guest.guest_name}</b>.`);
                         fetchHistory();
                     } else {
                         showResult('error', 'Update Gagal', updateError.message);
@@ -311,7 +344,6 @@
         }
 
         async function fetchHistory() {
-            // Kita coba urutkan berdasarkan scanned_at. Jika NULL (karena kolom baru), gunakan created_at sebagai cadangan.
             const { data, error } = await _supabase
                 .from('invitation_list')
                 .select('*')
