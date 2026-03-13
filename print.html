@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Undangan Lipat Mewah - Navy Gold</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Montserrat:wght@300;400;600&family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #c5a059;
+            --navy: #0a192f;
+            --white: #ffffff;
+        }
+        body {
+            background-color: #d1d5db;
+            font-family: 'Montserrat', sans-serif;
+            padding: 40px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* Ukuran Kertas A4 Landscape */
+        .page {
+            width: 11.69in;
+            height: 8.27in;
+            background-color: #0a192f;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            position: relative;
+            display: flex;
+            overflow: hidden;
+            -webkit-print-color-adjust: exact;
+            margin-bottom: 20px;
+        }
+
+        /* Garis Lipat (Hanya tampil di layar) */
+        .fold-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            border-left: 1px dashed rgba(255,255,255,0.2);
+            z-index: 50;
+        }
+
+        .half {
+            width: 50%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            box-sizing: border-box;
+        }
+
+        .inner-border {
+            position: absolute;
+            inset: 30px;
+            border: 2px solid #c5a059;
+            pointer-events: none;
+        }
+
+        .white-line {
+            position: absolute;
+            inset: 40px;
+            border: 1px solid #ffffff;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-cursive { font-family: 'Great Vibes', cursive; }
+        .text-gold { color: #c5a059; }
+
+        /* Wreath SVG Style */
+        .wreath {
+            width: 250px;
+            height: 250px;
+            margin-bottom: 20px;
+        }
+
+        @media print {
+            body { background: none; padding: 0; margin: 0; gap: 0; }
+            .no-print { display: none; }
+            .page { 
+                box-shadow: none; 
+                margin: 0;
+                page-break-after: always;
+            }
+            .fold-line { display: none; }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn-action {
+            color: white;
+            padding: 12px 35px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            font-size: 14px;
+            background: #0a192f; 
+            border: 2px solid #c5a059;
+        }
+        
+        .btn-action:hover { 
+            transform: scale(1.05); 
+            background: #1a2a44;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="action-buttons no-print">
+        <button class="btn-action" onclick="window.print()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Simpan sebagai PDF
+        </button>
+    </div>
+
+    <div id="export-content">
+        <!-- HALAMAN 1: SISI LUAR (BELAKANG & DEPAN) -->
+        <div class="page">
+            <div class="fold-line no-print"></div>
+            
+            <!-- Kiri: Sisi Belakang -->
+            <div class="half">
+                <div class="inner-border"></div>
+                <div class="white-line"></div>
+                <div class="text-center text-white z-10">
+                    <p style="color: #c5a059; font-size: 24px; margin-bottom: 15px;">♥</p>
+                    <p class="font-serif italic text-sm opacity-70">Terima kasih atas doa & restunya</p>
+                    <div class="mt-8 border-t border-gold/30 pt-8 w-32 mx-auto">
+                        <p class="font-cursive text-3xl text-gold" style="color: #c5a059;">Wanita & Pria</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kanan: Sampul Depan -->
+            <div class="half">
+                <div class="inner-border"></div>
+                <div class="white-line"></div>
+                
+                <!-- Ornamen Wreath -->
+                <div class="relative flex items-center justify-center">
+                    <svg class="wreath text-gold" viewBox="0 0 100 100" style="color: #c5a059;">
+                        <path fill="none" stroke="currentColor" stroke-width="0.5" d="M50 10 A40 40 0 0 1 50 90 A40 40 0 0 1 50 10" stroke-dasharray="2 2"/>
+                        <g fill="currentColor">
+                            <circle cx="50" cy="10" r="1.5"/><circle cx="90" cy="50" r="1.5"/><circle cx="50" cy="90" r="1.5"/><circle cx="10" cy="50" r="1.5"/>
+                            <path d="M48 8 L50 4 L52 8 Z"/><path d="M88 48 L92 50 L88 52 Z"/>
+                        </g>
+                    </svg>
+                    <div class="absolute text-center z-10">
+                        <h1 class="font-cursive text-5xl text-gold" style="color: #c5a059;">Wanita</h1>
+                        <p class="text-white text-xl my-1">&</p>
+                        <h1 class="font-cursive text-5xl text-gold" style="color: #c5a059;">Pria</h1>
+                    </div>
+                </div>
+
+                <div class="mt-8 text-center text-white">
+                    <p class="uppercase tracking-[0.4em] text-[10px] mb-6 text-gold" style="color: #c5a059;">Walimatul 'Urs</p>
+                    <div class="bg-white/10 px-6 py-4 rounded-xl border border-white/20" style="border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1);">
+                        <p class="text-[9px] uppercase tracking-widest opacity-60 mb-2">Kepada Yth. Bapak/Ibu/Saudara/i:</p>
+                        <div class="h-10 border-b border-white/40 w-48 mx-auto" style="border-bottom: 1px solid rgba(255,255,255,0.4);"></div>
+                        <p class="text-[8px] mt-2 italic opacity-50">Mohon maaf bila ada kesalahan penulisan nama & gelar</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HALAMAN 2: SISI DALAM (ISI UTAMA) -->
+        <div class="page">
+            <div class="fold-line no-print"></div>
+
+            <!-- Kiri: Data Keluarga & Salam -->
+            <div class="half">
+                <div class="inner-border"></div>
+                <div class="text-white text-center z-10">
+                    <p class="font-serif italic text-xs mb-6">Bismillaahirrahmaanirrahiim</p>
+                    <h2 class="font-serif text-lg mb-8 text-gold uppercase tracking-widest" style="color: #c5a059;">Assalamu'alaikum Wr. Wb.</h2>
+                    
+                    <div class="space-y-8">
+                        <div>
+                            <h3 class="font-cursive text-4xl text-gold" style="color: #c5a059;">Nama Lengkap Wanita</h3>
+                            <p class="text-[10px] opacity-70 mt-2">Putri pertama dari Bapak Fulan & Ibu Fulana</p>
+                        </div>
+                        <p class="font-serif italic text-gold" style="color: #c5a059;">dengan</p>
+                        <div>
+                            <h3 class="font-cursive text-4xl text-gold" style="color: #c5a059;">Nama Lengkap Pria</h3>
+                            <p class="text-[10px] opacity-70 mt-2">Putra pertama dari Bapak Fulan & Ibu Fulana</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kanan: Detail Acara & Doa -->
+            <div class="half">
+                <div class="inner-border"></div>
+                <div class="text-white text-center z-10">
+                    <div class="grid grid-cols-2 gap-4 mb-10" style="display: flex; gap: 10px; justify-content: center;">
+                        <div class="border border-gold/40 p-4 rounded-2xl" style="border: 1px solid rgba(197, 160, 89, 0.4); padding: 15px; width: 140px;">
+                            <p class="font-bold text-gold text-[10px] uppercase tracking-widest mb-2" style="color: #c5a059;">Akad Nikah</p>
+                            <p class="text-[11px] font-semibold">08.00 WIB</p>
+                            <p class="text-[9px] opacity-60 mt-1">Masjid Raya Purwakarta</p>
+                        </div>
+                        <div class="border border-gold/40 p-4 rounded-2xl" style="border: 1px solid rgba(197, 160, 89, 0.4); padding: 15px; width: 140px;">
+                            <p class="font-bold text-gold text-[10px] uppercase tracking-widest mb-2" style="color: #c5a059;">Resepsi</p>
+                            <p class="text-[11px] font-semibold">11.00 - 13.00 WIB</p>
+                            <p class="text-[9px] opacity-60 mt-1">Gedung Pertemuan</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-gold text-navy font-bold py-2 px-8 inline-block rounded-full mb-8 text-xs uppercase tracking-[0.2em]" style="background: #c5a059; color: #0a192f; padding: 10px 30px; border-radius: 50px;">
+                        Sabtu, 13 Juni 2026
+                    </div>
+
+                    <p class="text-[10px] leading-relaxed opacity-80 italic px-4">
+                        "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kedua mempelai."
+                    </p>
+
+                    <div class="mt-10">
+                        <p class="font-serif text-xs mb-2 uppercase tracking-widest">Wassalamu'alaikum Wr. Wb.</p>
+                        <p class="font-cursive text-2xl text-gold" style="color: #c5a059;">Wanita & Pria</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p class="no-print text-gray-500 text-sm italic mb-10 text-center">
+        *Tips: Gunakan opsi "Simpan sebagai PDF" di dialog cetak untuk hasil terbaik.
+    </p>
+
+</body>
+</html>

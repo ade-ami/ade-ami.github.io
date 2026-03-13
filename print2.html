@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Undangan Navy Floral - Premium Print</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Montserrat:wght@300;400;600&family=Great+Vibes&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --navy: #0e2a47; 
+            --gold: #b89655;
+            --text-gray: #4a5568;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Lora', serif;
+            padding: 40px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Ukuran Kertas A4 Landscape */
+        .page {
+            width: 11.69in;
+            height: 8.27in;
+            background: radial-gradient(circle at center, #ffffff 0%, #e8f4f8 100%);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+            position: relative;
+            display: flex;
+            overflow: hidden;
+            -webkit-print-color-adjust: exact;
+            margin-bottom: 30px;
+        }
+
+        /* Border Tipis sesuai gambar */
+        .inner-border {
+            position: absolute;
+            inset: 40px;
+            border: 1px solid rgba(14, 42, 71, 0.15);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .half {
+            width: 50%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        /* Dekorasi Bunga Navy */
+        .floral-corner {
+            position: absolute;
+            width: 320px;
+            z-index: 20;
+            filter: brightness(0.8) contrast(1.1);
+        }
+        .top-left { top: -40px; left: -40px; transform: rotate(0deg); }
+        .top-right { top: -40px; right: -40px; transform: scaleX(-1); }
+        .bottom-left { bottom: -40px; left: -40px; transform: scaleY(-1); }
+        .bottom-right { bottom: -40px; right: -40px; transform: scale(-1); }
+
+        .font-serif-display { font-family: 'Playfair Display', serif; }
+        .font-cursive { font-family: 'Great Vibes', cursive; }
+        
+        /* Blok Tanggal Horizontal sesuai gambar */
+        .date-section {
+            width: 100%;
+            max-width: 320px;
+            margin: 25px 0;
+            border-top: 1.5px solid var(--navy);
+            border-bottom: 1.5px solid var(--navy);
+            padding: 12px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            color: var(--navy);
+        }
+
+        .fold-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            border-left: 1px dashed rgba(0, 0, 0, 0.1);
+            z-index: 50;
+        }
+
+        @media print {
+            body { background: none; padding: 0; }
+            .no-print { display: none; }
+            .page { box-shadow: none; margin: 0; page-break-after: always; }
+            .fold-line { display: none; }
+        }
+
+        .btn-download {
+            background: var(--navy);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print">
+        <button class="btn-download" onclick="generatePDF()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Unduh PDF Siap Cetak
+        </button>
+    </div>
+
+    <div id="export-content">
+        <!-- HALAMAN 1 (SISI LUAR: KIRI BELAKANG, KANAN DEPAN) -->
+        <div class="page">
+            <div class="fold-line no-print"></div>
+            <div class="inner-border"></div>
+            
+            <!-- SISI BELAKANG (KIRI) -->
+            <div class="half">
+                <img src="https://raw.githubusercontent.com/ade-ami/ade-ami.github.io/refs/heads/main/img/floral.png" class="floral-corner top-left">
+                <div class="text-center">
+                    <p class="font-cursive text-5xl text-[#0e2a47] mb-6">Terima Kasih</p>
+                    <p class="text-[11px] leading-relaxed uppercase tracking-[0.2em] text-gray-500 max-w-[280px]">
+                        Atas kehadiran serta doa restu yang Bapak/Ibu berikan kepada kami berdua.
+                    </p>
+                </div>
+            </div>
+
+            <!-- SISI DEPAN / SAMPUL (KANAN) - MENYESUAIKAN GAMBAR -->
+            <div class="half">
+                <img src="https://raw.githubusercontent.com/ade-ami/ade-ami.github.io/refs/heads/main/img/floral.png" class="floral-corner top-right">
+                <img src="https://raw.githubusercontent.com/ade-ami/ade-ami.github.io/refs/heads/main/img/floral.png" class="floral-corner bottom-right">
+                
+                <div class="text-center relative">
+                    <p class="uppercase tracking-[0.4em] text-[12px] text-[#0e2a47] mb-12 font-bold">SAVE THE DATE</p>
+                    
+                    <div class="mb-10">
+                        <h1 class="font-serif-display italic text-5xl text-[#0e2a47]">Jonathan Patterson</h1>
+                        <p class="font-cursive text-4xl text-[#0e2a47] my-4">&</p>
+                        <h1 class="font-serif-display italic text-5xl text-[#0e2a47]">Korina Villanueva</h1>
+                    </div>
+
+                    <p class="text-[14px] text-[#0e2a47] max-w-[340px] mx-auto mb-8 font-medium">
+                        We invite you to celebrate the love that has come together in a party full of warmth.
+                    </p>
+
+                    <!-- BLOK TANGGAL PERSIS GAMBAR -->
+                    <div class="w-full max-w-[320px] mx-auto flex flex-col items-center">
+                        <p class="uppercase tracking-[0.3em] text-[13px] font-bold text-[#0e2a47] mb-1">JUNE</p>
+                        <div class="date-section">
+                            <span class="uppercase tracking-widest text-[11px] font-bold">MONDAY</span>
+                            <span class="font-serif-display text-5xl leading-none">23</span>
+                            <span class="uppercase tracking-widest text-[11px] font-bold">AT 09 AM</span>
+                        </div>
+                        <div class="mt-4">
+                            <p class="uppercase tracking-[0.2em] text-[11px] font-bold text-[#0e2a47]">123 ANYWHERE ST., ANY CITY</p>
+                            <p class="uppercase tracking-[0.2em] text-[11px] font-bold text-[#0e2a47] mt-1">ST 12345</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HALAMAN 2 (SISI DALAM: KIRI DATA, KANAN JADWAL) -->
+        <div class="page">
+            <div class="fold-line no-print"></div>
+            <div class="inner-border"></div>
+
+            <!-- DATA MEMPELAI (KIRI) -->
+            <div class="half">
+                <img src="https://raw.githubusercontent.com/ade-ami/ade-ami.github.io/refs/heads/main/img/floral.png" class="floral-corner top-left">
+                <div class="text-center">
+                    <p class="font-serif italic text-sm text-gray-400 mb-8 tracking-[0.2em]">Assalamu’alaikum Wr. Wb.</p>
+                    <p class="text-[12px] leading-relaxed mb-10 text-gray-600 px-8">
+                        Tanpa mengurangi rasa hormat, kami mengundang Bapak/Ibu/Saudara/i untuk hadir di acara pernikahan kami:
+                    </p>
+                    
+                    <div class="space-y-10">
+                        <div>
+                            <h3 class="font-serif-display text-3xl text-[#0e2a47]">Jonathan Patterson</h3>
+                            <p class="text-[10px] text-gray-400 mt-2 uppercase tracking-widest">Putra dari Bpk. Patterson & Ibu Patterson</p>
+                        </div>
+                        <p class="font-cursive text-3xl text-gold">&</p>
+                        <div>
+                            <h3 class="font-serif-display text-3xl text-[#0e2a47]">Korina Villanueva</h3>
+                            <p class="text-[10px] text-gray-400 mt-2 uppercase tracking-widest">Putri dari Bpk. Villanueva & Ibu Villanueva</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- JADWAL & LOKASI (KANAN) -->
+            <div class="half">
+                <img src="https://raw.githubusercontent.com/ade-ami/ade-ami.github.io/refs/heads/main/img/floral.png" class="floral-corner bottom-right">
+                <div class="text-center">
+                    <div class="bg-white/50 border border-[#0e2a47]/10 p-8 rounded-2xl mb-10">
+                        <div class="mb-6">
+                            <p class="font-bold text-[#0e2a47] text-[11px] uppercase tracking-[0.3em] mb-2">Akad Nikah</p>
+                            <p class="text-base font-serif">08.00 - 10.00 WIB</p>
+                        </div>
+                        <div class="h-[1px] bg-[#0e2a47]/10 w-1/2 mx-auto my-6"></div>
+                        <div>
+                            <p class="font-bold text-[#0e2a47] text-[11px] uppercase tracking-[0.3em] mb-2">Resepsi</p>
+                            <p class="text-base font-serif">11.00 - Selesai</p>
+                        </div>
+                    </div>
+
+                    <p class="text-[#0e2a47] font-bold uppercase tracking-widest text-[11px] mb-2">Lokasi Acara:</p>
+                    <p class="text-sm text-gray-600 px-10 leading-relaxed italic mb-12">
+                        The Grand Ballroom, 123 Anywhere St., Any City, ST 12345
+                    </p>
+
+                    <p class="font-cursive text-4xl text-[#0e2a47]">Kami yang Berbahagia</p>
+                    <p class="text-[10px] text-gray-400 mt-2 uppercase tracking-widest">Keluarga Besar Patterson & Villanueva</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function generatePDF() {
+            const element = document.getElementById('export-content');
+            const opt = {
+                margin: 0,
+                filename: 'Undangan_Navy_Floral.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 3, useCORS: true },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
+</body>
+</html>
