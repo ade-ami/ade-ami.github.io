@@ -216,7 +216,6 @@
             display: block;
         }
 
-        /* Styling input disabled/readonly */
         input[readonly] {
             background: rgba(255, 255, 255, 0.05);
             color: rgba(255, 255, 255, 0.6);
@@ -224,7 +223,6 @@
             border-color: rgba(255, 255, 255, 0.05);
         }
 
-        /* Custom Swal Style */
         .swal2-popup {
             border-radius: 2rem !important;
             font-family: 'Montserrat', sans-serif !important;
@@ -269,8 +267,9 @@
             </div>
             
             <div class="flex flex-col items-center gap-6">
-                <button onclick="openInvitation()" class="bg-blue-600 text-white px-10 py-4 rounded-full font-bold hover:bg-blue-500 transition-all shadow-lg flex items-center gap-3 mx-auto uppercase tracking-widest text-sm active:scale-95">
-                    <i class="fa-solid fa-envelope-open"></i> Buka Undangan
+                <!-- Tombol Buka Undangan -->
+                <button id="btn-open-invitation" onclick="openInvitation()" class="bg-blue-600 text-white px-10 py-4 rounded-full font-bold hover:bg-blue-500 transition-all shadow-lg flex items-center gap-3 mx-auto uppercase tracking-widest text-sm active:scale-95">
+                    <i class="fa-solid fa-envelope-open"></i> <span id="open-btn-text">Buka Undangan</span>
                 </button>
 
                 <!-- QR CODE CONTAINER -->
@@ -427,7 +426,7 @@
                             <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_QRIS.svg" alt="QRIS" class="h-8">
                         </div>
                         <div id="qrcode-payment" class="mb-4">
-                            <p class="text-xs text-slate-400">Memuat Barcode...</p>
+                            <!-- Barcode QRIS dimuat di sini -->
                         </div>
                         <p class="text-xs text-slate-500 uppercase mb-6 font-bold tracking-widest">Scan QRIS untuk Kirim Hadiah</p>
                         <button onclick="downloadQR()" class="bg-blue-400 text-white px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest active:scale-95 transition-transform">
@@ -453,7 +452,7 @@
             </div>
         </section>
 
-        <!-- RSVP & GUESTBOOK -->
+        <!-- RSVP & GUESTBOOK (BAGIAN UCAPAN) -->
         <section id="guestbook" class="bg-blue-950 text-white py-24 px-6 relative">
             <div class="container mx-auto max-w-2xl text-center">
                 <div class="fade-down-element">
@@ -528,7 +527,7 @@ Kami yang berbahagia</p>
     </main>
 
     <!-- NAVIGATION BAR -->
-    <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 w-full bg-white/90 backdrop-blur-xl py-3 px-4 z-[150] flex justify-around border-t md:max-w-md md:mx-auto rounded-t-[2rem] shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.1)] hidden">
+    <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 w-full bg-white/90 backdrop-blur-xl py-3 px-4 z-[150] flex justify-around border-t md:max-w-md md:mx-auto rounded-t-[2rem] shadow-[0_-10px_25_rgba(0,0,0,0.1)] hidden">
         <a href="#sampul" class="nav-link flex flex-col items-center gap-1 text-[10px] font-bold uppercase tracking-tighter active">
             <i class="fa-solid fa-house text-lg"></i>
             <span>Beranda</span>
@@ -549,7 +548,7 @@ Kami yang berbahagia</p>
             <i class="fa-solid fa-gift text-lg"></i>
             <span>Hadiah</span>
         </a>
-        <a href="#guestbook" class="nav-link flex flex-col items-center gap-1 text-[10px] font-bold uppercase tracking-tighter">
+        <a href="#guestbook" id="nav-rsvp" class="nav-link flex flex-col items-center gap-1 text-[10px] font-bold uppercase tracking-tighter">
             <i class="fa-solid fa-comment-dots text-lg"></i>
             <span>RSVP</span>
         </a>
@@ -576,7 +575,8 @@ Kami yang berbahagia</p>
         let targetDateMs = 0;
         let settingsData = {};
         let galleryImages = [];
-        let hasSubmittedUcapan = false; // Flag status pengiriman ucapan
+        let hasSubmittedUcapan = false;
+        let isAuthorized = false; // Status akses undangan
 
         function getBankLogoHtml(bankName) {
             if (!bankName) return 'BANK';
@@ -636,40 +636,66 @@ Kami yang berbahagia</p>
             } catch (err) { console.error("Gagal memuat pengaturan:", err); }
         }
 
+        /**
+         * PROTEKSI AKSES & VALIDASI TAMU
+         */
         async function fetchGuestAndLockRSVP() {
             const urlParams = new URLSearchParams(window.location.search);
             const to = urlParams.get('to');
             const rsvpInput = document.getElementById('rsvp-nama');
             const coverName = document.getElementById('guest-name');
             const btnText = document.getElementById('btn-text');
+            const rsvpSection = document.getElementById('guestbook');
+            const openBtn = document.getElementById('btn-open-invitation');
+            const navRSVP = document.getElementById('nav-rsvp');
 
+            // 1. Jika tidak ada parameter 'to' (Akses dari uleman.biz.id saja)
             if (!to) {
-                rsvpInput.value = "";
-                rsvpInput.placeholder = "Masukkan nama Anda";
+                isAuthorized = false;
+                rsvpSection.style.display = 'none';
+                if(navRSVP) navRSVP.style.display = 'none';
+                
+                openBtn.disabled = true;
+                openBtn.classList.add('bg-slate-500', 'cursor-not-allowed', 'hover:bg-slate-500');
+                document.getElementById('open-btn-text').innerText = "Akses Terbatas";
+                coverName.innerText = "Link Tidak Valid";
                 return;
             }
 
             const decodedTo = decodeURIComponent(to);
-            rsvpInput.value = decodedTo;
             coverName.innerText = decodedTo;
 
             try {
-                // 1. Cek di tabel undangan
-                const { data: inviteData } = await _supabase
+                // 2. Cek di tabel invitation_list
+                const { data: inviteData, error } = await _supabase
                     .from('invitation_list')
                     .select('guest_name')
                     .eq('guest_name', decodedTo)
-                    .single();
+                    .maybeSingle();
 
-                if (inviteData) {
-                    rsvpInput.readOnly = true;
+                if (!inviteData) {
+                    // Tamu tidak terdaftar di database
+                    isAuthorized = false;
+                    rsvpSection.style.display = 'none';
+                    if(navRSVP) navRSVP.style.display = 'none';
+                    
+                    openBtn.disabled = true;
+                    openBtn.classList.add('bg-red-500', 'cursor-not-allowed', 'hover:bg-red-500');
+                    document.getElementById('open-btn-text').innerText = "Tidak Terdaftar";
+                    return;
                 }
 
-                // 2. Cek apakah sudah pernah kirim ucapan
+                // 3. Tamu Terverifikasi
+                isAuthorized = true;
+                rsvpSection.style.display = 'block';
+                rsvpInput.value = inviteData.guest_name;
+                rsvpInput.readOnly = true;
+
+                // 4. Cek apakah sudah pernah kirim ucapan
                 const { data: guestbookData } = await _supabase
                     .from('guestbook')
                     .select('Nama')
-                    .eq('Nama', decodedTo)
+                    .eq('Nama', inviteData.guest_name)
                     .maybeSingle();
 
                 if (guestbookData) {
@@ -677,7 +703,7 @@ Kami yang berbahagia</p>
                     btnText.innerText = "Sudah Mengirim Ucapan";
                 }
                 
-                generateQRCode(decodedTo);
+                generateQRCode(inviteData.guest_name);
             } catch (err) {
                 console.error("Gagal validasi tamu:", err);
             }
@@ -751,7 +777,6 @@ Kami yang berbahagia</p>
             document.getElementById('guestbook').scrollIntoView({ behavior: 'smooth' });
         };
 
-        // INTEGRASI SWEETALERT2 UNTUK RSVP
         document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submit-btn');
@@ -759,19 +784,16 @@ Kami yang berbahagia</p>
             const formData = new FormData(e.target);
             const namaTamu = formData.get('Nama');
 
-            // 1. Alert jika sudah pernah mengirim ucapan
             if (hasSubmittedUcapan) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Terima Kasih',
                     text: 'Anda sudah memberikan ucapan',
-                    confirmButtonColor: '#2563eb',
-                    confirmButtonText: 'Tutup'
+                    confirmButtonColor: '#2563eb'
                 });
                 return;
             }
 
-            // 2. Pop-up Konfirmasi Sebelum Mengirim
             const result = await Swal.fire({
                 title: 'Kirim Ucapan?',
                 text: "Pastikan pesan dan doa Anda sudah sesuai.",
@@ -787,26 +809,6 @@ Kami yang berbahagia</p>
                 btn.disabled = true;
                 txt.innerHTML = '<span class="loading-spinner"></span> Mengirim...';
 
-                // Double check ke database untuk keamanan
-                const { data: checkData } = await _supabase
-                    .from('guestbook')
-                    .select('Nama')
-                    .eq('Nama', namaTamu)
-                    .maybeSingle();
-
-                if (checkData) {
-                    hasSubmittedUcapan = true;
-                    txt.innerText = "Sudah Mengirim Ucapan";
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Oops...',
-                        text: 'Anda sudah memberikan ucapan, Terima kasih',
-                        confirmButtonColor: '#2563eb'
-                    });
-                    btn.disabled = false;
-                    return;
-                }
-
                 const entry = { 
                     Nama: namaTamu, 
                     Jumlah: parseInt(formData.get('Jumlah')), 
@@ -817,25 +819,14 @@ Kami yang berbahagia</p>
                 const { error } = await _supabase.from('guestbook').insert([entry]);
                 if (!error) { 
                     hasSubmittedUcapan = true;
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Terkirim!',
-                        text: 'Terima kasih atas konfirmasi dan doa restunya.',
-                        confirmButtonColor: '#2563eb'
-                    });
+                    Swal.fire({ icon: 'success', title: 'Terkirim!', text: 'Terima kasih atas doa restunya.', confirmButtonColor: '#2563eb' });
                     e.target.reset(); 
                     fetchGuestbook(); 
                     txt.innerText = "Sudah Mengirim Ucapan";
-
                     const rsvpInput = document.getElementById('rsvp-nama');
                     if(rsvpInput.readOnly) rsvpInput.value = namaTamu;
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal',
-                        text: 'Terjadi kesalahan sistem. Coba lagi nanti.',
-                        confirmButtonColor: '#2563eb'
-                    });
+                    Swal.fire({ icon: 'error', title: 'Gagal', text: 'Coba lagi nanti.', confirmButtonColor: '#2563eb' });
                     btn.disabled = false;
                     txt.innerText = "Kirim Ucapan";
                 }
@@ -843,10 +834,17 @@ Kami yang berbahagia</p>
         });
 
         function openInvitation() {
+            if (!isAuthorized) {
+                Swal.fire({ icon: 'error', title: 'Akses Ditolak', text: 'Maaf, Anda memerlukan link undangan resmi untuk masuk.', confirmButtonColor: '#2563eb' });
+                return;
+            }
+
             const elem = document.documentElement;
-            if (elem.requestFullscreen) elem.requestFullscreen().catch(err => console.log(err));
+            if (elem.requestFullscreen) elem.requestFullscreen().catch(() => {});
+            
             const cover = document.getElementById('cover');
             cover.classList.add('opacity-0', '-translate-y-full');
+            
             setTimeout(() => {
                 cover.style.display = 'none';
                 document.getElementById('main-content').style.display = 'block';
@@ -854,7 +852,10 @@ Kami yang berbahagia</p>
                 document.getElementById('music-player').style.display = 'block';
                 const audio = document.getElementById('background-music');
                 audio.play().catch(() => {});
+                
+                // Pastikan QRIS dimuat saat dibuka
                 generateQRIS();
+                
                 const observer = new IntersectionObserver((entries) => {
                     entries.forEach(e => {
                         if (e.isIntersecting) e.target.classList.add('show');
@@ -865,23 +866,6 @@ Kami yang berbahagia</p>
             }, 800);
         }
 
-        window.showToast = (msg, type = "success") => {
-            const t = document.getElementById('toast');
-            const icon = document.getElementById('toast-icon');
-            document.getElementById('toast-message').innerText = msg;
-            
-            if (type === "warning") {
-                icon.className = "fa-solid fa-circle-exclamation text-yellow-400 text-lg";
-            } else if (type === "error") {
-                icon.className = "fa-solid fa-circle-xmark text-red-400 text-lg";
-            } else {
-                icon.className = "fa-solid fa-circle-check text-green-400 text-lg";
-            }
-
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 4000);
-        };
-
         function toggleMusic() {
             const a = document.getElementById('background-music');
             const i = document.getElementById('music-icon');
@@ -889,6 +873,17 @@ Kami yang berbahagia</p>
             if (a.paused) { a.play(); b.classList.add('music-rotate'); i.classList.replace('fa-play', 'fa-compact-disc'); }
             else { a.pause(); b.classList.remove('music-rotate'); i.classList.replace('fa-compact-disc', 'fa-play'); }
         }
+
+        window.showToast = (msg, type = "success") => {
+            const t = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            document.getElementById('toast-message').innerText = msg;
+            if (type === "warning") icon.className = "fa-solid fa-circle-exclamation text-yellow-400 text-lg";
+            else if (type === "error") icon.className = "fa-solid fa-circle-xmark text-red-400 text-lg";
+            else icon.className = "fa-solid fa-circle-check text-green-400 text-lg";
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 4000);
+        };
 
         function copyAcc(who) {
             const val = who === 'bride' ? settingsData.bride_bank_acc : settingsData.groom_bank_acc;
@@ -946,52 +941,32 @@ Kami yang berbahagia</p>
         function generateQRIS() {
             const container = document.getElementById('qrcode-payment');
             if (!container) return;
-            const qrUrl = `https://api.qrserver.com/create-qr-code/?size=500x500&data=${encodeURIComponent(qrisString)}`;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(qrisString)}`;
             container.innerHTML = `<img id="qris-img" src="${qrUrl}" alt="Barcode QRIS" class="mx-auto" crossorigin="anonymous">`;
         }
 
         function downloadQR() {
             const qrImg = document.getElementById('qris-img');
-            if (!qrImg || !qrImg.src) {
-                window.showToast("Barcode belum siap.", "warning");
-                return;
-            }
-
+            if (!qrImg || !qrImg.src) { window.showToast("Barcode belum siap.", "warning"); return; }
             window.showToast("Menyiapkan unduhan...");
-
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            const w = 600;
-            const h = 750;
-            canvas.width = w;
-            canvas.height = h;
-
-            ctx.fillStyle = "#FFFFFF";
-            ctx.fillRect(0, 0, w, h);
-
-            const logoQRIS = new Image();
-            logoQRIS.crossOrigin = "anonymous";
+            const w = 600; const h = 750;
+            canvas.width = w; canvas.height = h;
+            ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, w, h);
+            const logoQRIS = new Image(); logoQRIS.crossOrigin = "anonymous";
             logoQRIS.src = "https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_QRIS.svg";
-
             logoQRIS.onload = function() {
-                const logoW = 120;
-                const logoH = 40;
+                const logoW = 120; const logoH = 40;
                 ctx.drawImage(logoQRIS, (w - logoW) / 2, 40, logoW, logoH);
-
-                const tempQR = new Image();
-                tempQR.crossOrigin = "anonymous";
+                const tempQR = new Image(); tempQR.crossOrigin = "anonymous";
                 tempQR.src = qrImg.src;
-
                 tempQR.onload = function() {
                     const qrSize = 480;
                     ctx.drawImage(tempQR, (w - qrSize) / 2, 100, qrSize, qrSize);
-
-                    ctx.fillStyle = "#475569";
-                    ctx.font = "bold 20px Montserrat, sans-serif";
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
+                    ctx.fillStyle = "#475569"; ctx.font = "bold 20px Montserrat, sans-serif";
+                    ctx.textAlign = "center"; ctx.textBaseline = "middle";
                     ctx.fillText("SCAN QRIS UNTUK KIRIM HADIAH", w / 2, h - 70);
-
                     const link = document.createElement('a');
                     link.href = canvas.toDataURL("image/png");
                     link.download = 'QRIS-Pembayaran.png';
