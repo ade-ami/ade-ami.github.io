@@ -24,10 +24,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Montserrat:wght@300;400;600&family=Great+Vibes&display=swap" rel="stylesheet">
+    
     <!-- Import Supabase Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Import QR Code Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Import SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
         body {
             font-family: 'Montserrat', sans-serif;
@@ -218,6 +222,12 @@
             color: rgba(255, 255, 255, 0.6);
             cursor: not-allowed;
             border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Custom Swal Style */
+        .swal2-popup {
+            border-radius: 2rem !important;
+            font-family: 'Montserrat', sans-serif !important;
         }
     </style>
 </head>
@@ -653,7 +663,6 @@ Kami yang berbahagia</p>
 
                 if (inviteData) {
                     rsvpInput.readOnly = true;
-                    console.log("Tamu terverifikasi.");
                 }
 
                 // 2. Cek apakah sudah pernah kirim ucapan
@@ -742,59 +751,94 @@ Kami yang berbahagia</p>
             document.getElementById('guestbook').scrollIntoView({ behavior: 'smooth' });
         };
 
+        // INTEGRASI SWEETALERT2 UNTUK RSVP
         document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submit-btn');
             const txt = document.getElementById('btn-text');
-            
-            // Pengecekan lokal sebelum kirim
-            if (hasSubmittedUcapan) {
-                window.showToast("Anda sudah memberikan ucapan, Terima kasih", "warning");
-                return;
-            }
-
-            btn.disabled = true;
-            txt.innerHTML = '<span class="loading-spinner"></span> Mengirim...';
             const formData = new FormData(e.target);
             const namaTamu = formData.get('Nama');
 
-            // Pengecekan ke database untuk memastikan keamanan (double check)
-            const { data: checkData } = await _supabase
-                .from('guestbook')
-                .select('Nama')
-                .eq('Nama', namaTamu)
-                .maybeSingle();
-
-            if (checkData) {
-                hasSubmittedUcapan = true;
-                txt.innerText = "Sudah Mengirim Ucapan";
-                window.showToast("Anda sudah memberikan ucapan, Terima kasih", "warning");
-                btn.disabled = false;
+            // 1. Alert jika sudah pernah mengirim ucapan
+            if (hasSubmittedUcapan) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Akses Ditolak',
+                    text: 'Anda sudah memberikan ucapan, Terima kasih',
+                    confirmButtonColor: '#2563eb',
+                    confirmButtonText: 'Tutup'
+                });
                 return;
             }
 
-            const entry = { 
-                Nama: namaTamu, 
-                Jumlah: parseInt(formData.get('Jumlah')), 
-                Status: formData.get('Status'), 
-                Ucapan: formData.get('Ucapan') 
-            };
-            
-            const { error } = await _supabase.from('guestbook').insert([entry]);
-            if (!error) { 
-                hasSubmittedUcapan = true;
-                window.showToast("Terima kasih atas konfirmasinya!", "success"); 
-                e.target.reset(); 
-                fetchGuestbook(); 
-                txt.innerText = "Sudah Mengirim Ucapan";
+            // 2. Pop-up Konfirmasi Sebelum Mengirim
+            const result = await Swal.fire({
+                title: 'Kirim Ucapan?',
+                text: "Pastikan pesan dan doa Anda sudah sesuai.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#2563eb',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Kirim Sekarang',
+                cancelButtonText: 'Batal'
+            });
 
-                // Restore nama jika readonly agar tidak kosong
-                const rsvpInput = document.getElementById('rsvp-nama');
-                if(rsvpInput.readOnly) rsvpInput.value = namaTamu;
-            } else {
-                window.showToast("Gagal mengirim. Coba lagi nanti.", "error");
-                btn.disabled = false;
-                txt.innerText = "Kirim Ucapan";
+            if (result.isConfirmed) {
+                btn.disabled = true;
+                txt.innerHTML = '<span class="loading-spinner"></span> Mengirim...';
+
+                // Double check ke database untuk keamanan
+                const { data: checkData } = await _supabase
+                    .from('guestbook')
+                    .select('Nama')
+                    .eq('Nama', namaTamu)
+                    .maybeSingle();
+
+                if (checkData) {
+                    hasSubmittedUcapan = true;
+                    txt.innerText = "Sudah Mengirim Ucapan";
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Oops...',
+                        text: 'Anda sudah memberikan ucapan, Terima kasih',
+                        confirmButtonColor: '#2563eb'
+                    });
+                    btn.disabled = false;
+                    return;
+                }
+
+                const entry = { 
+                    Nama: namaTamu, 
+                    Jumlah: parseInt(formData.get('Jumlah')), 
+                    Status: formData.get('Status'), 
+                    Ucapan: formData.get('Ucapan') 
+                };
+                
+                const { error } = await _supabase.from('guestbook').insert([entry]);
+                if (!error) { 
+                    hasSubmittedUcapan = true;
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Terkirim!',
+                        text: 'Terima kasih atas konfirmasi dan doa restunya.',
+                        confirmButtonColor: '#2563eb'
+                    });
+                    e.target.reset(); 
+                    fetchGuestbook(); 
+                    txt.innerText = "Sudah Mengirim Ucapan";
+
+                    const rsvpInput = document.getElementById('rsvp-nama');
+                    if(rsvpInput.readOnly) rsvpInput.value = namaTamu;
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: 'Terjadi kesalahan sistem. Coba lagi nanti.',
+                        confirmButtonColor: '#2563eb'
+                    });
+                    btn.disabled = false;
+                    txt.innerText = "Kirim Ucapan";
+                }
             }
         });
 
@@ -902,7 +946,7 @@ Kami yang berbahagia</p>
         function generateQRIS() {
             const container = document.getElementById('qrcode-payment');
             if (!container) return;
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(qrisString)}`;
+            const qrUrl = `https://api.qrserver.com/create-qr-code/?size=500x500&data=${encodeURIComponent(qrisString)}`;
             container.innerHTML = `<img id="qris-img" src="${qrUrl}" alt="Barcode QRIS" class="mx-auto" crossorigin="anonymous">`;
         }
 
