@@ -225,7 +225,7 @@
 
     <!-- Notifikasi Toast -->
     <div id="toast">
-        <i class="fa-solid fa-circle-check text-green-400 text-lg"></i>
+        <i id="toast-icon" class="fa-solid fa-circle-check text-green-400 text-lg"></i>
         <span id="toast-message">Notifikasi</span>
     </div>
 
@@ -566,6 +566,7 @@ Kami yang berbahagia</p>
         let targetDateMs = 0;
         let settingsData = {};
         let galleryImages = [];
+        let hasSubmittedUcapan = false; // Flag status pengiriman ucapan
 
         function getBankLogoHtml(bankName) {
             if (!bankName) return 'BANK';
@@ -625,14 +626,12 @@ Kami yang berbahagia</p>
             } catch (err) { console.error("Gagal memuat pengaturan:", err); }
         }
 
-        /**
-         * FUNGSI UNTUK MENGAMBIL NAMA TAMU DARI DATABASE
-         */
         async function fetchGuestAndLockRSVP() {
             const urlParams = new URLSearchParams(window.location.search);
             const to = urlParams.get('to');
             const rsvpInput = document.getElementById('rsvp-nama');
             const coverName = document.getElementById('guest-name');
+            const btnText = document.getElementById('btn-text');
 
             if (!to) {
                 rsvpInput.value = "";
@@ -640,39 +639,38 @@ Kami yang berbahagia</p>
                 return;
             }
 
-            // Dekode nama dari URL (misal Siska Risma)
             const decodedTo = decodeURIComponent(to);
-            
-            // Set sementara sambil fetch
             rsvpInput.value = decodedTo;
             coverName.innerText = decodedTo;
 
             try {
-                // Cari di tabel invitation_list kolom guest_name
-                const { data, error } = await _supabase
+                // 1. Cek di tabel undangan
+                const { data: inviteData } = await _supabase
                     .from('invitation_list')
                     .select('guest_name')
                     .eq('guest_name', decodedTo)
                     .single();
 
-                if (data && !error) {
-                    // Jika ketemu, kunci input agar permanen
-                    rsvpInput.value = data.guest_name;
-                    coverName.innerText = data.guest_name;
+                if (inviteData) {
                     rsvpInput.readOnly = true;
-                    console.log("Tamu terverifikasi dari database.");
-                } else {
-                    // Jika tidak ketemu di DB, tetap tampilkan nama dari URL tapi jangan di-lock (atau sesuai kebijakan Anda)
-                    rsvpInput.readOnly = false;
-                    rsvpInput.placeholder = "Masukkan nama Anda";
+                    console.log("Tamu terverifikasi.");
+                }
+
+                // 2. Cek apakah sudah pernah kirim ucapan
+                const { data: guestbookData } = await _supabase
+                    .from('guestbook')
+                    .select('Nama')
+                    .eq('Nama', decodedTo)
+                    .maybeSingle();
+
+                if (guestbookData) {
+                    hasSubmittedUcapan = true;
+                    btnText.innerText = "Sudah Mengirim Ucapan";
                 }
                 
-                // Generate QR Code tamu
-                generateQRCode(rsvpInput.value);
-
+                generateQRCode(decodedTo);
             } catch (err) {
                 console.error("Gagal validasi tamu:", err);
-                rsvpInput.readOnly = false;
             }
         }
 
@@ -748,13 +746,35 @@ Kami yang berbahagia</p>
             e.preventDefault();
             const btn = document.getElementById('submit-btn');
             const txt = document.getElementById('btn-text');
+            
+            // Pengecekan lokal sebelum kirim
+            if (hasSubmittedUcapan) {
+                window.showToast("Anda sudah memberikan ucapan, Terima kasih", "warning");
+                return;
+            }
+
             btn.disabled = true;
             txt.innerHTML = '<span class="loading-spinner"></span> Mengirim...';
             const formData = new FormData(e.target);
-            
-            // Nama tetap diambil dari input meskipun readonly
+            const namaTamu = formData.get('Nama');
+
+            // Pengecekan ke database untuk memastikan keamanan (double check)
+            const { data: checkData } = await _supabase
+                .from('guestbook')
+                .select('Nama')
+                .eq('Nama', namaTamu)
+                .maybeSingle();
+
+            if (checkData) {
+                hasSubmittedUcapan = true;
+                txt.innerText = "Sudah Mengirim Ucapan";
+                window.showToast("Anda sudah memberikan ucapan, Terima kasih", "warning");
+                btn.disabled = false;
+                return;
+            }
+
             const entry = { 
-                Nama: formData.get('Nama'), 
+                Nama: namaTamu, 
                 Jumlah: parseInt(formData.get('Jumlah')), 
                 Status: formData.get('Status'), 
                 Ucapan: formData.get('Ucapan') 
@@ -762,18 +782,20 @@ Kami yang berbahagia</p>
             
             const { error } = await _supabase.from('guestbook').insert([entry]);
             if (!error) { 
-                window.showToast("Terima kasih atas konfirmasinya!"); 
+                hasSubmittedUcapan = true;
+                window.showToast("Terima kasih atas konfirmasinya!", "success"); 
                 e.target.reset(); 
                 fetchGuestbook(); 
-                // Restore nama jika readonly
+                txt.innerText = "Sudah Mengirim Ucapan";
+
+                // Restore nama jika readonly agar tidak kosong
                 const rsvpInput = document.getElementById('rsvp-nama');
-                if(rsvpInput.readOnly) {
-                   const to = new URLSearchParams(window.location.search).get('to');
-                   if(to) rsvpInput.value = decodeURIComponent(to);
-                }
+                if(rsvpInput.readOnly) rsvpInput.value = namaTamu;
+            } else {
+                window.showToast("Gagal mengirim. Coba lagi nanti.", "error");
+                btn.disabled = false;
+                txt.innerText = "Kirim Ucapan";
             }
-            btn.disabled = false;
-            txt.innerText = "Kirim Ucapan";
         });
 
         function openInvitation() {
@@ -799,9 +821,19 @@ Kami yang berbahagia</p>
             }, 800);
         }
 
-        window.showToast = (msg) => {
+        window.showToast = (msg, type = "success") => {
             const t = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
             document.getElementById('toast-message').innerText = msg;
+            
+            if (type === "warning") {
+                icon.className = "fa-solid fa-circle-exclamation text-yellow-400 text-lg";
+            } else if (type === "error") {
+                icon.className = "fa-solid fa-circle-xmark text-red-400 text-lg";
+            } else {
+                icon.className = "fa-solid fa-circle-check text-green-400 text-lg";
+            }
+
             t.classList.add('show');
             setTimeout(() => t.classList.remove('show'), 4000);
         };
@@ -816,7 +848,7 @@ Kami yang berbahagia</p>
 
         function copyAcc(who) {
             const val = who === 'bride' ? settingsData.bride_bank_acc : settingsData.groom_bank_acc;
-            if (!val) { window.showToast("Nomor rekening tidak ditemukan."); return; }
+            if (!val) { window.showToast("Nomor rekening tidak ditemukan.", "warning"); return; }
             copyToClipboard(val, "Nomor rekening disalin!");
         }
 
@@ -877,7 +909,7 @@ Kami yang berbahagia</p>
         function downloadQR() {
             const qrImg = document.getElementById('qris-img');
             if (!qrImg || !qrImg.src) {
-                window.showToast("Barcode belum siap.");
+                window.showToast("Barcode belum siap.", "warning");
                 return;
             }
 
@@ -928,7 +960,6 @@ Kami yang berbahagia</p>
         window.addEventListener('DOMContentLoaded', () => {
             fetchSettings();
             fetchGuestbook();
-            // Inisialisasi pengecekan tamu dari database
             fetchGuestAndLockRSVP();
         });
     </script>
