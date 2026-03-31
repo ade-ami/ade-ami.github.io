@@ -11,10 +11,9 @@
 
     <!-- OPEN GRAPH / FACEBOOK / WHATSAPP -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://uleman.ac.id/"> <!-- Ganti dengan URL website Anda -->
+    <meta property="og:url" content="https://uleman.ac.id/"> 
     <meta property="og:title" content="The Wedding of Ami & Ade">
     <meta property="og:image" content="https://raw.githubusercontent.com/ade-ami/ade-ami.github.io/refs/heads/main/img/aa.jpg?auto=format&fit=crop&q=80&w=600"> 
-    <!-- PENTING: Gunakan URL gambar absolut untuk og:image -->
 
     <!-- TWITTER -->
     <meta property="twitter:card" content="summary_large_image">
@@ -187,7 +186,6 @@
             height: 530px;
         }
 
-        /* Styling QR Code */
         #qrcode, #qrcode-payment {
             background: white;
             padding: 10px;
@@ -213,6 +211,14 @@
             height: auto;
             display: block;
         }
+
+        /* Styling input disabled/readonly */
+        input[readonly] {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.6);
+            cursor: not-allowed;
+            border-color: rgba(255, 255, 255, 0.05);
+        }
     </style>
 </head>
 <body class="bg-blue-50 text-slate-900">
@@ -231,7 +237,7 @@
         <button onclick="prevImage()" class="absolute left-4 md:left-8 text-white text-4xl z-[210]">
             <i class="fa-solid fa-chevron-left"></i>
         </button>
-        <button onclick="prevImage()" class="absolute right-4 md:right-8 text-white text-4xl z-[210]">
+        <button onclick="nextImage()" class="absolute right-4 md:right-8 text-white text-4xl z-[210]">
             <i class="fa-solid fa-chevron-right"></i>
         </button>
         <div class="relative max-w-5xl w-full flex justify-center items-center">
@@ -447,7 +453,7 @@
                 <form id="rsvp-form" class="space-y-6 text-left fade-down-element">
                     <div class="space-y-2">
                         <label class="block text-xs font-bold text-blue-200 uppercase tracking-widest">Nama Lengkap</label>
-                        <input type="text" name="Nama" required class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-blue-300/30" placeholder="Masukkan nama Anda">
+                        <input type="text" id="rsvp-nama" name="Nama" required class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-blue-300/30" placeholder="Memuat nama tamu...">
                     </div>
                     <div class="grid md:grid-cols-2 gap-6">
                         <div class="space-y-2">
@@ -619,6 +625,57 @@ Kami yang berbahagia</p>
             } catch (err) { console.error("Gagal memuat pengaturan:", err); }
         }
 
+        /**
+         * FUNGSI UNTUK MENGAMBIL NAMA TAMU DARI DATABASE
+         */
+        async function fetchGuestAndLockRSVP() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const to = urlParams.get('to');
+            const rsvpInput = document.getElementById('rsvp-nama');
+            const coverName = document.getElementById('guest-name');
+
+            if (!to) {
+                rsvpInput.value = "";
+                rsvpInput.placeholder = "Masukkan nama Anda";
+                return;
+            }
+
+            // Dekode nama dari URL (misal Siska Risma)
+            const decodedTo = decodeURIComponent(to);
+            
+            // Set sementara sambil fetch
+            rsvpInput.value = decodedTo;
+            coverName.innerText = decodedTo;
+
+            try {
+                // Cari di tabel invitation_list kolom guest_name
+                const { data, error } = await _supabase
+                    .from('invitation_list')
+                    .select('guest_name')
+                    .eq('guest_name', decodedTo)
+                    .single();
+
+                if (data && !error) {
+                    // Jika ketemu, kunci input agar permanen
+                    rsvpInput.value = data.guest_name;
+                    coverName.innerText = data.guest_name;
+                    rsvpInput.readOnly = true;
+                    console.log("Tamu terverifikasi dari database.");
+                } else {
+                    // Jika tidak ketemu di DB, tetap tampilkan nama dari URL tapi jangan di-lock (atau sesuai kebijakan Anda)
+                    rsvpInput.readOnly = false;
+                    rsvpInput.placeholder = "Masukkan nama Anda";
+                }
+                
+                // Generate QR Code tamu
+                generateQRCode(rsvpInput.value);
+
+            } catch (err) {
+                console.error("Gagal validasi tamu:", err);
+                rsvpInput.readOnly = false;
+            }
+        }
+
         function renderGallery() {
             const container = document.getElementById('gallery-container');
             container.innerHTML = '';
@@ -694,11 +751,29 @@ Kami yang berbahagia</p>
             btn.disabled = true;
             txt.innerHTML = '<span class="loading-spinner"></span> Mengirim...';
             const formData = new FormData(e.target);
-            const entry = { Nama: formData.get('Nama'), Jumlah: parseInt(formData.get('Jumlah')), Status: formData.get('Status'), Ucapan: formData.get('Ucapan') };
+            
+            // Nama tetap diambil dari input meskipun readonly
+            const entry = { 
+                Nama: formData.get('Nama'), 
+                Jumlah: parseInt(formData.get('Jumlah')), 
+                Status: formData.get('Status'), 
+                Ucapan: formData.get('Ucapan') 
+            };
+            
             const { error } = await _supabase.from('guestbook').insert([entry]);
-            if (!error) { window.showToast("Terima kasih atas konfirmasinya!"); e.target.reset(); fetchGuestbook(); }
+            if (!error) { 
+                window.showToast("Terima kasih atas konfirmasinya!"); 
+                e.target.reset(); 
+                fetchGuestbook(); 
+                // Restore nama jika readonly
+                const rsvpInput = document.getElementById('rsvp-nama');
+                if(rsvpInput.readOnly) {
+                   const to = new URLSearchParams(window.location.search).get('to');
+                   if(to) rsvpInput.value = decodeURIComponent(to);
+                }
+            }
             btn.disabled = false;
-            txt.innerText = "Konfirmasi Kehadiran";
+            txt.innerText = "Kirim Ucapan";
         });
 
         function openInvitation() {
@@ -797,16 +872,8 @@ Kami yang berbahagia</p>
             if (!container) return;
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(qrisString)}`;
             container.innerHTML = `<img id="qris-img" src="${qrUrl}" alt="Barcode QRIS" class="mx-auto" crossorigin="anonymous">`;
-            const img = document.getElementById('qris-img');
-            img.onload = () => { console.log("QRIS Barcode dimuat."); };
-            img.onerror = () => { container.innerHTML = '<p class="text-xs text-red-500">Gagal memuat barcode.</p>'; };
         }
 
-        /**
-         * FUNGSI UNDUH QR TERBARU
-         * Membuat canvas yang menggabungkan Logo QRIS, Kode QR, dan Teks instruksi
-         * agar hasilnya persis seperti gambar yang Anda unggah.
-         */
         function downloadQR() {
             const qrImg = document.getElementById('qris-img');
             if (!qrImg || !qrImg.src) {
@@ -816,7 +883,6 @@ Kami yang berbahagia</p>
 
             window.showToast("Menyiapkan unduhan...");
 
-            // Konfigurasi Canvas (Ukuran hasil unduhan)
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             const w = 600;
@@ -824,22 +890,18 @@ Kami yang berbahagia</p>
             canvas.width = w;
             canvas.height = h;
 
-            // 1. Gambar Latar Belakang Putih
             ctx.fillStyle = "#FFFFFF";
             ctx.fillRect(0, 0, w, h);
 
-            // 2. Muat Logo QRIS (Bagian Atas)
             const logoQRIS = new Image();
             logoQRIS.crossOrigin = "anonymous";
             logoQRIS.src = "https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_QRIS.svg";
 
             logoQRIS.onload = function() {
-                // Gambar Logo (Tengah Atas)
                 const logoW = 120;
                 const logoH = 40;
                 ctx.drawImage(logoQRIS, (w - logoW) / 2, 40, logoW, logoH);
 
-                // 3. Muat & Gambar Kode QR (Bagian Tengah)
                 const tempQR = new Image();
                 tempQR.crossOrigin = "anonymous";
                 tempQR.src = qrImg.src;
@@ -848,14 +910,12 @@ Kami yang berbahagia</p>
                     const qrSize = 480;
                     ctx.drawImage(tempQR, (w - qrSize) / 2, 100, qrSize, qrSize);
 
-                    // 4. Gambar Teks (Bagian Bawah)
-                    ctx.fillStyle = "#475569"; // Warna text slate-600
+                    ctx.fillStyle = "#475569";
                     ctx.font = "bold 20px Montserrat, sans-serif";
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
                     ctx.fillText("SCAN QRIS UNTUK KIRIM HADIAH", w / 2, h - 70);
 
-                    // 5. Eksekusi Unduh
                     const link = document.createElement('a');
                     link.href = canvas.toDataURL("image/png");
                     link.download = 'QRIS-Pembayaran.png';
@@ -863,34 +923,14 @@ Kami yang berbahagia</p>
                     window.showToast("Berhasil diunduh!");
                 };
             };
-            
-            logoQRIS.onerror = function() {
-                // Jika logo gagal muat, tetap unduh QR saja
-                const tempQR = new Image();
-                tempQR.crossOrigin = "anonymous";
-                tempQR.src = qrImg.src;
-                tempQR.onload = function() {
-                    ctx.drawImage(tempQR, 50, 100, 500, 500);
-                    const link = document.createElement('a');
-                    link.href = canvas.toDataURL("image/png");
-                    link.download = 'QRIS-Pembayaran.png';
-                    link.click();
-                };
-            };
         }
 
         window.addEventListener('DOMContentLoaded', () => {
             fetchSettings();
             fetchGuestbook();
-            generateQRIS();
-            const p = new URLSearchParams(window.location.search);
-            const to = p.get('to');
-            if (to) {
-                document.getElementById('guest-name').innerText = to;
-                generateQRCode(to);
-            }
+            // Inisialisasi pengecekan tamu dari database
+            fetchGuestAndLockRSVP();
         });
     </script>
 </body>
 </html>
-
