@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-	<link href="img/setting.png" rel="icon">
+    <link href="img/setting.png" rel="icon">
     <title>Wedding Admin - Ami & Ade</title>
+    
+    <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js"></script>
+
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -27,9 +31,30 @@
             }
         }
     </script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:wght@300;700&display=swap');
         
+        @property --primary-light-angle { syntax: "<angle>"; inherits: false; initial-value: -75deg; }
+        @property --dark-edge-angle { syntax: "<angle>"; inherits: false; initial-value: 105deg; }
+
+        :root {
+            --minute-marker-opacity: 1;
+            --inner-shadow-opacity: 1;
+            --outer-shadow-opacity: 1;
+            --reflection-opacity: 0.5;
+            --glossy-opacity: 0.3;
+            --hour-number-opacity: 1;
+            --hour-number-color: rgba(50, 50, 50, 0.9);
+            --minute-marker-color: rgba(80, 80, 80, 0.5);
+            --hand-color: rgba(50, 50, 50, 0.9);
+            --second-hand-color: rgba(255, 107, 0, 1);
+            --shadow-layer1-opacity: 0.1;
+            --shadow-layer2-opacity: 0.1;
+            --shadow-layer3-opacity: 0.1;
+        }
+
         * { -webkit-tap-highlight-color: transparent; }
         
         body { 
@@ -37,15 +62,86 @@
             transition: background-color 0.3s ease; 
             overflow: hidden;
             width: 100%;
+            height: 100dvh;
+            margin: 0;
+            padding: 0;
         }
 
-        /* Sidebar POS Style */
-        #sidebar { 
-            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), left 0.3s ease;
-            z-index: 1000;
+        /* --- ANIME LOGIN STYLE --- */
+        #login-wrapper {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: url('https://images8.alphacoders.com/980/thumb-1920-980830.png') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Open Sans Condensed', "Inter", sans-serif;
         }
-        .nav-label { transition: opacity 0.2s ease; white-space: nowrap; }
+
+        .glass-clock-container { position: relative; width: 350px; height: 350px; display: flex; justify-content: center; align-items: center; z-index: 2; }
+        .glass-effect-wrapper { position: relative; z-index: 2; border-radius: 50%; background: transparent; pointer-events: none; transition: all 400ms cubic-bezier(0.25, 1, 0.5, 1); perspective: 1000px; transform-style: preserve-3d; }
+        .glass-effect-shadow { --shadow-offset: 3em; position: absolute; width: calc(100% + var(--shadow-offset)); height: calc(100% + var(--shadow-offset)); top: calc(0% - var(--shadow-offset) / 2); left: calc(0% - var(--shadow-offset) / 2); filter: blur(10px); pointer-events: none; z-index: 1; transition: all 400ms cubic-bezier(0.25, 1, 0.5, 1); opacity: 1; }
+        .glass-effect-shadow::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: linear-gradient(180deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2)); width: calc(100% - var(--shadow-offset) - 0.25em); height: calc(100% - var(--shadow-offset) - 0.25em); top: calc(var(--shadow-offset) - 0.5em); left: calc(var(--shadow-offset) - 0.875em); padding: 0.125em; box-sizing: border-box; mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude; -webkit-mask-composite: xor; overflow: visible; opacity: 0.8; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 0 15px 25px rgba(0, 0, 0, 0.05), 0 20px 40px rgba(0, 0, 0, 0.05); }
+        .glass-clock-face { --border-width: clamp(2px, 0.0625em, 4px); position: relative; width: 350px; height: 350px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.03); background-image: linear-gradient(-75deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)); backdrop-filter: blur(1px); box-shadow: inset 0 0.4em 0.4em rgba(0, 0, 0, 0.1), inset 0 -0.4em 0.4em rgba(255, 255, 255, 0.5), 10px 5px 10px rgba(0, 0, 0, var(--shadow-layer1-opacity)), 10px 20px 20px rgba(0, 0, 0, var(--shadow-layer2-opacity)), 10px 55px 50px rgba(0, 0, 0, var(--shadow-layer3-opacity)); z-index: 3; overflow: hidden; pointer-events: auto; cursor: pointer; transition: all 400ms cubic-bezier(0.25, 1, 0.5, 1); user-select: none; transform-style: preserve-3d; }
+        .glass-clock-face:hover { box-shadow: inset 0 0.4em 0.4em rgba(0, 0, 0, 0.1), inset 0 -0.4em 0.4em rgba(255, 255, 255, 0.6), 10px 5px 15px rgba(0, 0, 0, calc(var(--shadow-layer1-opacity) + 0.1)), 10px 20px 30px rgba(0, 0, 0, calc(var(--shadow-layer2-opacity) + 0.1)), 10px 55px 60px rgba(0, 0, 0, calc(var(--shadow-layer3-opacity) + 0.1)); }
+        .glass-clock-face::after { content: ""; position: absolute; z-index: 10; inset: 0; border-radius: 50%; width: calc(100% + var(--border-width)); height: calc(100% + var(--border-width)); top: calc(0% - var(--border-width) / 2); left: calc(0% - var(--border-width) / 2); padding: var(--border-width); box-sizing: border-box; background: conic-gradient(from var(--primary-light-angle) at 50% 50%, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.2) 5% 40%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0.2) 60% 95%, rgba(255, 255, 255, 1)), linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.5)); mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude; -webkit-mask-composite: xor; box-shadow: inset 0 0 0 calc(var(--border-width) / 2) rgba(255, 255, 255, 0.9), 0 0 12px rgba(255, 255, 255, 0.8); transition: all 400ms cubic-bezier(0.25, 1, 0.5, 1), --primary-light-angle 500ms ease; opacity: 0.9; }
+        .glass-edge-highlight { position: absolute; width: 350px; height: 350px; border-radius: 50%; top: 0; left: 0; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); z-index: 8; pointer-events: none; opacity: 0.6; }
+        .glass-edge-shadow { position: absolute; width: 350px; height: 350px; border-radius: 50%; top: 0; left: 0; box-shadow: inset -5px 5px 15px rgba(0, 0, 0, 0.3), inset -8px 8px 20px rgba(0, 0, 0, 0.2); z-index: 7; pointer-events: none; opacity: var(--inner-shadow-opacity); }
+        .glass-dark-edge { position: absolute; z-index: 9; inset: 0; border-radius: 50%; width: calc(100% + var(--border-width)); height: calc(100% + var(--border-width)); top: calc(0% - var(--border-width) / 2); left: calc(0% - var(--border-width) / 2); padding: var(--border-width); box-sizing: border-box; background: conic-gradient(from var(--dark-edge-angle) at 50% 50%, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0) 5% 40%, rgba(0, 0, 0, 0.5) 50%, rgba(0, 0, 0, 0) 60% 95%, rgba(0, 0, 0, 0.5)); mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude; -webkit-mask-composite: xor; transition: all 400ms cubic-bezier(0.25, 1, 0.5, 1), --dark-edge-angle 500ms ease; box-shadow: inset 0 0 0 calc(var(--border-width) / 2) rgba(0, 0, 0, 0.2); opacity: var(--inner-shadow-opacity); }
+        .glass-glossy-overlay { position: absolute; width: 350px; height: 350px; border-radius: 50%; top: 0; left: 0; background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 15%, rgba(255, 255, 255, 0.5) 25%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0.2) 75%, rgba(255, 255, 255, 0.1) 100%); pointer-events: none; z-index: 6; mix-blend-mode: overlay; opacity: var(--glossy-opacity); filter: blur(10px); }
+        .glass-reflection-overlay { position: absolute; width: 330px; height: 330px; border-radius: 50%; top: 10px; left: 10px; background: radial-gradient(ellipse at 30% 30%, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.3) 30%, rgba(255, 255, 255, 0.1) 60%, transparent 100%); pointer-events: none; z-index: 15; mix-blend-mode: overlay; opacity: 0.7; transform: rotate(-15deg); filter: blur(10px); }
+        .glass-reflection { position: absolute; width: 350px; height: 175px; top: 0; left: 0; background: linear-gradient(to bottom, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.4) 40%, rgba(255, 255, 255, 0) 100%); border-radius: 175px 175px 0 0; pointer-events: none; z-index: 10; mix-blend-mode: soft-light; opacity: var(--reflection-opacity); filter: blur(10px); }
+        .glass-effect-wrapper:hover .glass-effect-shadow { opacity: 0.9; }
+        .glass-effect-wrapper:hover .glass-effect-shadow::after { opacity: 0.85; }
+        .glass-effect-wrapper:hover .glass-reflection-overlay { opacity: 0.8; }
+        .glass-effect-wrapper:active { transform: scale3d(0.97, 0.97, 1); }
+        .glass-effect-wrapper:active .glass-clock-face { box-shadow: inset 0 0.4em 0.4em rgba(0, 0, 0, 0.1), inset 0 -0.4em 0.4em rgba(255, 255, 255, 0.4), 0 5px 20px rgba(0, 0, 0, 0.1), 0 10px 30px rgba(0, 0, 0, 0.1), 0 15px 40px rgba(0, 0, 0, 0.1); }
+        .glass-effect-wrapper:active .glass-clock-face::after { --primary-light-angle: -75deg; }
         
+        .clock-center-blur { position: absolute; width: 36px; height: 36px; top: 157px; left: 157px; background-color: rgba(255, 255, 255, 0.35); border-radius: 50%; backdrop-filter: blur(4px); z-index: 16; pointer-events: none; box-shadow: 0 0 20px rgba(255, 255, 255, 0.4), inset 0 0 8px rgba(255, 255, 255, 0.6); }
+        .clock-hour-marks { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 14; }
+        .minute-marker { position: absolute; width: 1px; height: 10px; background-color: var(--minute-marker-color); top: 10px; left: 175px; transform-origin: center 165px; box-shadow: 0 0 2px rgba(255, 255, 255, 0.3); opacity: var(--minute-marker-opacity); }
+        .clock-number { position: absolute; font-size: 16px; font-weight: 500; color: var(--hour-number-color); text-align: center; width: 30px; height: 20px; line-height: 20px; text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5); z-index: 15; opacity: var(--hour-number-opacity); transition: opacity 0.3s ease; pointer-events: none; }
+        .clock-date, .clock-timezone { position: absolute; font-size: 12px; font-weight: 400; color: rgba(255, 255, 255, 0.9); text-align: center; width: 140px; height: auto; line-height: 1; left: 105px; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8); z-index: 15; pointer-events: none; }
+        .clock-date { bottom: 115px; } .clock-timezone { bottom: 100px; }
+        .clock-hand { position: absolute; transform-origin: center bottom; bottom: 175px; left: 175px; z-index: 15; pointer-events: none; }
+        .hour-hand { width: 6px; height: 70px; background-color: var(--hand-color); margin-left: -3px; border-radius: 3px; box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); }
+        .minute-hand { width: 4px; height: 100px; background-color: var(--hand-color); margin-left: -2px; border-radius: 2px; box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); }
+        .clock-center-dot { position: absolute; width: 12px; height: 12px; background: var(--second-hand-color); border-radius: 50%; top: 169px; left: 169px; z-index: 17; box-shadow: 0 0 8px rgba(255, 107, 0, 0.4); pointer-events: none; }
+        .second-hand-container { position: absolute; width: 2px; height: 120px; top: 55px; left: 174px; transform-origin: 1px 120px; z-index: 17; pointer-events: none; }
+        .second-hand { position: absolute; width: 2px; height: 120px; background-color: var(--second-hand-color); bottom: 0; left: 0; box-shadow: 0 0 5px rgba(255, 107, 0, 0.5); }
+        .second-hand-counterweight { position: absolute; width: 6px; height: 14px; background-color: var(--second-hand-color); bottom: -14px; left: -2px; border-radius: 0 0 4px 4px; box-shadow: 0 0 5px rgba(255, 107, 0, 0.5); }
+
+        #container, #forgotten-container {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; margin: auto;
+            width: 320px; border-radius: 12px; background: rgba(10, 10, 10, 0.75);
+            box-shadow: 0px 10px 40px rgba(0,0,0,0.8); display: none; z-index: 50;
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        #container { height: 350px; padding: 20px; }
+        #forgotten-container { height: 220px; padding: 20px; }
+        .close-btn { position: absolute; cursor: pointer; top: 15px; right: 15px; width: 24px; height: 24px; opacity: .5; transition: all 0.2s ease-in-out; }
+        .close-btn:hover { opacity: 1; transform: scale(1.1); }
+        #container h1, #forgotten-container h1 { margin-top: 10px; margin-bottom: 20px; text-align: center; font-size: 28px; color: #fff; text-shadow: 2px 2px 5px rgba(0,0,0,0.5); font-weight: bold; }
+        #container input, #forgotten-container input { width: 100%; display: block; margin: 15px 0; font-size: 15px; color: #fff; padding: 12px 15px; border-radius: 6px; border: none; background: rgba(255, 255, 255, 0.1); box-sizing: border-box; transition: all 0.2s ease-in-out; font-family: 'Inter', sans-serif; }
+        #container input:focus, #forgotten-container input:focus { outline: none; box-shadow: 0 0 10px rgba(107, 255, 3, 0.3); background: rgba(255, 255, 255, 0.2); }
+        .login-submit-btn { width: 100%; display: block; margin: 20px 0 10px; padding: 12px; font-size: 16px; color: #fff; background: rgba(107, 255, 3, 0.5); border: none; border-radius: 6px; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: all 0.2s ease-in-out; font-family: 'Open Sans Condensed', sans-serif; text-transform: uppercase; }
+        .login-submit-btn:hover { background: rgba(107, 255, 3, 0.8); transform: translateY(-2px); }
+        .login-submit-btn:disabled { background: rgba(255, 255, 255, 0.2); cursor: not-allowed; transform: none; }
+        #remember-container { margin-top: 15px; display: flex; justify-content: space-between; align-items: center; }
+        #remember-container .checkbox { cursor: pointer; appearance: none; padding: 5px; border-radius: 4px; background: rgba(255, 255, 255, 0.2); width: 16px; height: 16px; margin: 0; vertical-align: middle; position: relative; }
+        #remember-container .checkbox:checked { background: rgba(107, 255, 3, 0.6); }
+        #remember-container .checkbox:checked:after { content: '\2714'; font-size: 11px; position: absolute; top: 0px; left: 3px; color: #fff; }
+        #remember { font-size: 13px; color: rgba(255,255,255,.8); margin-left: 5px; font-family: 'Inter', sans-serif;}
+        #forgotten { font-size: 13px; color: rgba(255,255,255,.6); cursor: pointer; transition: all 0.2s ease-in-out; font-family: 'Inter', sans-serif;}
+        #forgotten:hover { color: rgba(255,255,255,1); text-decoration: underline; }
+
+        /* --- ADMIN STYLE --- */
+        #sidebar { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), left 0.3s ease; z-index: 1000; }
+        .nav-label { transition: opacity 0.2s ease; white-space: nowrap; }
         @media (min-width: 1024px) {
             .collapsed { width: 80px !important; }
             .collapsed .nav-label { display: none; opacity: 0; }
@@ -54,98 +150,96 @@
             .collapsed #sidebar-header { justify-content: center; }
             #sidebar-overlay { display: none !important; }
         }
-
         @media (max-width: 1023px) {
-            #sidebar {
-                position: fixed;
-                height: 100dvh;
-                left: -100%;
-                width: 280px !important;
-            }
-            #sidebar.mobile-open {
-                left: 0;
-            }
-            #sidebar-overlay {
-                display: none;
-                z-index: 900;
-                position: fixed;
-                inset: 0;
-                background: rgba(15, 23, 42, 0.6);
-                backdrop-filter: blur(4px);
-            }
-            #sidebar-overlay.mobile-open {
-                display: block;
-            }
+            #sidebar { position: fixed; height: 100dvh; left: -100%; width: 280px !important; }
+            #sidebar.mobile-open { left: 0; }
+            #sidebar-overlay { display: none; z-index: 900; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
+            #sidebar-overlay.mobile-open { display: block; }
         }
-
-        .wa-preview-container {
-            background-color: #e5ddd5;
-            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            background-blend-mode: overlay;
-        }
+        .wa-preview-container { background-color: #e5ddd5; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-blend-mode: overlay; }
         .dark .wa-preview-container { background-color: #0b141a; filter: brightness(0.8); }
-        .wa-chat-bubble {
-            background: #ffffff; color: #111b21; padding: 12px 15px; border-radius: 8px 8px 8px 0;
-            font-size: 0.85rem; line-height: 1.5; position: relative; box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
-            white-space: pre-wrap;
-        }
+        .wa-chat-bubble { background: #ffffff; color: #111b21; padding: 12px 15px; border-radius: 8px 8px 8px 0; font-size: 0.85rem; line-height: 1.5; position: relative; box-shadow: 0 1px 0.5px rgba(0,0,0,0.13); white-space: pre-wrap; }
         .dark .wa-chat-bubble { background: #202c33; color: #e9edef; }
-
-        .phone-frame {
-            width: 100%; max-width: 360px; height: 640px; border: 12px solid #1e293b; border-radius: 32px;
-            overflow: hidden; position: relative; background: white; margin: 0 auto;
-        }
-
+        .phone-frame { width: 100%; max-width: 360px; height: 640px; border: 12px solid #1e293b; border-radius: 32px; overflow: hidden; position: relative; background: white; margin: 0 auto; }
         #reader { width: 100% !important; border: none !important; border-radius: 1.5rem; overflow: hidden; }
         #reader__scan_region { background: #000 !important; }
-        
         .page-content { display: none; }
         .page-active { display: block; }
-        
         .bank-dropdown-list { display: none; position: absolute; width: 100%; z-index: 50; top: 100%; left: 0; margin-top: 5px; max-height: 250px; overflow-y: auto; border: 1px solid rgba(0,0,0,0.1); }
         .bank-dropdown-list.show { display: block; }
-
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 h-[100dvh] w-screen overflow-hidden">
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
 
-    <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div id="login-wrapper">
+        <svg style="position: absolute; width: 100%; height: 100%; z-index: 0; pointer-events: none;" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <pattern id="dottedGrid" width="30" height="30" patternUnits="userSpaceOnUse">
+                    <circle cx="2" cy="2" r="1" fill="rgba(0,0,0,0.3)" />
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#dottedGrid)" />
+        </svg>
 
-    <!-- LOGIN SCREEN -->
-    <div id="login-screen" class="fixed inset-0 bg-indigo-950 z-[2000] flex items-center justify-center p-6 overflow-y-auto">
-        <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] w-full max-w-md p-10 shadow-2xl">
-            <div class="text-center mb-8">
-                <div class="bg-indigo-100 dark:bg-indigo-900/30 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 text-indigo-600">
-                    <i data-lucide="shield-check" class="w-10 h-10"></i>
+        <div class="glass-clock-container">
+            <div class="glass-effect-wrapper">
+                <div class="glass-effect-shadow" style="opacity: var(--outer-shadow-opacity);"></div>
+                <div class="glass-clock-face" id="clock-trigger">
+                    <div class="glass-glossy-overlay" id="glass-glossy-overlay"></div>
+                    <div class="glass-edge-highlight"></div>
+                    <div class="glass-edge-shadow"></div>
+                    <div class="glass-dark-edge"></div>
+                    <div class="glass-reflection"></div>
+                    <div class="glass-reflection-overlay" id="glass-reflection-overlay"></div>
+                    <div class="clock-hour-marks" id="clock-hour-marks"></div>
+                    <div class="hour-hand clock-hand" id="hour-hand"></div>
+                    <div class="minute-hand clock-hand" id="minute-hand"></div>
+                    <div class="second-hand-container" id="second-hand-container">
+                        <div class="second-hand"></div>
+                        <div class="second-hand-counterweight"></div>
+                    </div>
+                    <div class="clock-center-dot"></div>
+                    <div class="clock-center-blur"></div>
+                    <div class="clock-date" id="clock-date"></div>
+                    <div class="clock-timezone" id="clock-timezone">Admin Dashboard</div>
                 </div>
-                <h2 class="text-2xl font-black text-slate-800 dark:text-white tracking-tighter uppercase">Admin Login</h2>
-                <p class="text-slate-400 dark:text-slate-500 text-sm mt-1 font-medium">Dashboard Pernikahan Ami & Ade</p>
             </div>
-            
-            <form id="login-form" class="space-y-4" onsubmit="handleLogin(event)">
-                <div class="space-y-1 text-left">
-                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email</label>
-                    <input type="email" id="login-email" required class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition text-sm" placeholder="admin@wedding.com">
+        </div>
+
+        <div id="container">
+            <h1>Login Admin</h1>
+            <span class="close-btn"><i data-lucide="x-circle" class="text-white w-6 h-6"></i></span>
+            <form onsubmit="handleLogin(event)">
+                <input type="email" id="login-email" required placeholder="Alamat E-mail">
+                <input type="password" id="login-password" required placeholder="Kata Sandi">
+                <button type="submit" id="btn-login" class="login-submit-btn">Masuk Sistem</button>
+                <div id="remember-container">
+                    <div>
+                        <input type="checkbox" id="checkbox-2-1" class="checkbox" checked="checked"/>
+                        <span id="remember">Ingat saya</span>
+                    </div>
+                    <span id="forgotten">Lupa sandi?</span>
                 </div>
-                <div class="space-y-1 text-left">
-                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Password</label>
-                    <input type="password" id="login-password" required class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition text-sm" placeholder="••••••••">
-                </div>
-                <button type="submit" id="btn-login" class="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl hover:bg-indigo-700 transition active:scale-95 shadow-lg shadow-indigo-200 uppercase tracking-widest text-xs mt-4">
-                    Masuk
-                </button>
+            </form>
+        </div>
+
+        <div id="forgotten-container">
+            <h1>Pemulihan</h1>
+            <span class="close-btn"><i data-lucide="x-circle" class="text-white w-6 h-6"></i></span>
+            <form>
+                <input type="email" placeholder="E-mail Terdaftar">
+                <button type="button" onclick="showToast('Fitur ini sedang dalam pengembangan.', 'warning')" class="login-submit-btn" style="background: rgba(87,198,255,.6);">Kirim Reset</button>
             </form>
         </div>
     </div>
 
-    <!-- MAIN APP STRUCTURE -->
+    <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
     <div id="main-app" class="flex h-[100dvh] w-screen hidden overflow-hidden">
         
-        <!-- SIDEBAR -->
         <aside id="sidebar" class="w-64 bg-indigo-950 text-white flex-shrink-0 flex flex-col h-full border-r border-indigo-900 shadow-2xl overflow-hidden">
             <div id="sidebar-header" class="p-6 flex items-center gap-4 overflow-hidden shrink-0">
                 <div class="bg-white p-1 rounded-2xl text-indigo-900 flex-shrink-0 w-12 h-12 flex items-center justify-center overflow-hidden shadow-xl border-4 border-indigo-500/20">
@@ -197,7 +291,6 @@
             </div>
         </aside>
 
-        <!-- CONTENT AREA -->
         <main class="flex-grow flex flex-col min-w-0 min-h-0 overflow-hidden relative h-full">
             <header class="h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 md:px-8 shrink-0 z-30 shadow-sm">
                 <div class="flex items-center gap-3">
@@ -250,7 +343,7 @@
                                 <thead>
                                     <tr class="bg-slate-50/50 dark:bg-slate-900/50 text-slate-400 uppercase text-[9px] font-black tracking-widest">
                                         <th class="px-8 py-5 w-16">No</th>
-                                        <th onclick="toggleSort('rsvp', 'Nama')" class="px-8 py-5 cursor-pointer hover:text-blue-500 transition-colors text-left">Nama <i id="sort-rsvp-Nama" class="fa-solid fa-sort ml-1 opacity-30"></i></th>
+                                        <th onclick="toggleSort('rsvp', 'Nama')" class="px-8 py-5 cursor-pointer hover:text-blue-500 transition-colors text-left">Nama</th>
                                         <th onclick="toggleSort('rsvp', 'Status')" class="px-8 py-5 text-center cursor-pointer hover:text-blue-500 transition-colors">Status</th>
                                         <th onclick="toggleSort('rsvp', 'Jumlah')" class="px-8 py-5 text-center cursor-pointer hover:text-blue-500 transition-colors">Jml</th>
                                         <th class="px-8 py-5 border-b dark:border-slate-700 text-left">Ucapan</th>
@@ -310,11 +403,9 @@
                                 <button id="stop-scan-btn" onclick="stopScanner()" class="flex-1 bg-red-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hidden shadow-xl active:scale-95 transition flex items-center justify-center gap-2 text-center"><i data-lucide="x-circle" class="w-4 h-4"></i> Tutup</button>
                             </div>
                         </div>
-
                         <div id="scanner-section" class="bg-slate-900 p-10 flex justify-center hidden shadow-inner">
                             <div id="reader" class="max-w-md w-full border-4 border-white dark:border-slate-700 rounded-3xl overflow-hidden shadow-2xl"></div>
                         </div>
-
                         <div class="p-8 border-b border-slate-100 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4">
                             <input type="text" id="search-scan" oninput="filterScan()" placeholder="Cari nama tamu..." class="w-full md:w-72 px-6 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
                             <div class="flex gap-2 w-full md:w-auto">
@@ -327,10 +418,10 @@
                                 <thead class="bg-slate-50/50 dark:bg-slate-900/50 text-slate-400 uppercase text-[9px] font-black tracking-widest">
                                     <tr>
                                         <th class="px-8 py-5 w-16">No</th>
-                                        <th onclick="toggleSort('scan', 'guest_name')" class="px-8 py-5 cursor-pointer hover:text-blue-500 transition-colors text-left uppercase">Nama Tamu <i id="sort-scan-guest_name" class="fa-solid fa-sort ml-1 opacity-30"></i></th>
-                                        <th onclick="toggleSort('scan', 'created_at')" class="px-8 py-5 text-center cursor-pointer hover:text-blue-500 transition-colors uppercase">Tgl Buat <i id="sort-scan-created_at" class="fa-solid fa-sort ml-1 opacity-30"></i></th>
-                                        <th onclick="toggleSort('scan', 'scanned_at')" class="px-8 py-5 text-center cursor-pointer hover:text-blue-500 transition-colors uppercase">Tgl Scan <i id="sort-scan-scanned_at" class="fa-solid fa-sort ml-1 opacity-30"></i></th>
-                                        <th onclick="toggleSort('scan', 'is_scanned')" class="px-8 py-5 text-center cursor-pointer hover:text-blue-500 transition-colors uppercase">Status <i id="sort-scan-is_scanned" class="fa-solid fa-sort ml-1 opacity-30"></i></th>
+                                        <th onclick="toggleSort('scan', 'guest_name')" class="px-8 py-5 cursor-pointer hover:text-blue-500 transition-colors text-left uppercase">Nama Tamu</th>
+                                        <th onclick="toggleSort('scan', 'created_at')" class="px-8 py-5 text-center cursor-pointer hover:text-blue-500 transition-colors uppercase">Tgl Buat</th>
+                                        <th onclick="toggleSort('scan', 'scanned_at')" class="px-8 py-5 text-center cursor-pointer hover:text-blue-500 transition-colors uppercase">Tgl Scan</th>
+                                        <th onclick="toggleSort('scan', 'is_scanned')" class="px-8 py-5 text-center cursor-pointer hover:text-blue-500 transition-colors uppercase">Status</th>
                                         <th class="px-8 py-5 text-center uppercase">Aksi</th>
                                     </tr>
                                 </thead>
@@ -369,13 +460,10 @@
                             <button onclick="fillSQL('invitation_list')" class="px-5 py-3 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase whitespace-nowrap hover:bg-indigo-700 transition-all shadow-lg">Invitation Table</button>
                         </div>
                         <textarea id="sql-input" rows="12" class="w-full p-8 font-mono text-xs bg-slate-900 text-green-400 rounded-[2rem] border border-slate-700 outline-none focus:ring-2 focus:ring-blue-500 shadow-inner" placeholder="-- SQL script..."></textarea>
-                        <div id="sql-output" class="mt-6 p-6 font-mono text-[10px] bg-black text-slate-400 rounded-[1.5rem] border border-slate-800 h-32 overflow-auto shadow-inner text-left">
-                            > Console dashboard siap menerima perintah...
-                        </div>
                     </div>
                 </div>
 
-                <!-- PAGE: SETTINGS -->
+                <!-- PAGE: SETTINGS (Full Restored) -->
                 <div id="page-settings" class="page-content space-y-10 text-left max-w-4xl mx-auto pb-24">
                     <div class="bg-white dark:bg-slate-800 rounded-[3rem] shadow-sm border border-slate-100 dark:border-slate-700 p-10 transition-colors">
                         <div class="flex items-center gap-4 mb-10">
@@ -385,7 +473,6 @@
                                 <p class="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase">Mempelai, Lokasi & Media</p>
                             </div>
                         </div>
-                        
                         <form id="settings-form" class="space-y-12">
                             <!-- Mempelai Wanita -->
                             <div class="bg-slate-50 dark:bg-slate-900/50 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm space-y-6">
@@ -505,22 +592,17 @@
         </main>
     </div>
 
-    <!-- MODAL HASIL SCAN -->
-    <div id="modal-result" class="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md hidden">
+    <!-- RESULT MODAL -->
+    <div id="modal-result" class="fixed inset-0 z-[2500] flex items-end sm:items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md hidden">
         <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] p-10 shadow-2xl transform transition-all translate-y-full opacity-0" id="modal-result-content">
-            <div id="modal-icon" class="w-24 h-24 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-full mx-auto flex items-center justify-center text-4xl mb-8 shadow-inner">
-                <i data-lucide="check" class="w-12 h-12"></i>
-            </div>
-            <h2 class="text-center text-2xl font-black mb-3 dark:text-white text-center w-full" id="modal-result-title">Berhasil!</h2>
-            <div class="text-center text-slate-500 dark:text-slate-400 mb-10 text-lg font-medium leading-relaxed" id="modal-result-body">
-                Selamat datang, <br>
-                <span class="font-black text-slate-900 dark:text-white" id="guest-name-result">Nama Tamu</span>
-            </div>
+            <div id="modal-icon" class="w-24 h-24 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-full mx-auto flex items-center justify-center text-4xl mb-8 shadow-inner"></div>
+            <h2 class="text-center text-2xl font-black mb-3 dark:text-white text-center w-full" id="modal-result-title">Pesan</h2>
+            <div class="text-center text-slate-500 dark:text-slate-400 mb-10 text-lg font-medium leading-relaxed" id="modal-result-body"></div>
             <button onclick="closeResultModal()" class="w-full bg-slate-900 dark:bg-white dark:text-slate-900 text-white py-5 rounded-3xl font-black text-sm active:scale-95 transition-all shadow-xl uppercase tracking-widest">Tutup</button>
         </div>
     </div>
 
-    <!-- RSVP EDIT MODAL -->
+    <!-- CRUD RSVP MODAL -->
     <div id="crud-modal" class="fixed inset-0 bg-slate-950/70 hidden z-[1500] flex items-center justify-center p-4 backdrop-blur-md">
         <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-[2.5rem] p-10 shadow-2xl transition-all scale-95 opacity-0" id="crud-modal-content">
             <h3 class="text-xl font-black mb-8 text-center dark:text-white tracking-tighter uppercase">Ubah Data RSVP</h3>
@@ -560,7 +642,7 @@
         const supabaseKey = 'sb_publishable_sdf_MeOzRGvsGACogsDBLg_sDMgZOeW';
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-        const authSection = document.getElementById('login-screen');
+        const loginWrapper = document.getElementById('login-wrapper');
         const mainApp = document.getElementById('main-app');
         
         let rawData = [];
@@ -581,52 +663,67 @@
             { name: 'OVO', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/eb/Logo_ovo_purple.svg' }
         ];
 
-        // --- AUTH ---
+        // --- AUTH & INITIALIZATION ---
         async function checkSession() {
             const { data: { session } } = await _supabase.auth.getSession();
-            if (session) showAdmin(); else showLogin();
+            if (session) {
+                showAdmin();
+            } else {
+                showLogin();
+            }
         }
 
         function showLogin() { 
-            authSection.style.display = 'flex'; mainApp.style.display = 'none'; 
+            loginWrapper.style.display = 'flex'; 
+            mainApp.style.display = 'none'; 
         }
 
         function showAdmin() { 
-            authSection.style.display = 'none'; mainApp.style.display = 'flex'; 
-            fetchData(); fetchInvitationList(); fetchSettings(); 
+            loginWrapper.style.display = 'none'; 
+            mainApp.style.display = 'flex'; 
+            fetchData(); 
+            fetchInvitationList();
+            fetchSettings();
         }
 
-        async function handleLogin(event) {
+        window.handleLogin = async (event) => {
             event.preventDefault();
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
             const btn = document.getElementById('btn-login');
-            btn.innerText = "VERIFIKASI..."; btn.disabled = true;
+            btn.innerText = "Memverifikasi..."; btn.disabled = true;
+            
             const { error } = await _supabase.auth.signInWithPassword({ email, password });
-            if (error) { alert("Login gagal: " + error.message); btn.innerText = "Masuk Dashboard"; btn.disabled = false; } 
-            else showAdmin();
-        }
+            
+            if (error) { 
+                showToast("Login gagal: " + error.message, 'error'); 
+                btn.innerText = "Masuk Sistem"; 
+                btn.disabled = false; 
+            } else {
+                // Sembunyikan form login dengan GSAP lalu tunjukkan admin
+                TweenMax.to("#container", 0.4, { 
+                    scale: 0, opacity: 0, ease: Sine.easeInOut, 
+                    onComplete: () => {
+                        $("#container").hide();
+                        showAdmin();
+                    } 
+                });
+            }
+        };
 
         async function handleLogout() { 
             await _supabase.auth.signOut(); 
             window.location.reload(); 
         }
 
-        // --- NAVIGATION & SIDEBAR ---
+        // --- UI & THEME LOGIC ---
         function toggleSidebar() {
             const sb = document.getElementById('sidebar');
             const ov = document.getElementById('sidebar-overlay');
             if (window.innerWidth < 1024) {
                 sb.classList.toggle('mobile-open');
                 ov.classList.toggle('mobile-open');
-                document.body.style.overflow = sb.classList.contains('mobile-open') ? 'hidden' : 'auto';
-            } else {
-                sb.classList.toggle('collapsed');
-            }
-        }
-
-        function toggleSidebarMini() {
-            document.getElementById('sidebar').classList.toggle('collapsed');
+            } else { sb.classList.toggle('collapsed'); }
         }
 
         function changePage(page) {
@@ -634,17 +731,8 @@
             pages.forEach(p => {
                 const el = document.getElementById(`page-${p}`);
                 const nav = document.getElementById(`nav-${p}`);
-                if(el) {
-                    if (p === page) el.classList.add('page-active');
-                    else el.classList.remove('page-active');
-                }
-                if(nav) {
-                    if (p === page) {
-                        nav.className = "nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition bg-indigo-800 text-white shadow-lg text-left";
-                    } else {
-                        nav.className = "nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition text-slate-300 hover:bg-indigo-800 hover:text-white text-left";
-                    }
-                }
+                if(el) { el.classList.toggle('page-active', p === page); }
+                if(nav) { nav.className = p === page ? "nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition bg-indigo-800 text-white shadow-lg text-left" : "nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition text-slate-300 hover:bg-indigo-800 hover:text-white text-left"; }
             });
 
             const titles = { rsvp: 'RSVP Management', generator: 'Undangan Generator', scan: 'Check-in Tamu', preview: 'Live Web Preview', sql: 'SQL Console', settings: 'Settings & Media' };
@@ -652,18 +740,12 @@
 
             if(page !== 'scan') stopScanner();
             if(page === 'preview') updatePreviewFrame();
-            if(page === 'generator') updateGenPreview();
-            
-            if(window.innerWidth < 1024) {
-                const sb = document.getElementById('sidebar');
-                const ov = document.getElementById('sidebar-overlay');
-                sb.classList.remove('mobile-open');
-                ov.classList.remove('mobile-open');
-                document.body.style.overflow = 'auto';
+            if(window.innerWidth < 1024) { 
+                document.getElementById('sidebar').classList.remove('mobile-open'); 
+                document.getElementById('sidebar-overlay').classList.remove('mobile-open'); 
             }
         }
 
-        // --- THEME ---
         function toggleTheme() {
             const isDark = document.documentElement.classList.toggle('dark');
             localStorage.setItem('admin-theme', isDark ? 'dark' : 'light');
@@ -675,15 +757,170 @@
             const themeIcon = document.getElementById('theme-icon-indicator');
             if (isDark) {
                 themeText.innerText = 'Light Mode';
-                themeIcon.setAttribute('data-lucide', 'sun');
+                if(themeIcon) themeIcon.setAttribute('data-lucide', 'sun');
             } else {
                 themeText.innerText = 'Dark Mode';
-                themeIcon.setAttribute('data-lucide', 'moon');
+                if(themeIcon) themeIcon.setAttribute('data-lucide', 'moon');
             }
             lucide.createIcons();
         }
 
+        // --- MODALS ---
+        function showToast(msg, type='warning') {
+            showResultModal(type, type === 'warning' ? 'Perhatian' : (type === 'error' ? 'Gagal' : 'Berhasil'), msg);
+        }
+
+        function showResultModal(type, title, message) {
+            const modal = document.getElementById('modal-result');
+            const icon = document.getElementById('modal-icon');
+            const titleEl = document.getElementById('modal-result-title');
+            const bodyEl = document.getElementById('modal-result-body');
+            
+            if (type === 'success') { 
+                icon.innerHTML = '<i data-lucide="check" class="w-12 h-12"></i>'; 
+                icon.className = "w-24 h-24 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-full mx-auto flex items-center justify-center mb-8 shadow-inner"; 
+            } 
+            else if (type === 'warning') { 
+                icon.innerHTML = '<i data-lucide="alert-circle" class="w-12 h-12"></i>'; 
+                icon.className = "w-24 h-24 bg-amber-100 dark:bg-amber-900/30 text-amber-500 rounded-full mx-auto flex items-center justify-center mb-8 shadow-inner"; 
+            } 
+            else { 
+                icon.innerHTML = '<i data-lucide="x" class="w-12 h-12"></i>'; 
+                icon.className = "w-24 h-24 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full mx-auto flex items-center justify-center mb-8 shadow-inner"; 
+            }
+            
+            titleEl.innerText = title; 
+            bodyEl.innerHTML = message;
+            modal.classList.remove('hidden'); 
+            lucide.createIcons();
+            
+            setTimeout(() => { document.getElementById('modal-result-content').classList.remove('translate-y-full', 'opacity-0'); }, 10);
+        }
+
+        function closeResultModal() {
+            document.getElementById('modal-result-content').classList.add('translate-y-full', 'opacity-0');
+            setTimeout(() => { document.getElementById('modal-result').classList.add('hidden'); }, 300);
+        }
+
+        // --- DATA RSVP ---
+        async function fetchData() {
+            const { data, error } = await _supabase.from('guestbook').select('*');
+            if (!error) { rawData = data; renderRSVP(); }
+        }
+
+        function renderRSVP() {
+            const body = document.getElementById('guest-table-body'); 
+            body.innerHTML = '';
+            
+            const sortedData = [...rawData].sort(dynamicSort(rsvpSort.key, rsvpSort.dir));
+            document.getElementById('stat-total').innerText = sortedData.length;
+            document.getElementById('stat-hadir').innerText = sortedData.filter(d => d.Status === 'Hadir').length;
+            document.getElementById('stat-tidak').innerText = sortedData.filter(d => d.Status === 'Tidak Hadir').length;
+            document.getElementById('stat-Tamu').innerText = sortedData.reduce((a, b) => a + (parseInt(b.Jumlah) || 0), 0);
+            
+            sortedData.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-8 py-5 text-slate-400 font-bold">${index+1}</td>
+                    <td class="px-8 py-5 font-bold dark:text-white text-left">${item.Nama}</td>
+                    <td class="px-8 py-5 text-center"><span class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase ${item.Status === 'Hadir' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">${item.Status}</span></td>
+                    <td class="px-8 py-5 text-center font-black text-sm">${item.Jumlah}</td>
+                    <td class="px-8 py-5 italic opacity-60 truncate max-w-[250px] font-medium text-left">${item.Ucapan || '-'}</td>
+                    <td class="px-8 py-5 font-mono text-[10px] opacity-50 text-right">${new Date(item.created_at).toLocaleString('id-ID')}</td>
+                    <td class="px-8 py-5 text-center">
+                        <button onclick='openEditModal(${JSON.stringify(item)})' class="p-2.5 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all"><i data-lucide="edit" class="w-4 h-4"></i></button>
+                    </td>`;
+                body.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+
+        function filterRSVP() {
+            const q = document.getElementById('search-rsvp').value.toLowerCase();
+            const filtered = rawData.filter(d => d.Nama.toLowerCase().includes(q));
+            // Implementasikan perenderan array tersaring tanpa menyentuh data asli
+            const body = document.getElementById('guest-table-body');
+            body.innerHTML = '';
+            filtered.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-8 py-5 text-slate-400 font-bold">${index+1}</td>
+                    <td class="px-8 py-5 font-bold dark:text-white text-left">${item.Nama}</td>
+                    <td class="px-8 py-5 text-center"><span class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase ${item.Status === 'Hadir' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">${item.Status}</span></td>
+                    <td class="px-8 py-5 text-center font-black text-sm">${item.Jumlah}</td>
+                    <td class="px-8 py-5 italic opacity-60 truncate max-w-[250px] font-medium text-left">${item.Ucapan || '-'}</td>
+                    <td class="px-8 py-5 font-mono text-[10px] opacity-50 text-right">${new Date(item.created_at).toLocaleString('id-ID')}</td>
+                    <td class="px-8 py-5 text-center">
+                        <button onclick='openEditModal(${JSON.stringify(item)})' class="p-2.5 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all"><i data-lucide="edit" class="w-4 h-4"></i></button>
+                    </td>`;
+                body.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+
         // --- SCAN LOGIC ---
+        async function fetchInvitationList() {
+            const { data, error } = await _supabase.from('invitation_list').select('*');
+            if (!error) { invitationList = data; renderScan(); }
+        }
+        
+        function renderScan() {
+            const body = document.getElementById('invitation-table-body'); 
+            body.innerHTML = '';
+            const sortedData = [...invitationList].sort(dynamicSort(scanSort.key, scanSort.dir));
+            
+            sortedData.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-8 py-5 text-slate-400 font-bold">${index+1}</td>
+                    <td class="px-8 py-5 font-bold dark:text-white text-left">${item.guest_name}</td>
+                    <td class="px-8 py-5 text-center opacity-50 font-mono text-[10px]">${new Date(item.created_at).toLocaleString('id-ID')}</td>
+                    <td class="px-8 py-5 text-center font-mono text-[10px] text-indigo-500">${item.scanned_at ? new Date(item.scanned_at).toLocaleString('id-ID') : '-'}</td>
+                    <td class="px-8 py-5 text-center">
+                        <span class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase ${item.is_scanned ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-400'}">
+                            ${item.is_scanned ? 'Hadir' : 'Menunggu'}
+                        </span>
+                    </td>
+                    <td class="px-8 py-5 text-center">
+                        <button onclick="toggleManualCheckIn('${item.id}', ${!item.is_scanned})" class="px-4 py-2 text-[10px] font-black rounded-xl transition-all ${item.is_scanned ? 'bg-slate-100 text-slate-400' : 'bg-indigo-600 text-white shadow-lg shadow-blue-900/20 active:scale-95'} uppercase tracking-widest">
+                            ${item.is_scanned ? 'BATAL' : 'CHECK-IN'}
+                        </button>
+                    </td>`;
+                body.appendChild(tr);
+            });
+        }
+
+        function filterScan() {
+            const q = document.getElementById('search-scan').value.toLowerCase();
+            const filtered = invitationList.filter(d => d.guest_name.toLowerCase().includes(q));
+            
+            const body = document.getElementById('invitation-table-body'); 
+            body.innerHTML = '';
+            filtered.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-8 py-5 text-slate-400 font-bold">${index+1}</td>
+                    <td class="px-8 py-5 font-bold dark:text-white text-left">${item.guest_name}</td>
+                    <td class="px-8 py-5 text-center opacity-50 font-mono text-[10px]">${new Date(item.created_at).toLocaleString('id-ID')}</td>
+                    <td class="px-8 py-5 text-center font-mono text-[10px] text-indigo-500">${item.scanned_at ? new Date(item.scanned_at).toLocaleString('id-ID') : '-'}</td>
+                    <td class="px-8 py-5 text-center">
+                        <span class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase ${item.is_scanned ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-400'}">
+                            ${item.is_scanned ? 'Hadir' : 'Menunggu'}
+                        </span>
+                    </td>
+                    <td class="px-8 py-5 text-center">
+                        <button onclick="toggleManualCheckIn('${item.id}', ${!item.is_scanned})" class="px-4 py-2 text-[10px] font-black rounded-xl transition-all ${item.is_scanned ? 'bg-slate-100 text-slate-400' : 'bg-indigo-600 text-white shadow-lg shadow-blue-900/20 active:scale-95'} uppercase tracking-widest">
+                            ${item.is_scanned ? 'BATAL' : 'CHECK-IN'}
+                        </button>
+                    </td>`;
+                body.appendChild(tr);
+            });
+        }
+
         function startScanner() {
             document.getElementById('scanner-section').classList.remove('hidden');
             document.getElementById('start-scan-btn').classList.add('hidden');
@@ -693,7 +930,7 @@
             html5QrCode = new Html5Qrcode("reader");
             const config = { fps: 15, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess).catch(err => {
-                alert("Gagal memuat kamera: " + err);
+                showToast("Gagal memuat kamera: " + err, 'error');
                 stopScanner();
             });
         }
@@ -741,103 +978,13 @@
             }
         }
 
-        function showResultModal(type, title, message) {
-            const modal = document.getElementById('modal-result');
-            const icon = document.getElementById('modal-icon');
-            const titleEl = document.getElementById('modal-result-title');
-            const bodyEl = document.getElementById('modal-result-body');
-            if (type === 'success') {
-                icon.className = "w-24 h-24 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-full mx-auto flex items-center justify-center text-4xl mb-8";
-                icon.innerHTML = '<i data-lucide="check"></i>';
-            } else if (type === 'warning') {
-                icon.className = "w-24 h-24 bg-amber-100 dark:bg-amber-900/30 text-amber-500 rounded-full mx-auto flex items-center justify-center text-4xl mb-8";
-                icon.innerHTML = '<i data-lucide="alert-circle"></i>';
-            } else {
-                icon.className = "w-24 h-24 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full mx-auto flex items-center justify-center text-4xl mb-8";
-                icon.innerHTML = '<i data-lucide="x"></i>';
-            }
-            titleEl.innerText = title;
-            bodyEl.innerHTML = message;
-            modal.classList.remove('hidden');
-            lucide.createIcons();
-            setTimeout(() => { document.getElementById('modal-result-content').classList.remove('translate-y-full', 'opacity-0'); }, 10);
-        }
-
-        function closeResultModal() {
-            const content = document.getElementById('modal-result-content');
-            content.classList.add('translate-y-full', 'opacity-0');
-            setTimeout(() => { document.getElementById('modal-result').classList.add('hidden'); }, 300);
-        }
-
-        // --- DATA ---
-        async function fetchData() {
-            const { data, error } = await _supabase.from('guestbook').select('*');
-            if (!error) { rawData = data; renderRSVP(); }
-        }
-
-        function renderRSVP() {
-            const body = document.getElementById('guest-table-body');
-            body.innerHTML = '';
-            const sortedData = [...rawData].sort(dynamicSort(rsvpSort.key, rsvpSort.dir));
-            document.getElementById('stat-total').innerText = sortedData.length;
-            document.getElementById('stat-hadir').innerText = sortedData.filter(d => d.Status === 'Hadir').length;
-            document.getElementById('stat-tidak').innerText = sortedData.filter(d => d.Status === 'Tidak Hadir').length;
-            document.getElementById('stat-Tamu').innerText = sortedData.reduce((a, b) => a + (parseInt(b.Jumlah) || 0), 0);
-            sortedData.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors";
-                tr.innerHTML = `
-                    <td class="px-8 py-5 text-slate-400 font-bold">${index + 1}</td>
-                    <td class="px-8 py-5 font-bold dark:text-white text-left">${item.Nama}</td>
-                    <td class="px-8 py-5 text-center"><span class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase ${item.Status === 'Hadir' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">${item.Status}</span></td>
-                    <td class="px-8 py-5 text-center font-black text-sm">${item.Jumlah}</td>
-                    <td class="px-8 py-5 italic opacity-60 truncate max-w-[250px] font-medium text-left">${item.Ucapan || '-'}</td>
-                    <td class="px-8 py-5 font-mono text-[10px] opacity-50 text-right">${new Date(item.created_at).toLocaleString('id-ID')}</td>
-                    <td class="px-8 py-5 text-center">
-                        <button onclick='openEditModal(${JSON.stringify(item)})' class="p-2.5 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all"><i data-lucide="edit" class="w-4 h-4"></i></button>
-                    </td>`;
-                body.appendChild(tr);
-            });
-            lucide.createIcons();
-        }
-
-        async function fetchInvitationList() {
-            const { data, error } = await _supabase.from('invitation_list').select('*');
-            if (!error) { invitationList = data; renderScan(); }
-        }
-
-        function renderScan() {
-            const body = document.getElementById('invitation-table-body');
-            body.innerHTML = '';
-            const sortedData = [...invitationList].sort(dynamicSort(scanSort.key, scanSort.dir));
-            sortedData.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors";
-                tr.innerHTML = `
-                    <td class="px-8 py-5 text-slate-400 font-bold">${index + 1}</td>
-                    <td class="px-8 py-5 font-bold dark:text-white text-left">${item.guest_name}</td>
-                    <td class="px-8 py-5 text-center opacity-50 font-mono text-[10px]">${new Date(item.created_at).toLocaleString('id-ID')}</td>
-                    <td class="px-8 py-5 text-center font-mono text-[10px] text-indigo-500">${item.scanned_at ? new Date(item.scanned_at).toLocaleString('id-ID') : '-'}</td>
-                    <td class="px-8 py-5 text-center">
-                        <span class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase ${item.is_scanned ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-400'}">
-                            ${item.is_scanned ? 'Hadir' : 'Menunggu'}
-                        </span>
-                    </td>
-                    <td class="px-8 py-5 text-center">
-                        <button onclick="toggleManualCheckIn('${item.id}', ${!item.is_scanned})" class="px-4 py-2 text-[10px] font-black rounded-xl transition-all ${item.is_scanned ? 'bg-slate-100 text-slate-400' : 'bg-indigo-600 text-white shadow-lg shadow-blue-900/20 active:scale-95'} uppercase tracking-widest">
-                            ${item.is_scanned ? 'BATAL' : 'CHECK-IN'}
-                        </button>
-                    </td>`;
-                body.appendChild(tr);
-            });
-        }
-
         async function toggleManualCheckIn(id, status) {
             const now = status ? new Date().toISOString() : null;
             await _supabase.from('invitation_list').update({ is_scanned: status, scanned_at: now }).eq('id', id);
             fetchInvitationList();
         }
 
+        // --- CRUD & SORTING ---
         function dynamicSort(key, direction) {
             return (a, b) => {
                 let vA = a[key] || ''; let vB = b[key] || '';
@@ -853,36 +1000,26 @@
             else { scanSort.dir = (scanSort.key === key && scanSort.dir === 'asc') ? 'desc' : 'asc'; scanSort.key = key; renderScan(); }
         }
 
-        // --- UTILS ---
-        function updateGenPreview() {
-            const baseUrl = document.getElementById('gen-baseUrl').value.trim();
-            const guestName = document.getElementById('gen-guestName').value.trim() || "[Nama Tamu]";
-            const finalUrl = `${baseUrl}?to=${encodeURIComponent(guestName)}`;
-            const msg = `Assalamu'alaikum Warahmatullahi Wabarakatuh.\n\nTanpa mengurangi rasa hormat, kami mengundang \n\n*${guestName}* \n\nuntuk hadir dalam acara pernikahan kami.\n\nLink Undangan:\n${finalUrl}\n\nTerima kasih.\n*Ami Fitriyanti & Ade Martadikusumah*`;
-            document.getElementById('gen-messagePreview').innerText = msg;
-            return msg;
+        function openEditModal(i) {
+            document.getElementById('entry-id').value = i.id; document.getElementById('field-nama').value = i.Nama;
+            document.getElementById('field-status').value = i.Status; document.getElementById('field-jumlah').value = i.Jumlah;
+            document.getElementById('field-ucapan').value = i.Ucapan; 
+            const modal = document.getElementById('crud-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => { document.getElementById('crud-modal-content').classList.add('scale-100', 'opacity-100'); }, 10);
         }
-
-        async function handleKirimDanSimpan() {
-            const guestName = document.getElementById('gen-guestName').value.trim();
-            if (!guestName) return alert("Isi nama tamu!");
-            const { error } = await _supabase.from('invitation_list').insert([{ guest_name: guestName }]);
-            if (!error) {
-                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(updateGenPreview())}`, '_blank');
-                fetchInvitationList();
-            } else { alert("Gagal menyimpan ke database."); }
+        function closeEditModal() { 
+            document.getElementById('crud-modal-content').classList.remove('scale-100', 'opacity-100');
+            setTimeout(() => { document.getElementById('crud-modal').classList.add('hidden'); }, 300);
         }
+        document.getElementById('crud-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('entry-id').value;
+            const payload = { Nama: document.getElementById('field-nama').value, Status: document.getElementById('field-status').value, Jumlah: parseInt(document.getElementById('field-jumlah').value), Ucapan: document.getElementById('field-ucapan').value };
+            await _supabase.from('guestbook').update(payload).eq('id', id); closeEditModal(); fetchData();
+        });
 
-        function fillSQL(type) {
-            const input = document.getElementById('sql-input');
-            const queries = {
-                guestbook: `-- Stuktur Tabel Guestbook\nCREATE TABLE guestbook (\n  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,\n  "Nama" TEXT NOT NULL,\n  "Jumlah" INT4 DEFAULT 1,\n  "Status" TEXT DEFAULT 'Hadir',\n  "Ucapan" TEXT,\n  created_at TIMESTAMPTZ DEFAULT NOW()\n);`,
-                settings: `-- Struktur Tabel Settings\nCREATE TABLE settings (\n  id BIGINT PRIMARY KEY,\n  bride_name TEXT, bride_parents TEXT, bride_image TEXT, bride_bank_name TEXT, bride_bank_acc TEXT,\n  groom_name TEXT, groom_parents TEXT, groom_image TEXT, groom_bank_name TEXT, groom_bank_acc TEXT,\n  wedding_date TIMESTAMPTZ, location_name TEXT, location_address TEXT, maps_url TEXT,\n  bg_music TEXT, gallery_1 TEXT, gallery_2 TEXT, gallery_3 TEXT, gallery_4 TEXT, gallery_5 TEXT, gallery_6 TEXT\n);`,
-                invitation_list: `-- Struktur Tabel Invitation List\nCREATE TABLE invitation_list (\n  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,\n  guest_name TEXT NOT NULL,\n  is_scanned BOOLEAN DEFAULT FALSE,\n  scanned_at TIMESTAMPTZ,\n  created_at TIMESTAMPTZ DEFAULT NOW()\n);`
-            };
-            input.value = queries[type];
-        }
-
+        // --- SETTINGS PAGE & BANK ---
         async function fetchSettings() {
             const { data, error } = await _supabase.from('settings').select('*').eq('id', 1).single();
             if (!error && data) {
@@ -930,26 +1067,21 @@
             const btn = document.getElementById('save-settings-btn');
             btn.innerText = "MEMPROSES..."; btn.disabled = true;
             const payload = {
-                bride_name: document.getElementById('set-bride').value,
-                bride_parents: document.getElementById('set-bride-parents').value,
-                bride_bank_name: document.getElementById('set-bride-bank').value,
-                bride_bank_acc: document.getElementById('set-bride-acc').value,
-                groom_name: document.getElementById('set-groom').value,
-                groom_parents: document.getElementById('set-groom-parents').value,
-                groom_bank_name: document.getElementById('set-groom-bank').value,
-                groom_bank_acc: document.getElementById('set-groom-acc').value,
-                wedding_date: document.getElementById('set-date').value,
-                location_name: document.getElementById('set-loc-name').value,
-                location_address: document.getElementById('set-loc-address').value,
-                maps_url: document.getElementById('set-maps-url').value,
+                bride_name: document.getElementById('set-bride').value, bride_parents: document.getElementById('set-bride-parents').value,
+                bride_bank_name: document.getElementById('set-bride-bank').value, bride_bank_acc: document.getElementById('set-bride-acc').value,
+                groom_name: document.getElementById('set-groom').value, groom_parents: document.getElementById('set-groom-parents').value,
+                groom_bank_name: document.getElementById('set-groom-bank').value, groom_bank_acc: document.getElementById('set-groom-acc').value,
+                wedding_date: document.getElementById('set-date').value, location_name: document.getElementById('set-loc-name').value,
+                location_address: document.getElementById('set-loc-address').value, maps_url: document.getElementById('set-maps-url').value,
                 bg_music: document.getElementById('set-music').value,
                 gallery_1: document.getElementById('set-gal-1').value, gallery_2: document.getElementById('set-gal-2').value,
                 gallery_3: document.getElementById('set-gal-3').value, gallery_4: document.getElementById('set-gal-4').value,
                 gallery_5: document.getElementById('set-gal-5').value, gallery_6: document.getElementById('set-gal-6').value
             };
             const { error } = await _supabase.from('settings').update(payload).eq('id', 1);
-            if (!error) { alert("Berhasil Diperbarui!"); fetchSettings(); }
-            btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Seluruh Perubahan'; btn.disabled = false;
+            if (!error) { showToast("Berhasil Diperbarui!", "success"); fetchSettings(); }
+            btn.innerHTML = '<i data-lucide="save" class="w-6 h-6"></i> Simpan Perubahan'; btn.disabled = false;
+            lucide.createIcons();
         });
 
         // --- EXPORT ---
@@ -981,116 +1113,162 @@
             link.click();
         }
 
-        function updatePreviewFrame() { 
-            const url = document.getElementById('gen-baseUrl').value;
-            document.getElementById('web-preview-iframe').src = url; 
+        // --- GENERATOR & SQL & PREVIEW ---
+        function updateGenPreview() {
+            const baseUrl = document.getElementById('gen-baseUrl').value.trim();
+            const guestName = document.getElementById('gen-guestName').value.trim() || "[Nama Tamu]";
+            const finalUrl = `${baseUrl}?to=${encodeURIComponent(guestName)}`;
+            const msg = `Assalamu'alaikum Warahmatullahi Wabarakatuh.\n\nTanpa mengurangi rasa hormat, kami mengundang \n\n*${guestName}* \n\nuntuk hadir dalam acara pernikahan kami.\n\nLink Undangan:\n${finalUrl}\n\nTerima kasih.\n*Ami Fitriyanti & Ade Martadikusumah*`;
+            document.getElementById('gen-messagePreview').innerText = msg;
+            return msg;
         }
+
+        async function handleKirimDanSimpan() {
+            const guestName = document.getElementById('gen-guestName').value.trim();
+            if (!guestName) return showToast("Isi nama tamu!", "warning");
+            const { error } = await _supabase.from('invitation_list').insert([{ guest_name: guestName }]);
+            if (!error) {
+                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(updateGenPreview())}`, '_blank');
+                fetchInvitationList();
+            } else { showToast("Gagal menyimpan ke database.", "error"); }
+        }
+
+        function fillSQL(type) {
+            const input = document.getElementById('sql-input');
+            const queries = {
+                guestbook: `-- Stuktur Tabel Guestbook\nCREATE TABLE guestbook (\n  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,\n  "Nama" TEXT NOT NULL,\n  "Jumlah" INT4 DEFAULT 1,\n  "Status" TEXT DEFAULT 'Hadir',\n  "Ucapan" TEXT,\n  created_at TIMESTAMPTZ DEFAULT NOW()\n);`,
+                settings: `-- Struktur Tabel Settings\nCREATE TABLE settings (\n  id BIGINT PRIMARY KEY,\n  bride_name TEXT, bride_parents TEXT, bride_image TEXT, bride_bank_name TEXT, bride_bank_acc TEXT,\n  groom_name TEXT, groom_parents TEXT, groom_image TEXT, groom_bank_name TEXT, groom_bank_acc TEXT,\n  wedding_date TIMESTAMPTZ, location_name TEXT, location_address TEXT, maps_url TEXT,\n  bg_music TEXT, gallery_1 TEXT, gallery_2 TEXT, gallery_3 TEXT, gallery_4 TEXT, gallery_5 TEXT, gallery_6 TEXT\n);`,
+                invitation_list: `-- Struktur Tabel Invitation List\nCREATE TABLE invitation_list (\n  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,\n  guest_name TEXT NOT NULL,\n  is_scanned BOOLEAN DEFAULT FALSE,\n  scanned_at TIMESTAMPTZ,\n  created_at TIMESTAMPTZ DEFAULT NOW()\n);`
+            };
+            input.value = queries[type];
+        }
+
+        function updatePreviewFrame() { 
+            const url = document.getElementById('gen-baseUrl') ? document.getElementById('gen-baseUrl').value : '';
+            if(document.getElementById('web-preview-iframe')) {
+                 document.getElementById('web-preview-iframe').src = url; 
+            }
+        }
+
         function setPreviewSize(size) {
             const cont = document.getElementById('preview-container');
             const bMob = document.getElementById('btn-p-mobile');
             const bDes = document.getElementById('btn-p-desktop');
             if(size === 'mobile') {
                 cont.style.maxWidth = '360px';
-                bMob.className = "flex-1 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase bg-white dark:bg-slate-600 shadow-sm transition-all dark:text-white";
-                bDes.className = "flex-1 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase text-slate-400 transition-all";
+                bMob.className = "flex-1 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest bg-white dark:bg-slate-600 shadow-sm transition-all dark:text-white";
+                bDes.className = "flex-1 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 transition-all";
             } else {
                 cont.style.maxWidth = '100%';
-                bDes.className = "flex-1 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase bg-white dark:bg-slate-600 shadow-sm transition-all dark:text-white";
-                bMob.className = "flex-1 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase text-slate-400 transition-all";
+                bDes.className = "flex-1 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest bg-white dark:bg-slate-600 shadow-sm transition-all dark:text-white";
+                bMob.className = "flex-1 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 transition-all";
             }
         }
 
-        // --- MODALS ---
-        function openEditModal(i) {
-            document.getElementById('entry-id').value = i.id; document.getElementById('field-nama').value = i.Nama;
-            document.getElementById('field-status').value = i.Status; document.getElementById('field-jumlah').value = i.Jumlah;
-            document.getElementById('field-ucapan').value = i.Ucapan; 
-            const modal = document.getElementById('crud-modal');
-            const content = document.getElementById('crud-modal-content');
-            modal.classList.remove('hidden');
-            setTimeout(() => { content.classList.add('scale-100', 'opacity-100'); }, 10);
+        // --- CLOCK LOGIC ---
+        let animationFrameId = null;
+
+        function updateHourAndMinuteHands() {
+            const now = new Date();
+            const jakartaTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
+            const hours = jakartaTime.getHours() % 12;
+            const minutes = jakartaTime.getMinutes();
+            const hourHand = document.getElementById("hour-hand");
+            const minuteHand = document.getElementById("minute-hand");
+            
+            if (hourHand && minuteHand) {
+                const hoursDegrees = hours * 30 + (minutes / 60) * 30;
+                const minutesDegrees = minutes * 6;
+                hourHand.style.transform = `rotate(${hoursDegrees}deg)`;
+                minuteHand.style.transform = `rotate(${minutesDegrees}deg)`;
+            }
+            
+            const dateDisplay = document.getElementById("clock-date");
+            if (dateDisplay) {
+                const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                dateDisplay.textContent = `${jakartaTime.getDate()} ${months[jakartaTime.getMonth()]} ${jakartaTime.getFullYear()}`;
+            }
+            setTimeout(updateHourAndMinuteHands, 60000);
         }
-        function closeEditModal() { 
-            const content = document.getElementById('crud-modal-content');
-            content.classList.remove('scale-100', 'opacity-100');
-            setTimeout(() => { document.getElementById('crud-modal').classList.add('hidden'); }, 300);
+
+        function animateSecondHand() {
+            const secondHandContainer = document.getElementById("second-hand-container");
+            function animate() {
+                const now = new Date();
+                const seconds = now.getSeconds();
+                const milliseconds = now.getMilliseconds();
+                const secondsAngle = seconds * 6 + (milliseconds / 1000) * 6;
+                if(secondHandContainer) {
+                    secondHandContainer.style.transform = `rotate(${secondsAngle}deg)`;
+                }
+                animationFrameId = requestAnimationFrame(animate);
+            }
+            animate();
         }
-        document.getElementById('crud-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('entry-id').value;
-            const payload = { Nama: document.getElementById('field-nama').value, Status: document.getElementById('field-status').value, Jumlah: parseInt(document.getElementById('field-jumlah').value), Ucapan: document.getElementById('field-ucapan').value };
-            await _supabase.from('guestbook').update(payload).eq('id', id); closeEditModal(); fetchData();
+
+        function initClockVisuals() {
+            const hourMarksContainer = document.getElementById("clock-hour-marks");
+            if(hourMarksContainer) {
+                for (let i = 0; i < 60; i++) {
+                    if (i % 5 === 0) {
+                        const hourIndex = i / 5;
+                        const hourNumber = document.createElement("div");
+                        hourNumber.className = "clock-number";
+                        const angle = (i * 6 * Math.PI) / 180;
+                        const radius = 145; 
+                        hourNumber.style.left = `${175 + Math.sin(angle) * radius - 15}px`;
+                        hourNumber.style.top = `${175 - Math.cos(angle) * radius - 10}px`;
+                        hourNumber.textContent = hourIndex === 0 ? "12" : hourIndex.toString();
+                        hourMarksContainer.appendChild(hourNumber);
+                    } else {
+                        const minuteMarker = document.createElement("div");
+                        minuteMarker.className = "minute-marker";
+                        minuteMarker.style.transform = `rotate(${i * 6}deg)`;
+                        hourMarksContainer.appendChild(minuteMarker);
+                    }
+                }
+            }
+            updateHourAndMinuteHands();
+            animateSecondHand();
+        }
+
+        // --- GSAP LOGIN ANIMATION HANDLERS ---
+        $(document).ready(function() {
+            $('#clock-trigger').click(function(){
+                if($("#container").is(":visible") || $("#forgotten-container").is(":visible")) return;
+                $("#container").show(); 
+                TweenMax.from("#container", 0.5, { scale: 0, opacity: 0, ease: Back.easeOut.config(1.7) });
+                TweenMax.to("#container", 0.5, { scale: 1, opacity: 1, ease: Back.easeOut.config(1.7) });
+            });
+
+            $(".close-btn").click(function(){
+                let parentContainer = $(this).parent();
+                TweenMax.to(parentContainer, 0.4, { 
+                    scale: 0, opacity: 0, ease: Sine.easeInOut, 
+                    onComplete: function() { parentContainer.hide(); }
+                });
+            });
+
+            $('#forgotten').click(function(e){
+                e.preventDefault(); 
+                TweenMax.to("#container", 0.3, { scale: 0.8, opacity: 0, ease: Sine.easeInOut, onComplete: function() {
+                    $("#container").hide();
+                    $("#forgotten-container").show();
+                    TweenMax.from("#forgotten-container", 0.4, { scale: 0.8, opacity: 0, ease: Sine.easeInOut });
+                    TweenMax.to("#forgotten-container", 0.4, { scale: 1, opacity: 1, ease: Sine.easeInOut });
+                }});
+            });
         });
 
-        window.filterScan = () => {
-            const q = document.getElementById('search-scan').value.toLowerCase();
-            const filtered = invitationList.filter(d => d.guest_name.toLowerCase().includes(q));
-            renderFilteredScan(filtered);
-        }
-
-        function renderFilteredScan(data) {
-            const body = document.getElementById('invitation-table-body');
-            body.innerHTML = '';
-            const sortedData = [...data].sort(dynamicSort(scanSort.key, scanSort.dir));
-            sortedData.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors";
-                tr.innerHTML = `
-                    <td class="px-8 py-5 text-slate-400 font-bold">${index + 1}</td>
-                    <td class="px-8 py-5 font-bold dark:text-white text-left">${item.guest_name}</td>
-                    <td class="px-8 py-5 text-center opacity-50 font-mono text-[10px]">${new Date(item.created_at).toLocaleString('id-ID')}</td>
-                    <td class="px-8 py-5 text-center font-mono text-[10px] text-indigo-500">${item.scanned_at ? new Date(item.scanned_at).toLocaleString('id-ID') : '-'}</td>
-                    <td class="px-8 py-5 text-center">
-                        <span class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase ${item.is_scanned ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-400'}">
-                            ${item.is_scanned ? 'Hadir' : 'Menunggu'}
-                        </span>
-                    </td>
-                    <td class="px-8 py-5 text-center">
-                        <button onclick="toggleManualCheckIn('${item.id}', ${!item.is_scanned})" class="px-4 py-2 text-[10px] font-black rounded-xl transition-all ${item.is_scanned ? 'bg-slate-100 text-slate-400' : 'bg-indigo-600 text-white shadow-lg shadow-blue-900/20 active:scale-95'} uppercase tracking-widest">
-                            ${item.is_scanned ? 'BATAL' : 'CHECK-IN'}
-                        </button>
-                    </td>`;
-                body.appendChild(tr);
-            });
-        }
-
-        function filterRSVP() {
-            const q = document.getElementById('search-rsvp').value.toLowerCase();
-            const filtered = rawData.filter(d => d.Nama.toLowerCase().includes(q));
-            renderFilteredRSVP(filtered);
-        }
-
-        function renderFilteredRSVP(data) {
-            const body = document.getElementById('guest-table-body');
-            body.innerHTML = '';
-            const sortedData = [...data].sort(dynamicSort(rsvpSort.key, rsvpSort.dir));
-            sortedData.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors";
-                tr.innerHTML = `
-                    <td class="px-8 py-5 text-slate-400 font-bold">${index + 1}</td>
-                    <td class="px-8 py-5 font-bold dark:text-white text-left">${item.Nama}</td>
-                    <td class="px-8 py-5 text-center"><span class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase ${item.Status === 'Hadir' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">${item.Status}</span></td>
-                    <td class="px-8 py-5 text-center font-black text-sm">${item.Jumlah}</td>
-                    <td class="px-8 py-5 italic opacity-60 truncate max-w-[250px] font-medium text-left">${item.Ucapan || '-'}</td>
-                    <td class="px-8 py-5 font-mono text-[10px] opacity-50 text-right">${new Date(item.created_at).toLocaleString('id-ID')}</td>
-                    <td class="px-8 py-5 text-center">
-                        <button onclick='openEditModal(${JSON.stringify(item)})' class="p-2.5 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all"><i data-lucide="edit" class="w-4 h-4"></i></button>
-                    </td>`;
-                body.appendChild(tr);
-            });
-            lucide.createIcons();
-        }
-
-        // --- INIT ---
+        // --- ONLOAD ---
         window.onload = () => {
             lucide.createIcons();
             const savedTheme = localStorage.getItem('admin-theme') || 'light';
             if (savedTheme === 'dark') document.documentElement.classList.add('dark');
             updateThemeUI(savedTheme === 'dark');
+            initClockVisuals();
             checkSession();
         }
     </script>
 </body>
 </html>
-
