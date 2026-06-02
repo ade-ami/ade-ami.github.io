@@ -219,6 +219,79 @@
             height: 16px;
             animation: spin 1s linear infinite;
         }
+
+        /* Custom Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: scale(1);
+        }
+
+        .modal-icon {
+            font-size: 3rem;
+            color: #f59e0b;
+            margin-bottom: 15px;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .modal-body {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .modal-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .modal-btn:hover {
+            opacity: 0.9;
+        }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -265,6 +338,16 @@
         <button class="btn-wa" id="btnKirim" onclick="handleKirim()">
             <i class="fab fa-whatsapp"></i> <span id="btnText">Kirim & Simpan</span>
         </button>
+    </div>
+</div>
+
+<!-- Custom Dialog Modal -->
+<div class="modal-overlay" id="customModal">
+    <div class="modal-box">
+        <div class="modal-icon" id="modalIcon"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="modal-title" id="modalTitle">Perhatian</div>
+        <div class="modal-body" id="modalBody">Nama yang Anda masukkan sudah terdaftar.</div>
+        <button class="modal-btn" onclick="closeModal()">Tutup</button>
     </div>
 </div>
 
@@ -317,36 +400,83 @@ Terima kasih.
         document.getElementById('messagePreview').innerText = getMessage();
     }
 
+    // Custom Modal Handlers
+    function showNotification(title, message, isError = false) {
+        const modal = document.getElementById('customModal');
+        const iconContainer = document.getElementById('modalIcon');
+        const titleEl = document.getElementById('modalTitle');
+        const bodyEl = document.getElementById('modalBody');
+
+        titleEl.innerText = title;
+        bodyEl.innerHTML = message;
+
+        if (isError) {
+            iconContainer.innerHTML = '<i class="fas fa-times-circle" style="color: #ef4444;"></i>';
+        } else {
+            iconContainer.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i>';
+        }
+
+        modal.classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('customModal').classList.remove('active');
+    }
+
     async function handleKirim() {
         const guestName = document.getElementById('guestName').value.trim();
         const btn = document.getElementById('btnKirim');
         const btnText = document.getElementById('btnText');
 
         if (!guestName) {
-            alert("Harap masukkan nama tamu!");
+            showNotification("Nama Kosong", "Harap masukkan nama tamu terlebih dahulu!");
             return;
         }
 
         btn.disabled = true;
-        btnText.innerHTML = '<div class="loading-spinner"></div> Menyimpan...';
+        btnText.innerHTML = '<div class="loading-spinner"></div> Memverifikasi...';
 
         try {
-            // 1. Simpan ke Supabase (Tabel invitation_list)
-            const { error } = await _supabase
+            // 1. Cek duplikasi nama secara Case-Insensitive di database Supabase
+            const { data: duplicateData, error: fetchErr } = await _supabase
+                .from('invitation_list')
+                .select('guest_name')
+                .ilike('guest_name', guestName);
+
+            if (fetchErr) throw fetchErr;
+
+            if (duplicateData && duplicateData.length > 0) {
+                // Tampilkan warning jika nama sudah terdaftar di database
+                showNotification(
+                    "Nama Sudah Ada", 
+                    `Nama <b>${guestName}</b> yang Anda masukkan sudah ada di dalam daftar undangan.`
+                );
+                btn.disabled = false;
+                btnText.innerText = "Kirim & Simpan";
+                return;
+            }
+
+            // Update status tombol jika lolos validasi
+            btnText.innerHTML = '<div class="loading-spinner"></div> Menyimpan...';
+
+            // 2. Simpan ke Supabase (Tabel invitation_list) karena nama belum terdaftar
+            const { error: insertErr } = await _supabase
                 .from('invitation_list')
                 .insert([{ guest_name: guestName }]);
 
-            if (error) throw error;
+            if (insertErr) throw insertErr;
 
-            // 2. Buka WhatsApp
+            // 3. Buka WhatsApp
             const message = encodeURIComponent(getMessage());
             window.open(`https://api.whatsapp.com/send?text=${message}`, '_blank');
+            
+            // Kosongkan input setelah berhasil disimpan
+            document.getElementById('guestName').value = '';
+            updatePreview();
 
         } catch (err) {
-            console.error("Gagal menyimpan:", err);
-            // Tetap buka WA meski gagal simpan ke DB
-            const message = encodeURIComponent(getMessage());
-            window.open(`https://api.whatsapp.com/send?text=${message}`, '_blank');
+            console.error("Gagal memproses data:", err);
+            showNotification("Kesalahan", "Terjadi kegagalan koneksi atau sistem dalam menyimpan data.", true);
         } finally {
             btn.disabled = false;
             btnText.innerText = "Kirim & Simpan";
@@ -358,6 +488,3 @@ Terima kasih.
 
 </body>
 </html>
-
-
-
