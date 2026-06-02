@@ -376,12 +376,12 @@
                             </div>
                             <div class="space-y-2">
                                 <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-2">Pratinjau Pesan</label>
-                                <div class="wa-preview-container p-6 rounded-[2rem] border dark:border-slate-700 shadow-inner">
+                                <div class="wa-preview-container p-6 rounded-[2rem] border dark:border-slate-700 shadow-inner max-h-72 overflow-y-auto">
                                     <div id="gen-messagePreview" class="wa-chat-bubble text-xs"></div>
                                 </div>
                             </div>
-                            <button onclick="handleKirimDanSimpan()" class="w-full bg-green-600 text-white font-black py-5 rounded-[1.5rem] hover:bg-green-700 transition active:scale-95 shadow-xl flex items-center justify-center gap-4 text-sm tracking-widest uppercase">
-                                <i data-lucide="message-circle" class="w-5 h-5"></i> KIRIM & SIMPAN
+                            <button id="btnKirim" onclick="handleKirimDanSimpan()" class="w-full bg-[#25d366] text-white font-black py-5 rounded-[1.5rem] hover:bg-green-600 transition active:scale-95 shadow-xl flex items-center justify-center gap-4 text-sm tracking-widest uppercase disabled:bg-slate-400 disabled:cursor-not-allowed">
+                                <i data-lucide="message-circle" class="w-5 h-5"></i> <span id="btnText">KIRIM & SIMPAN</span>
                             </button>
                         </div>
                     </div>
@@ -1084,53 +1084,61 @@
             lucide.createIcons();
         });
 
-        // --- EXPORT ---
-        function exportData(type, format) {
-            let data = [];
-            let filename = `Laporan_${type}_${new Date().toLocaleDateString()}`;
-            if(type === 'rsvp') {
-                data = rawData.map((i, index) => ({'No': index+1, 'Nama': i.Nama, 'Status': i.Status, 'Jml': i.Jumlah, 'Ucapan': i.Ucapan, 'Tanggal': new Date(i.created_at).toLocaleString('id-ID')}));
-            } else {
-                data = invitationList.map((i, index) => ({'No': index+1, 'Nama': i.guest_name, 'Tgl Buat': new Date(i.created_at).toLocaleString('id-ID'), 'Tgl Scan': i.scanned_at ? new Date(i.scanned_at).toLocaleString('id-ID') : '-', 'Status': i.is_scanned ? 'Hadir' : 'Menunggu'}));
-            }
-
-            let table = `<table border="1" style="border-collapse:collapse;width:100%"><thead><tr style="background:#eee">`;
-            if(data.length > 0) {
-                Object.keys(data[0]).forEach(k => table += `<th style="padding:8px">${k}</th>`);
-                table += `</tr></thead><tbody>`;
-                data.forEach(r => {
-                    table += `<tr>`;
-                    Object.values(r).forEach(v => table += `<td style="padding:8px">${v}</td>`);
-                    table += `</tr>`;
-                });
-            }
-            table += `</tbody></table>`;
-            const html = `<html><head><meta charset='utf-8'></head><body><h2 style="font-family:Arial">${filename.replace(/_/g, ' ')}</h2>${table}</body></html>`;
-            const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-            const link = document.createElement('a'); 
-            link.href = URL.createObjectURL(blob); 
-            link.download = `${filename}.doc`; 
-            link.click();
-        }
-
-        // --- GENERATOR & SQL & PREVIEW ---
+        // --- UTILS ---
         function updateGenPreview() {
             const baseUrl = document.getElementById('gen-baseUrl').value.trim();
-            const guestName = document.getElementById('gen-guestName').value.trim() || "[Nama Tamu]";
-            const finalUrl = `${baseUrl}?to=${encodeURIComponent(guestName)}`;
-            const msg = `Assalamu'alaikum Warahmatullahi Wabarakatuh.\n\nTanpa mengurangi rasa hormat, kami mengundang \n\n*${guestName}* \n\nuntuk hadir dalam acara pernikahan kami.\n\nLink Undangan:\n${finalUrl}\n\nTerima kasih.\n*Ami Fitriyanti & Ade Martadikusumah*`;
+            const guestInput = document.getElementById('gen-guestName').value.trim();
+            const guestName = guestInput || "[Nama Tamu]";
+            const encodedName = encodeURIComponent(guestInput);
+            const finalUrl = guestInput ? `${baseUrl}?to=${encodedName}` : baseUrl;
+            const msg = `Assalamu'alaikum Warahmatullahi Wabarakatuh.\n\nTanpa mengurangi rasa hormat, kami mengundang \n*${guestName}*\nuntuk hadir dalam acara pernikahan kami.\n\nLink Undangan:\n${finalUrl}\n\nTerima kasih.\n*Ami Fitriyanti & Ade Martadikusumah*`;
             document.getElementById('gen-messagePreview').innerText = msg;
             return msg;
         }
 
         async function handleKirimDanSimpan() {
             const guestName = document.getElementById('gen-guestName').value.trim();
-            if (!guestName) return showToast("Isi nama tamu!", "warning");
-            const { error } = await _supabase.from('invitation_list').insert([{ guest_name: guestName }]);
-            if (!error) {
-                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(updateGenPreview())}`, '_blank');
+            const btn = document.getElementById('btnKirim');
+            const btnText = document.getElementById('btnText');
+
+            if (!guestName) {
+                showResultModal("warning", "Perhatian", "Harap masukkan nama tamu!");
+                return;
+            }
+
+            // Pengecekan nama ganda (duplikat)
+            const isDuplicate = invitationList.some(guest => guest.guest_name.toLowerCase() === guestName.toLowerCase());
+            if (isDuplicate) {
+                showResultModal("warning", "Nama Sudah Ada", `Nama <b>${guestName}</b> yang Anda masukkan sudah ada di dalam daftar undangan.`);
+                return;
+            }
+
+            btn.disabled = true;
+            btnText.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin inline-block"></i> MENYIMPAN...';
+            lucide.createIcons();
+
+            try {
+                // 1. Simpan ke Supabase
+                const { error } = await _supabase.from('invitation_list').insert([{ guest_name: guestName }]);
+                if (error) throw error;
+
+                // 2. Refresh List
                 fetchInvitationList();
-            } else { showToast("Gagal menyimpan ke database.", "error"); }
+
+                // 3. Buka WhatsApp
+                const message = encodeURIComponent(updateGenPreview());
+                window.open(`https://api.whatsapp.com/send?text=${message}`, '_blank');
+                
+                // 4. Kosongkan input setelah berhasil (Opsional)
+                document.getElementById('gen-guestName').value = '';
+                updateGenPreview();
+            } catch (err) {
+                console.error("Gagal menyimpan:", err);
+                showResultModal("error", "Gagal", "Gagal menyimpan data ke database.");
+            } finally {
+                btn.disabled = false;
+                btnText.innerText = "KIRIM & SIMPAN";
+            }
         }
 
         function fillSQL(type) {
