@@ -12,6 +12,8 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js"></script>
 
@@ -332,9 +334,11 @@
                     <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
                         <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4 bg-slate-50/40 dark:bg-slate-900/20">
                             <h3 class="font-black text-xs uppercase tracking-widest text-slate-400">Daftar Kehadiran & Ucapan</h3>
-                            <div class="flex gap-2 w-full md:w-auto">
-                                <input type="text" id="search-rsvp" oninput="filterRSVP()" placeholder="Cari nama..." class="px-5 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-medium focus:ring-2 focus:ring-indigo-500 outline-none w-full">
-                                <button onclick="exportData('rsvp', 'word')" class="bg-blue-600 text-white px-5 py-3 rounded-2xl hover:bg-blue-700 transition active:scale-95 shadow-lg flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"><i data-lucide="file-text" class="w-4 h-4"></i> Word</button>
+                            <div class="flex flex-wrap gap-2 w-full md:w-auto items-center justify-end">
+                                <input type="text" id="search-rsvp" oninput="filterRSVP()" placeholder="Cari nama..." class="px-5 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-medium focus:ring-2 focus:ring-indigo-500 outline-none w-full md:w-48">
+                                <button onclick="exportData('rsvp', 'excel')" class="bg-emerald-600 text-white px-4 py-3 rounded-2xl hover:bg-emerald-700 transition active:scale-95 shadow-lg flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"><i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Excel</button>
+                                <button onclick="exportData('rsvp', 'word')" class="bg-blue-600 text-white px-4 py-3 rounded-2xl hover:bg-blue-700 transition active:scale-95 shadow-lg flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"><i data-lucide="file-text" class="w-4 h-4"></i> Word</button>
+                                <button onclick="exportData('rsvp', 'pdf')" class="bg-red-600 text-white px-4 py-3 rounded-2xl hover:bg-red-700 transition active:scale-95 shadow-lg flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"><i data-lucide="file-down" class="w-4 h-4"></i> PDF</button>
                                 <button onclick="fetchData()" class="bg-slate-800 text-white px-4 py-3 rounded-2xl hover:bg-black transition active:scale-95 shadow-sm"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>
                             </div>
                         </div>
@@ -408,8 +412,10 @@
                         </div>
                         <div class="p-8 border-b border-slate-100 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4">
                             <input type="text" id="search-scan" oninput="filterScan()" placeholder="Cari nama tamu..." class="w-full md:w-72 px-6 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <div class="flex gap-2 w-full md:w-auto">
-                                <button onclick="exportData('scan', 'word')" class="flex-1 bg-blue-600 text-white px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition flex items-center justify-center gap-2"><i data-lucide="file-text" class="w-4 h-4"></i> Word</button>
+                            <div class="flex flex-wrap gap-2 w-full md:w-auto items-center justify-end">
+                                <button onclick="exportData('scan', 'excel')" class="bg-emerald-600 text-white px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:bg-emerald-700 active:scale-95 transition flex items-center justify-center gap-2"><i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Excel</button>
+                                <button onclick="exportData('scan', 'word')" class="bg-blue-600 text-white px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:bg-blue-700 active:scale-95 transition flex items-center justify-center gap-2"><i data-lucide="file-text" class="w-4 h-4"></i> Word</button>
+                                <button onclick="exportData('scan', 'pdf')" class="bg-red-600 text-white px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:bg-red-700 active:scale-95 transition flex items-center justify-center gap-2"><i data-lucide="file-down" class="w-4 h-4"></i> PDF</button>
                                 <button onclick="fetchInvitationList()" class="bg-slate-100 dark:bg-slate-700 p-3 rounded-2xl text-slate-500 hover:text-indigo-500 transition"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>
                             </div>
                         </div>
@@ -839,7 +845,6 @@
         function filterRSVP() {
             const q = document.getElementById('search-rsvp').value.toLowerCase();
             const filtered = rawData.filter(d => d.Nama.toLowerCase().includes(q));
-            // Implementasikan perenderan array tersaring tanpa menyentuh data asli
             const body = document.getElementById('guest-table-body');
             body.innerHTML = '';
             filtered.forEach((item, index) => {
@@ -1018,6 +1023,164 @@
             const payload = { Nama: document.getElementById('field-nama').value, Status: document.getElementById('field-status').value, Jumlah: parseInt(document.getElementById('field-jumlah').value), Ucapan: document.getElementById('field-ucapan').value };
             await _supabase.from('guestbook').update(payload).eq('id', id); closeEditModal(); fetchData();
         });
+
+        // --- EXPORT DATA FUNCTION (EXCEL, WORD, PDF) ---
+        window.exportData = function(view, format) {
+            let filtered = [];
+            if (view === 'rsvp') {
+                const q = document.getElementById('search-rsvp').value.toLowerCase();
+                filtered = rawData.filter(d => d.Nama.toLowerCase().includes(q));
+                filtered.sort(dynamicSort(rsvpSort.key, rsvpSort.dir));
+            } else {
+                const q = document.getElementById('search-scan').value.toLowerCase();
+                filtered = invitationList.filter(d => d.guest_name.toLowerCase().includes(q));
+                filtered.sort(dynamicSort(scanSort.key, scanSort.dir));
+            }
+
+            if (filtered.length === 0) {
+                showToast("Tidak ada data untuk diekspor.", "warning");
+                return;
+            }
+
+            const rows = filtered.map((item, index) => {
+                if (view === 'rsvp') {
+                    return [
+                        index + 1,
+                        item.Nama,
+                        item.Status,
+                        item.Jumlah,
+                        item.Ucapan || '-',
+                        new Date(item.created_at).toLocaleString('id-ID')
+                    ];
+                } else {
+                    return [
+                        index + 1,
+                        item.guest_name,
+                        new Date(item.created_at).toLocaleString('id-ID'),
+                        item.scanned_at ? new Date(item.scanned_at).toLocaleString('id-ID') : '-',
+                        item.is_scanned ? 'Hadir' : 'Menunggu'
+                    ];
+                }
+            });
+
+            const filename = `Laporan_${view}_${new Date().toISOString().slice(0, 10)}`;
+
+            if (format === 'excel') {
+                const headers = view === 'rsvp' 
+                    ? [['No', 'Nama Tamu', 'Status Kehadiran', 'Jumlah Tamu', 'Ucapan', 'Tanggal Kirim']] 
+                    : [['No', 'Nama Tamu', 'Tanggal Dibuat', 'Tanggal Scan', 'Status Absensi']];
+                
+                const worksheet = XLSX.utils.aoa_to_sheet(headers.concat(rows));
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, view === 'rsvp' ? "RSVP" : "Scan Tamu");
+                XLSX.writeFile(workbook, `${filename}.xlsx`);
+                showToast("Data berhasil diekspor ke Excel!", "success");
+            } 
+            else if (format === 'word') {
+                let tableHtml = `
+                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+                <head>
+                    <meta charset="utf-8">
+                    <title>Laporan ${view === 'rsvp' ? 'RSVP' : 'Scan Tamu'}</title>
+                    <style>
+                        body { font-family: 'Arial', sans-serif; }
+                        h2 { text-align: center; color: #1e293b; margin-bottom: 20px; }
+                        table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+                        th { background-color: #4f46e5; color: white; border: 1px solid #cbd5e1; padding: 10px; text-align: left; font-size: 12px; text-transform: uppercase; }
+                        td { border: 1px solid #cbd5e1; padding: 10px; font-size: 11px; }
+                        tr:nth-child(even) { background-color: #f8fafc; }
+                    </style>
+                </head>
+                <body>
+                    <h2>LAPORAN ${view === 'rsvp' ? 'RSVP & UCAPAN' : 'CHECK-IN SCAN TAMU'}</h2>
+                    <p>Tanggal Unduh: ${new Date().toLocaleString('id-ID')}</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                ${view === 'rsvp' 
+                                    ? '<th>No</th><th>Nama Tamu</th><th>Status</th><th>Jumlah</th><th>Ucapan</th><th>Tanggal Kirim</th>' 
+                                    : '<th>No</th><th>Nama Tamu</th><th>Tanggal Dibuat</th><th>Tanggal Scan</th><th>Status</th>'}
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                rows.forEach(row => {
+                    tableHtml += '<tr>';
+                    row.forEach(cell => {
+                        tableHtml += `<td>${cell}</td>`;
+                    });
+                    tableHtml += '</tr>';
+                });
+
+                tableHtml += `
+                        </tbody>
+                    </table>
+                </body>
+                </html>
+                `;
+
+                const blob = new Blob(['\ufeff' + tableHtml], { type: 'application/msword' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${filename}.doc`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast("Data berhasil diekspor ke Word!", "success");
+            } 
+            else if (format === 'pdf') {
+                if (!window.jspdf) {
+                    showToast("Pustaka PDF belum terunduh sempurna.", "error");
+                    return;
+                }
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('l', 'mm', 'a4'); // Mode Landscape
+
+                doc.setFontSize(16);
+                doc.setTextColor(30, 41, 59);
+                const titleText = view === 'rsvp' ? 'LAPORAN KEHADIRAN & UCAPAN (RSVP)' : 'LAPORAN KEHADIRAN CHECK-IN (SCAN TAMU)';
+                doc.text(titleText, 14, 15);
+
+                doc.setFontSize(10);
+                doc.setTextColor(100, 116, 139);
+                doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 22);
+
+                const pdfHeaders = view === 'rsvp'
+                    ? ['No', 'Nama Tamu', 'Status', 'Jml', 'Ucapan', 'Tanggal Kirim']
+                    : ['No', 'Nama Tamu', 'Tanggal Dibuat', 'Tanggal Scan', 'Status'];
+
+                const pdfRows = rows.map(r => r.map(cell => cell.toString()));
+
+                doc.autoTable({
+                    startY: 28,
+                    head: [pdfHeaders],
+                    body: pdfRows,
+                    theme: 'striped',
+                    headStyles: { fillColor: [79, 70, 229] },
+                    styles: { fontSize: 9, cellPadding: 3, font: 'helvetica' },
+                    columnStyles: view === 'rsvp' ? {
+                        0: { cellWidth: 15 },
+                        1: { cellWidth: 50 },
+                        2: { cellWidth: 25 },
+                        3: { cellWidth: 15 },
+                        4: { cellWidth: 110 },
+                        5: { cellWidth: 50 }
+                    } : {
+                        0: { cellWidth: 15 },
+                        1: { cellWidth: 90 },
+                        2: { cellWidth: 55 },
+                        3: { cellWidth: 55 },
+                        4: { cellWidth: 45 }
+                    }
+                });
+
+                doc.save(`${filename}.pdf`);
+                showToast("Data berhasil diekspor ke PDF!", "success");
+            }
+        };
 
         // --- SETTINGS PAGE & BANK ---
         async function fetchSettings() {
