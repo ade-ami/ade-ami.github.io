@@ -100,7 +100,7 @@
         .glass-effect-wrapper:hover .glass-effect-shadow::after { opacity: 0.85; }
         .glass-effect-wrapper:hover .glass-reflection-overlay { opacity: 0.8; }
         .glass-effect-wrapper:active { transform: scale3d(0.97, 0.97, 1); }
-        .glass-effect-wrapper:active .glass-clock-face { box-shadow: inset 0 0.4em 0.4em rgba(0, 0, 0, 0.1), inset 0 -0.4em 0.4em rgba(255, 255, 255, 0.4), 0 5px 20px rgba(0, 0, 0, 0.1), 0 10px 30px rgba(0, 0, 0, 0.1), 0 15px 40px rgba(0, 0, 0, 0.1); }
+        .glass-effect-wrapper:active .glass-clock-face { box-shadow: inset 0 0.4em 0.4em rgba(0, 0, 0, 0.1), inset 0 -0.4em 0.4em rgba(255, 255, 255, 0.6), 10px 5px 15px rgba(0, 0, 0, calc(var(--shadow-layer1-opacity) + 0.1)), 10px 20px 30px rgba(0, 0, 0, calc(var(--shadow-layer2-opacity) + 0.1)), 10px 55px 60px rgba(0, 0, 0, calc(var(--shadow-layer3-opacity) + 0.1)); }
         .glass-effect-wrapper:active .glass-clock-face::after { --primary-light-angle: -75deg; }
         
         .clock-center-blur { position: absolute; width: 36px; height: 36px; top: 157px; left: 157px; background-color: rgba(255, 255, 255, 0.35); border-radius: 50%; backdrop-filter: blur(4px); z-index: 16; pointer-events: none; box-shadow: 0 0 20px rgba(255, 255, 255, 0.4), inset 0 0 8px rgba(255, 255, 255, 0.6); }
@@ -331,7 +331,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
+                    <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden flex flex-col">
                         <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4 bg-slate-50/40 dark:bg-slate-900/20">
                             <h3 class="font-black text-xs uppercase tracking-widest text-slate-400">Daftar Kehadiran & Ucapan</h3>
                             <div class="flex flex-wrap gap-2 w-full md:w-auto items-center justify-end">
@@ -357,6 +357,28 @@
                                 </thead>
                                 <tbody id="guest-table-body" class="divide-y divide-slate-50 dark:divide-slate-700"></tbody>
                             </table>
+                        </div>
+                        <!-- FOOTER PAGINASI RSVP -->
+                        <div class="p-6 border-t border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/20 dark:bg-slate-900/10">
+                            <div class="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400">
+                                <span>Tampilkan</span>
+                                <select id="rsvp-limit-select" onchange="changeRsvpLimit(this.value)" class="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white font-bold">
+                                    <option value="10">10</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                                <span>entri</span>
+                                <span id="rsvp-showing-text" class="ml-2 font-medium opacity-75"></span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button id="btn-rsvp-prev" onclick="changeRsvpPage(-1)" class="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed">
+                                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                                </button>
+                                <span id="rsvp-page-indicator" class="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-2 min-w-[120px] text-center">Halaman 1 dari 1</span>
+                                <button id="btn-rsvp-next" onclick="changeRsvpPage(1)" class="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed">
+                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -393,7 +415,7 @@
 
                 <!-- PAGE: SCAN TAMU -->
                 <div id="page-scan" class="page-content space-y-6 text-left">
-                    <div class="bg-white dark:bg-slate-800 rounded-[3rem] shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
+                    <div class="bg-white dark:bg-slate-800 rounded-[3rem] shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden flex flex-col">
                         <div class="p-8 border-b border-slate-100 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-6 bg-indigo-50/20 dark:bg-slate-900/20">
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/30"><i data-lucide="qr-code" class="w-6 h-6"></i></div>
@@ -434,6 +456,28 @@
                                 <tbody id="invitation-table-body" class="divide-y divide-slate-50 dark:divide-slate-700"></tbody>
                             </table>
                         </div>
+                        <!-- FOOTER PAGINASI SCAN -->
+                        <div class="p-6 border-t border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/20 dark:bg-slate-900/10">
+                            <div class="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400">
+                                <span>Tampilkan</span>
+                                <select id="scan-limit-select" onchange="changeScanLimit(this.value)" class="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white font-bold">
+                                    <option value="10">10</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                                <span>entri</span>
+                                <span id="scan-showing-text" class="ml-2 font-medium opacity-75"></span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button id="btn-scan-prev" onclick="changeScanPage(-1)" class="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed">
+                                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                                </button>
+                                <span id="scan-page-indicator" class="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-2 min-w-[120px] text-center">Halaman 1 dari 1</span>
+                                <button id="btn-scan-next" onclick="changeScanPage(1)" class="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed">
+                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -469,7 +513,7 @@
                     </div>
                 </div>
 
-                <!-- PAGE: SETTINGS (Full Restored) -->
+                <!-- PAGE: SETTINGS -->
                 <div id="page-settings" class="page-content space-y-10 text-left max-w-4xl mx-auto pb-24">
                     <div class="bg-white dark:bg-slate-800 rounded-[3rem] shadow-sm border border-slate-100 dark:border-slate-700 p-10 transition-colors">
                         <div class="flex items-center gap-4 mb-10">
@@ -658,6 +702,14 @@
         let scanSort = { key: 'created_at', dir: 'desc' };
         let isProcessing = false;
 
+        // Paginasi State Variables
+        let rsvpPage = 1;
+        let rsvpLimit = 10;
+        let scanPage = 1;
+        let scanLimit = 10;
+        let rsvpSearchQuery = "";
+        let scanSearchQuery = "";
+
         const BANK_LIST = [
             { name: 'BCA', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg' },
             { name: 'Mandiri', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/ad/Bank_Mandiri_logo_2016.svg' },
@@ -706,7 +758,6 @@
                 btn.innerText = "Masuk Sistem"; 
                 btn.disabled = false; 
             } else {
-                // Sembunyikan form login dengan GSAP lalu tunjukkan admin
                 TweenMax.to("#container", 0.4, { 
                     scale: 0, opacity: 0, ease: Sine.easeInOut, 
                     onComplete: () => {
@@ -811,24 +862,48 @@
         // --- DATA RSVP ---
         async function fetchData() {
             const { data, error } = await _supabase.from('guestbook').select('*');
-            if (!error) { rawData = data; renderRSVP(); }
+            if (!error) { 
+                rawData = data; 
+                rsvpPage = 1;
+                renderRSVP(); 
+            }
         }
 
         function renderRSVP() {
             const body = document.getElementById('guest-table-body'); 
             body.innerHTML = '';
             
-            const sortedData = [...rawData].sort(dynamicSort(rsvpSort.key, rsvpSort.dir));
-            document.getElementById('stat-total').innerText = sortedData.length;
-            document.getElementById('stat-hadir').innerText = sortedData.filter(d => d.Status === 'Hadir').length;
-            document.getElementById('stat-tidak').innerText = sortedData.filter(d => d.Status === 'Tidak Hadir').length;
-            document.getElementById('stat-Tamu').innerText = sortedData.reduce((a, b) => a + (parseInt(b.Jumlah) || 0), 0);
+            // 1. Filter dataset based on current search query
+            let filtered = [...rawData];
+            if (rsvpSearchQuery) {
+                filtered = filtered.filter(d => d.Nama.toLowerCase().includes(rsvpSearchQuery.toLowerCase()));
+            }
+
+            // 2. Sort the dataset
+            filtered.sort(dynamicSort(rsvpSort.key, rsvpSort.dir));
             
-            sortedData.forEach((item, index) => {
+            // 3. Update dashboard stat counters
+            document.getElementById('stat-total').innerText = rawData.length;
+            document.getElementById('stat-hadir').innerText = rawData.filter(d => d.Status === 'Hadir').length;
+            document.getElementById('stat-tidak').innerText = rawData.filter(d => d.Status === 'Tidak Hadir').length;
+            document.getElementById('stat-Tamu').innerText = rawData.reduce((a, b) => a + (parseInt(b.Jumlah) || 0), 0);
+            
+            // 4. Calculate pagination bounds
+            const totalItems = filtered.length;
+            const totalPages = Math.ceil(totalItems / rsvpLimit) || 1;
+            if (rsvpPage > totalPages) rsvpPage = totalPages;
+            if (rsvpPage < 1) rsvpPage = 1;
+            
+            const startIdx = (rsvpPage - 1) * rsvpLimit;
+            const endIdx = Math.min(startIdx + rsvpLimit, totalItems);
+            const pageData = filtered.slice(startIdx, endIdx);
+
+            // 5. Populate and render active items
+            pageData.forEach((item, index) => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors";
                 tr.innerHTML = `
-                    <td class="px-8 py-5 text-slate-400 font-bold">${index+1}</td>
+                    <td class="px-8 py-5 text-slate-400 font-bold">${startIdx + index + 1}</td>
                     <td class="px-8 py-5 font-bold dark:text-white text-left">${item.Nama}</td>
                     <td class="px-8 py-5 text-center"><span class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase ${item.Status === 'Hadir' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">${item.Status}</span></td>
                     <td class="px-8 py-5 text-center font-black text-sm">${item.Jumlah}</td>
@@ -839,48 +914,74 @@
                     </td>`;
                 body.appendChild(tr);
             });
+
+            // 6. Refresh the RSVP pagination controls
+            document.getElementById('rsvp-showing-text').innerText = totalItems > 0 
+                ? `(menampilkan ${startIdx + 1} - ${endIdx} dari ${totalItems} entri)` 
+                : `(tidak ada entri)`;
+            document.getElementById('rsvp-page-indicator').innerText = `Halaman ${rsvpPage} dari ${totalPages}`;
+            document.getElementById('btn-rsvp-prev').disabled = rsvpPage <= 1;
+            document.getElementById('btn-rsvp-next').disabled = rsvpPage >= totalPages;
+
             lucide.createIcons();
         }
 
         function filterRSVP() {
-            const q = document.getElementById('search-rsvp').value.toLowerCase();
-            const filtered = rawData.filter(d => d.Nama.toLowerCase().includes(q));
-            const body = document.getElementById('guest-table-body');
-            body.innerHTML = '';
-            filtered.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors";
-                tr.innerHTML = `
-                    <td class="px-8 py-5 text-slate-400 font-bold">${index+1}</td>
-                    <td class="px-8 py-5 font-bold dark:text-white text-left">${item.Nama}</td>
-                    <td class="px-8 py-5 text-center"><span class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase ${item.Status === 'Hadir' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">${item.Status}</span></td>
-                    <td class="px-8 py-5 text-center font-black text-sm">${item.Jumlah}</td>
-                    <td class="px-8 py-5 italic opacity-60 truncate max-w-[250px] font-medium text-left">${item.Ucapan || '-'}</td>
-                    <td class="px-8 py-5 font-mono text-[10px] opacity-50 text-right">${new Date(item.created_at).toLocaleString('id-ID')}</td>
-                    <td class="px-8 py-5 text-center">
-                        <button onclick='openEditModal(${JSON.stringify(item)})' class="p-2.5 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all"><i data-lucide="edit" class="w-4 h-4"></i></button>
-                    </td>`;
-                body.appendChild(tr);
-            });
-            lucide.createIcons();
+            rsvpSearchQuery = document.getElementById('search-rsvp').value.trim();
+            rsvpPage = 1; // Reset to page 1 during new search filtering
+            renderRSVP();
         }
+
+        window.changeRsvpLimit = (val) => {
+            rsvpLimit = parseInt(val);
+            rsvpPage = 1;
+            renderRSVP();
+        };
+
+        window.changeRsvpPage = (direction) => {
+            rsvpPage += direction;
+            renderRSVP();
+        };
 
         // --- SCAN LOGIC ---
         async function fetchInvitationList() {
             const { data, error } = await _supabase.from('invitation_list').select('*');
-            if (!error) { invitationList = data; renderScan(); }
+            if (!error) { 
+                invitationList = data; 
+                scanPage = 1;
+                renderScan(); 
+            }
         }
         
         function renderScan() {
             const body = document.getElementById('invitation-table-body'); 
             body.innerHTML = '';
-            const sortedData = [...invitationList].sort(dynamicSort(scanSort.key, scanSort.dir));
             
-            sortedData.forEach((item, index) => {
+            // 1. Filter dataset based on current search query
+            let filtered = [...invitationList];
+            if (scanSearchQuery) {
+                filtered = filtered.filter(d => d.guest_name.toLowerCase().includes(scanSearchQuery.toLowerCase()));
+            }
+
+            // 2. Sort the dataset
+            filtered.sort(dynamicSort(scanSort.key, scanSort.dir));
+            
+            // 3. Calculate pagination bounds
+            const totalItems = filtered.length;
+            const totalPages = Math.ceil(totalItems / scanLimit) || 1;
+            if (scanPage > totalPages) scanPage = totalPages;
+            if (scanPage < 1) scanPage = 1;
+            
+            const startIdx = (scanPage - 1) * scanLimit;
+            const endIdx = Math.min(startIdx + scanLimit, totalItems);
+            const pageData = filtered.slice(startIdx, endIdx);
+
+            // 4. Populate and render active items
+            pageData.forEach((item, index) => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors";
                 tr.innerHTML = `
-                    <td class="px-8 py-5 text-slate-400 font-bold">${index+1}</td>
+                    <td class="px-8 py-5 text-slate-400 font-bold">${startIdx + index + 1}</td>
                     <td class="px-8 py-5 font-bold dark:text-white text-left">${item.guest_name}</td>
                     <td class="px-8 py-5 text-center opacity-50 font-mono text-[10px]">${new Date(item.created_at).toLocaleString('id-ID')}</td>
                     <td class="px-8 py-5 text-center font-mono text-[10px] text-indigo-500">${item.scanned_at ? new Date(item.scanned_at).toLocaleString('id-ID') : '-'}</td>
@@ -896,35 +997,34 @@
                     </td>`;
                 body.appendChild(tr);
             });
+
+            // 5. Refresh the Invitation pagination controls
+            document.getElementById('scan-showing-text').innerText = totalItems > 0 
+                ? `(menampilkan ${startIdx + 1} - ${endIdx} dari ${totalItems} entri)` 
+                : `(tidak ada entri)`;
+            document.getElementById('scan-page-indicator').innerText = `Halaman ${scanPage} dari ${totalPages}`;
+            document.getElementById('btn-scan-prev').disabled = scanPage <= 1;
+            document.getElementById('btn-scan-next').disabled = scanPage >= totalPages;
+
+            lucide.createIcons();
         }
 
         function filterScan() {
-            const q = document.getElementById('search-scan').value.toLowerCase();
-            const filtered = invitationList.filter(d => d.guest_name.toLowerCase().includes(q));
-            
-            const body = document.getElementById('invitation-table-body'); 
-            body.innerHTML = '';
-            filtered.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors";
-                tr.innerHTML = `
-                    <td class="px-8 py-5 text-slate-400 font-bold">${index+1}</td>
-                    <td class="px-8 py-5 font-bold dark:text-white text-left">${item.guest_name}</td>
-                    <td class="px-8 py-5 text-center opacity-50 font-mono text-[10px]">${new Date(item.created_at).toLocaleString('id-ID')}</td>
-                    <td class="px-8 py-5 text-center font-mono text-[10px] text-indigo-500">${item.scanned_at ? new Date(item.scanned_at).toLocaleString('id-ID') : '-'}</td>
-                    <td class="px-8 py-5 text-center">
-                        <span class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase ${item.is_scanned ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-400'}">
-                            ${item.is_scanned ? 'Hadir' : 'Menunggu'}
-                        </span>
-                    </td>
-                    <td class="px-8 py-5 text-center">
-                        <button onclick="toggleManualCheckIn('${item.id}', ${!item.is_scanned})" class="px-4 py-2 text-[10px] font-black rounded-xl transition-all ${item.is_scanned ? 'bg-slate-100 text-slate-400' : 'bg-indigo-600 text-white shadow-lg shadow-blue-900/20 active:scale-95'} uppercase tracking-widest">
-                            ${item.is_scanned ? 'BATAL' : 'CHECK-IN'}
-                        </button>
-                    </td>`;
-                body.appendChild(tr);
-            });
+            scanSearchQuery = document.getElementById('search-scan').value.trim();
+            scanPage = 1; // Reset to page 1 during new search filtering
+            renderScan();
         }
+
+        window.changeScanLimit = (val) => {
+            scanLimit = parseInt(val);
+            scanPage = 1;
+            renderScan();
+        };
+
+        window.changeScanPage = (direction) => {
+            scanPage += direction;
+            renderScan();
+        };
 
         function startScanner() {
             document.getElementById('scanner-section').classList.remove('hidden');
@@ -1269,7 +1369,6 @@
                 return;
             }
 
-            // Pengecekan nama ganda (duplikat)
             const isDuplicate = invitationList.some(guest => guest.guest_name.toLowerCase() === guestName.toLowerCase());
             if (isDuplicate) {
                 showResultModal("warning", "Nama Sudah Ada", `Nama <b>${guestName}</b> yang Anda masukkan sudah ada di dalam daftar undangan.`);
@@ -1281,18 +1380,14 @@
             lucide.createIcons();
 
             try {
-                // 1. Simpan ke Supabase
                 const { error } = await _supabase.from('invitation_list').insert([{ guest_name: guestName }]);
                 if (error) throw error;
 
-                // 2. Refresh List
                 fetchInvitationList();
 
-                // 3. Buka WhatsApp
                 const message = encodeURIComponent(updateGenPreview());
                 window.open(`https://api.whatsapp.com/send?text=${message}`, '_blank');
                 
-                // 4. Kosongkan input setelah berhasil (Opsional)
                 document.getElementById('gen-guestName').value = '';
                 updateGenPreview();
             } catch (err) {
