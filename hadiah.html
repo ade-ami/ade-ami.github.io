@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Penerimaan Hadiah - Meja Tamu</title>
-     <link href="img/logo.png" rel="icon">
+    <link href="img/logo.png" rel="icon">
     
     <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -136,7 +136,7 @@
         </div>
     </main>
 
-    <!-- Modal Success/Error -->
+    <!-- Modal Success/Error/Warning -->
     <div id="modal-feedback" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
         <div id="modal-feedback-content" class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl transform scale-90 transition-all duration-300 text-center">
             <div id="modal-icon" class="w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-6 shadow-inner">
@@ -144,7 +144,7 @@
             </div>
             <h3 id="modal-title" class="text-xl font-black text-slate-800 dark:text-white mb-2 transition-colors duration-300">Berhasil!</h3>
             <p id="modal-message" class="text-sm text-slate-500 dark:text-slate-400 font-medium mb-8 transition-colors duration-300">Data hadiah telah berhasil disimpan ke dalam database.</p>
-            <button onclick="closeModal()" class="w-full py-4 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-black rounded-2xl text-xs uppercase tracking-widest transition-colors">Tutup</button>
+            <button onclick="closeModal()" class="w-full py-4 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-black rounded-2xl text-xs uppercase tracking-widest transition-colors">Mengerti & Tutup</button>
         </div>
     </div>
 
@@ -193,6 +193,7 @@
             }
         }
 
+        // --- STREAMING_CHUNK:Menyusun Fitur Autocomplete Pencarian... ---
         // --- LOGIC DROPDOWN PENCARIAN NAMA ---
         function showGuestDropdown() {
             document.getElementById('guest-dropdown').classList.remove('hidden');
@@ -251,7 +252,7 @@
             }
         }
 
-        // --- STREAMING_CHUNK:Menyimpan data dan Feedback... ---
+        // --- STREAMING_CHUNK:Menyimpan Data dengan Cek Duplikasi... ---
         // --- SUBMIT DATA KE SUPABASE ---
         document.getElementById('form-hadiah').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -260,20 +261,42 @@
             const btnText = document.getElementById('btn-text');
             const originalText = btnText.innerText;
             
-            btn.disabled = true;
-            btnText.innerHTML = "Menyimpan...";
+            const senderName = document.getElementById('input-sender').value.trim();
             
-            const payload = {
-                sender_name: document.getElementById('input-sender').value.trim(),
-                gift_type: document.getElementById('input-type').value,
-                amount: document.getElementById('input-type').value === 'Uang' ? parseFloat(document.getElementById('input-amount').value || 0) : 0,
-                description: document.getElementById('input-desc').value.trim()
-            };
-
+            btn.disabled = true;
+            btnText.innerHTML = "Memeriksa & Menyimpan...";
+            
             try {
-                const { error } = await _supabase.from('gifts').insert([payload]);
+                // 1. CEK DUPLIKASI NAMA DI TABEL GIFTS
+                const { data: existingGifts, error: checkError } = await _supabase
+                    .from('gifts')
+                    .select('sender_name')
+                    .ilike('sender_name', senderName) // ilike mengabaikan huruf besar/kecil
+                    .limit(1);
+
+                if (checkError) throw checkError;
+
+                // Jika nama sudah ada di tabel gifts
+                if (existingGifts && existingGifts.length > 0) {
+                    showModal('warning', 'Nama Sudah Ada', `Tamu bernama <b class="text-slate-800 dark:text-white">${senderName}</b> sudah tercatat memberikan hadiah.<br><br>Jika ini tamu yang berbeda, mohon tambahkan keterangan di namanya (Contoh: "<b>${senderName} Kantor</b>").`);
+                    
+                    // Kembalikan status tombol
+                    btn.disabled = false;
+                    btnText.innerHTML = originalText;
+                    return; // Hentikan proses simpan
+                }
+
+                // 2. PROSES SIMPAN JIKA NAMA BELUM ADA
+                const payload = {
+                    sender_name: senderName,
+                    gift_type: document.getElementById('input-type').value,
+                    amount: document.getElementById('input-type').value === 'Uang' ? parseFloat(document.getElementById('input-amount').value || 0) : 0,
+                    description: document.getElementById('input-desc').value.trim()
+                };
+
+                const { error: insertError } = await _supabase.from('gifts').insert([payload]);
                 
-                if (error) throw error;
+                if (insertError) throw insertError;
                 
                 // Jika sukses
                 showModal('success', 'Tersimpan!', `Hadiah dari <b class="dark:text-white text-slate-800">${payload.sender_name}</b> berhasil dicatat.`);
@@ -283,13 +306,17 @@
 
             } catch (err) {
                 console.error(err);
-                showModal('error', 'Gagal', 'Terjadi kesalahan saat menyimpan data. Cek koneksi Anda.');
+                showModal('error', 'Gagal', 'Terjadi kesalahan saat memeriksa/menyimpan data. Cek koneksi Anda.');
             } finally {
-                btn.disabled = false;
-                btnText.innerHTML = originalText;
+                // Kembalikan tombol jika tidak di-return sebelumnya
+                if (btn.disabled && btnText.innerHTML === "Memeriksa & Menyimpan...") {
+                    btn.disabled = false;
+                    btnText.innerHTML = originalText;
+                }
             }
         });
 
+        // --- STREAMING_CHUNK:Menangani Dinamika Tampilan Modal... ---
         // --- MODAL FEEDBACK ---
         function showModal(type, title, message) {
             const modal = document.getElementById('modal-feedback');
@@ -302,6 +329,9 @@
             if (type === 'success') {
                 iconContainer.className = "w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-6 shadow-inner bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400";
                 iconContainer.innerHTML = '<i data-lucide="check-circle-2" class="w-10 h-10"></i>';
+            } else if (type === 'warning') {
+                iconContainer.className = "w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-6 shadow-inner bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400";
+                iconContainer.innerHTML = '<i data-lucide="alert-triangle" class="w-10 h-10"></i>';
             } else {
                 iconContainer.className = "w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-6 shadow-inner bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400";
                 iconContainer.innerHTML = '<i data-lucide="x-circle" class="w-10 h-10"></i>';
