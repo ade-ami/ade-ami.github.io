@@ -988,6 +988,7 @@
             setTimeout(() => { document.getElementById('modal-result').classList.add('hidden'); }, 300);
         }
 
+        // --- STREAMING_CHUNK:Menyusun Logic Pengambilan Data RSVP dan Filter... ---
         // --- DATA RSVP ---
         async function fetchData() {
             const { data, error } = await _supabase.from('guestbook').select('*');
@@ -1207,6 +1208,7 @@
             fetchInvitationList();
         }
 
+        // --- STREAMING_CHUNK:Memodifikasi Form Hadiah untuk Mencegah Duplikasi... ---
         // --- GIFTS LOGIC ---
         async function fetchGifts() {
             // Note: will show error quietly if table doesn't exist yet. 
@@ -1368,27 +1370,84 @@
             setTimeout(() => { document.getElementById('crud-gifts-modal').classList.add('hidden'); }, 300);
         }
 
+        // EVENT LISTENER FORM HADIAH UPDATE (PENGECEKAN DUPLIKASI NAMA)
         document.getElementById('crud-gifts-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            const btnSubmit = e.target.querySelector('button[type="submit"]');
+            const originalBtnHtml = btnSubmit.innerHTML;
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = "MEMERIKSA & MENYIMPAN...";
+
             const id = document.getElementById('gifts-entry-id').value;
+            const senderName = document.getElementById('gifts-sender').value.trim();
             const payload = { 
-                sender_name: document.getElementById('gifts-sender').value, 
+                sender_name: senderName, 
                 gift_type: document.getElementById('gifts-type').value, 
                 amount: document.getElementById('gifts-type').value === 'Uang' ? parseFloat(document.getElementById('gifts-amount').value || 0) : 0, 
                 description: document.getElementById('gifts-desc').value 
             };
             
-            if (id) {
-                await _supabase.from('gifts').update(payload).eq('id', id); 
-            } else {
-                await _supabase.from('gifts').insert([payload]); 
+            try {
+                // CEK DUPLIKASI NAMA DI TABEL GIFTS
+                if (!id) {
+                    // Jika mode TAMBAH BARU
+                    const { data: existingGifts, error: checkError } = await _supabase
+                        .from('gifts')
+                        .select('sender_name')
+                        .ilike('sender_name', senderName)
+                        .limit(1);
+
+                    if (checkError) throw checkError;
+
+                    if (existingGifts && existingGifts.length > 0) {
+                        showResultModal('warning', 'Nama Sudah Ada', `Tamu bernama <b class="text-slate-800 dark:text-white">${senderName}</b> sudah tercatat di data hadiah.<br><br>Jika ini tamu berbeda, mohon tambahkan keterangan di namanya (Contoh: "<b>${senderName} Kantor</b>").`);
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerHTML = originalBtnHtml;
+                        return; // Batalkan proses simpan
+                    }
+                } else {
+                    // Jika mode EDIT (Kecualikan ID saat ini)
+                    const { data: existingGifts, error: checkError } = await _supabase
+                        .from('gifts')
+                        .select('id, sender_name')
+                        .ilike('sender_name', senderName)
+                        .neq('id', id)
+                        .limit(1);
+
+                    if (checkError) throw checkError;
+
+                    if (existingGifts && existingGifts.length > 0) {
+                        showResultModal('warning', 'Nama Sudah Ada', `Tamu bernama <b class="text-slate-800 dark:text-white">${senderName}</b> sudah tercatat di entri hadiah yang lain.<br><br>Gunakan nama yang lebih spesifik.`);
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerHTML = originalBtnHtml;
+                        return; // Batalkan proses simpan
+                    }
+                }
+
+                // EKSEKUSI SIMPAN/UPDATE JIKA LOLOS PENGECEKAN
+                if (id) {
+                    const { error } = await _supabase.from('gifts').update(payload).eq('id', id); 
+                    if (error) throw error;
+                } else {
+                    const { error } = await _supabase.from('gifts').insert([payload]); 
+                    if (error) throw error;
+                }
+                
+                closeGiftModal(); 
+                fetchGifts();
+                showResultModal("success", "Berhasil!", "Data hadiah berhasil disimpan.");
+
+            } catch (error) {
+                console.error(error);
+                showResultModal("error", "Gagal", "Terjadi kesalahan saat memeriksa/menyimpan data. Cek koneksi Anda.");
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = originalBtnHtml;
             }
-            closeGiftModal(); 
-            fetchGifts();
-            showToast("Data hadiah berhasil disimpan", "success");
         });
 
-
+        // --- STREAMING_CHUNK:Menyusun Utilitas CRUD Tambahan... ---
         // --- CRUD & SORTING ---
         function dynamicSort(key, direction) {
             return (a, b) => {
@@ -1585,6 +1644,7 @@
             }
         };
 
+        // --- STREAMING_CHUNK:Menyusun Logic Pengaturan & Finalisasi Animasi ---
         // --- SETTINGS PAGE & BANK ---
         async function fetchSettings() {
             const { data, error } = await _supabase.from('settings').select('*').eq('id', 1).single();
