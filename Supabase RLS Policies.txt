@@ -1,0 +1,147 @@
+-- =========================================================
+-- SCRIPT RLS POLICIES UNTUK TABEL: EXPENSES & GIFTS
+-- =========================================================
+
+-- ==========================================
+-- 1. POLICIES UNTUK TABEL EXPENSES (BIAYA)
+-- ==========================================
+
+-- Mengaktifkan fitur Row Level Security (RLS) di tabel expenses
+ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
+
+-- Menghapus policy lama jika sudah ada (mencegah error saat run ulang)
+DROP POLICY IF EXISTS "Akses Penuh Admin untuk Expenses" ON expenses;
+
+-- Membuat Policy: Hanya user yang sudah login (authenticated) 
+-- yang bisa melihat, menambah, mengubah, dan menghapus (ALL)
+CREATE POLICY "Akses Penuh Admin untuk Expenses"
+ON expenses FOR ALL
+TO authenticated
+USING (true)
+WITH CHECK (true);
+
+
+-- ==========================================
+-- 2. POLICIES UNTUK TABEL GIFTS (HADIAH)
+-- ==========================================
+
+-- Mengaktifkan fitur Row Level Security (RLS) di tabel gifts
+ALTER TABLE gifts ENABLE ROW LEVEL SECURITY;
+
+-- Menghapus policy lama jika sudah ada
+DROP POLICY IF EXISTS "Akses Penuh Admin untuk Gifts" ON gifts;
+DROP POLICY IF EXISTS "Izinkan Cek Nama Publik untuk Gifts" ON gifts;
+DROP POLICY IF EXISTS "Izinkan Tambah Hadiah Publik untuk Gifts" ON gifts;
+
+-- Membuat Policy 1: Akses penuh (ALL) untuk Admin yang sudah login
+CREATE POLICY "Akses Penuh Admin untuk Gifts"
+ON gifts FOR ALL
+TO authenticated
+USING (true)
+WITH CHECK (true);
+
+-- Membuat Policy 2: Izinkan Publik (anon) untuk MELIHAT data (SELECT)
+-- Ini diperlukan agar Form Meja Tamu bisa mengecek nama ganda tanpa harus login
+CREATE POLICY "Izinkan Cek Nama Publik untuk Gifts"
+ON gifts FOR SELECT
+TO anon
+USING (true);
+
+-- Membuat Policy 3: Izinkan Publik (anon) untuk MENAMBAH data (INSERT)
+-- Ini diperlukan agar Form Meja Tamu bisa menyimpan data hadiah ke database
+CREATE POLICY "Izinkan Tambah Hadiah Publik untuk Gifts"
+ON gifts FOR INSERT
+TO anon
+WITH CHECK (true);
+
+-- Catatan: Publik (anon) TETAP TIDAK BISA menghapus (DELETE) atau mengubah (UPDATE) data hadiah. 
+-- Keamanan data tetap terjaga.
+
+
+-- ==========================================
+-- 3. POLICIES UNTUK TABEL SETTINGS (PENGATURAN)
+-- ==========================================
+
+ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Akses Penuh Admin untuk Settings" ON settings;
+DROP POLICY IF EXISTS "Izinkan Baca Publik untuk Settings" ON settings;
+
+-- Policy 1: Akses penuh (ALL) untuk Admin
+CREATE POLICY "Akses Penuh Admin untuk Settings"
+ON settings FOR ALL
+TO authenticated
+USING (true)
+WITH CHECK (true);
+
+-- Policy 2: Izinkan Publik membaca data (SELECT) 
+-- (Wajib ada agar halaman web undangan bisa menampilkan nama mempelai, tanggal, dll)
+CREATE POLICY "Izinkan Baca Publik untuk Settings"
+ON settings FOR SELECT
+TO anon
+USING (true);
+
+
+-- ==========================================
+-- 4. POLICIES UNTUK TABEL GUESTBOOK (RSVP)
+-- ==========================================
+
+ALTER TABLE guestbook ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Akses Penuh Admin untuk Guestbook" ON guestbook;
+DROP POLICY IF EXISTS "Izinkan Baca Publik untuk Guestbook" ON guestbook;
+DROP POLICY IF EXISTS "Izinkan Isi Publik untuk Guestbook" ON guestbook;
+
+-- Policy 1: Akses penuh (ALL) untuk Admin
+CREATE POLICY "Akses Penuh Admin untuk Guestbook"
+ON guestbook FOR ALL
+TO authenticated
+USING (true)
+WITH CHECK (true);
+
+-- Policy 2: Izinkan Publik membaca data (SELECT)
+-- (Agar halaman web undangan bisa menampilkan daftar ucapan dari tamu lain)
+CREATE POLICY "Izinkan Baca Publik untuk Guestbook"
+ON guestbook FOR SELECT
+TO anon
+USING (true);
+
+-- Policy 3: Izinkan Publik menambah data (INSERT)
+-- (Agar tamu bisa mengisi form RSVP)
+CREATE POLICY "Izinkan Isi Publik untuk Guestbook"
+ON guestbook FOR INSERT
+TO anon
+WITH CHECK (true);
+
+
+-- ==========================================
+-- 5. POLICIES UNTUK TABEL INVITATION_LIST (SCAN TAMU)
+-- ==========================================
+
+ALTER TABLE invitation_list ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Akses Penuh Admin untuk Invitation List" ON invitation_list;
+DROP POLICY IF EXISTS "Izinkan Baca Publik untuk Invitation List" ON invitation_list;
+DROP POLICY IF EXISTS "Izinkan Update Publik untuk Invitation List" ON invitation_list;
+
+-- Policy 1: Akses penuh (ALL) untuk Admin
+CREATE POLICY "Akses Penuh Admin untuk Invitation List"
+ON invitation_list FOR ALL
+TO authenticated
+USING (true)
+WITH CHECK (true);
+
+-- Policy 2: Izinkan Publik membaca data (SELECT)
+-- (Agar petugas meja tamu tanpa login bisa mencari nama tamu atau mengecek tamu saat scan)
+CREATE POLICY "Izinkan Baca Publik untuk Invitation List"
+ON invitation_list FOR SELECT
+TO anon
+USING (true);
+
+-- Policy 3: Izinkan Publik mengubah data (UPDATE)
+-- (Agar sistem scan Meja Tamu bisa mengupdate kolom `is_scanned` = true setelah di-scan)
+CREATE POLICY "Izinkan Update Publik untuk Invitation List"
+ON invitation_list FOR UPDATE
+TO anon
+USING (true)
+WITH CHECK (true);
