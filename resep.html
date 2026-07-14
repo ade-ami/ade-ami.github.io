@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="img/logo.jpg" rel="icon">
+    <title>Admin - Manajemen Resep & Kalkulasi</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- HTML2PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- SheetJS (Excel Parser) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #111827; color: #f3f4f6; transition: background-color 0.3s, color 0.3s; }
+        .glass-panel { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glass-input { background: #374151; border: 1px solid #4b5563; color: white; outline: none; transition: all 0.2s; }
+        .glass-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; }
+        
+        .page-view { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
+        .page-view.active { display: block; opacity: 1; animation: fadeIn 0.4s ease-out; }
+        
+        #loginScreen.active, #mainApp.active { display: flex; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+
+        #sidebar { transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease; }
+        #sidebar.collapsed { width: 0; padding-left: 0; padding-right: 0; opacity: 0; overflow: hidden; border: none; }
+
+        /* --- OVERRIDE UNTUK LIGHT MODE --- */
+        body.light-mode { background-color: #f3f4f6 !important; color: #1f2937 !important; }
+        .light-mode .bg-\[\#111827\] { background-color: #f3f4f6 !important; }
+        .light-mode .bg-gray-900 { background-color: #ffffff !important; }
+        .light-mode .bg-gray-800, .light-mode .bg-\[\#1f2937\], .light-mode .bg-\[\#374151\] { background-color: #f9fafb !important; }
+        
+        .light-mode .glass-panel { background: rgba(255, 255, 255, 0.95) !important; border-color: rgba(0,0,0,0.1) !important; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1) !important; }
+        .light-mode .glass-input { background: #ffffff !important; border-color: #d1d5db !important; color: #1f2937 !important; }
+        .light-mode .glass-input:focus { border-color: #3b82f6 !important; box-shadow: 0 0 0 1px #3b82f6 !important; }
+        
+        .light-mode .text-white { color: #111827 !important; }
+        .light-mode .text-gray-500 { color: #6b7280 !important; }
+        .light-mode .text-gray-400 { color: #4b5563 !important; }
+        .light-mode .text-gray-300 { color: #374151 !important; }
+        .light-mode .text-gray-200 { color: #1f2937 !important; }
+        
+        .light-mode .text-emerald-400 { color: #059669 !important; }
+        .light-mode .text-emerald-300 { color: #047857 !important; }
+        .light-mode .text-red-400 { color: #dc2626 !important; }
+        .light-mode .text-red-300 { color: #b91c1c !important; }
+        .light-mode .text-blue-400 { color: #2563eb !important; }
+        .light-mode .text-blue-300 { color: #1d4ed8 !important; }
+        .light-mode .text-yellow-400 { color: #d97706 !important; }
+        .light-mode .text-purple-400 { color: #7e22ce !important; }
+
+        .light-mode .bg-white\/5 { background-color: rgba(0, 0, 0, 0.03) !important; }
+        .light-mode .hover\:bg-white\/5:hover { background-color: rgba(0, 0, 0, 0.06) !important; }
+        .light-mode .border-white\/5 { border-color: rgba(0, 0, 0, 0.06) !important; }
+        .light-mode .border-white\/10 { border-color: rgba(0, 0, 0, 0.12) !important; }
+        .light-mode .divide-white\/5 > :not([hidden]) ~ :not([hidden]) { border-color: rgba(0, 0, 0, 0.06) !important; }
+        
+        .light-mode #loginScreen { background: radial-gradient(ellipse at top, #f3f4f6, #e5e7eb, #d1d5db) !important; }
+        .light-mode .nav-btn.bg-white\/10 { background-color: rgba(0,0,0,0.08) !important; color: #2563eb !important; border-left-color: #2563eb !important; }
+        .light-mode .bg-black\/20 { background-color: rgba(0,0,0,0.04) !important; }
+        .light-mode .bg-black\/30 { background-color: rgba(0,0,0,0.06) !important; }
+        .light-mode .border-gray-700 { border-color: #e5e7eb !important; }
+        .light-mode .border-gray-600 { border-color: #d1d5db !important; }
+        .light-mode .bg-gray-700 { background-color: #f3f4f6 !important; color: #1f2937 !important; border: 1px solid #d1d5db; }
+        .light-mode .hover\:bg-gray-600:hover { background-color: #e5e7eb !important; }
+        .light-mode option { background-color: #ffffff !important; color: #1f2937 !important; }
+		
+        .light-mode ::-webkit-scrollbar-track { background: #f3f4f6; }
+        .light-mode ::-webkit-scrollbar-thumb { background: #cbd5e1; }
+        .light-mode ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="overflow-hidden h-screen flex flex-col relative bg-[#111827]">
+
+    <!-- Notifikasi Toast -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-[9999] flex flex-col gap-3"></div>
+
+    <div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-black page-view active">
+        <div class="glass-panel p-8 rounded-2xl shadow-2xl w-full max-w-md border-t-4 border-t-blue-500 mx-4">
+            <div class="text-center mb-8">
+                <i class="ph ph-lock-key text-5xl text-blue-400 mb-2"></i>
+                <h2 class="text-2xl font-bold text-white">Login Sistem</h2>
+                <p class="text-gray-400 text-sm mt-1">Gunakan akun Supabase Anda</p>
+            </div>
+            
+            <form onsubmit="event.preventDefault(); doLogin();" class="space-y-4" id="loginFormContainer">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                    <input type="email" id="loginEmail" class="glass-input w-full rounded-lg px-4 py-3" placeholder="admin@resep.com" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                    <input type="password" id="loginPassword" class="glass-input w-full rounded-lg px-4 py-3" placeholder="••••••••" required>
+                </div>
+                <button type="submit" id="btnLogin" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-lg transition-colors mt-4 shadow-[0_0_15px_rgba(37,99,235,0.5)]">
+                    Masuk <i class="ph ph-sign-in ml-1"></i>
+                </button>
+            </form>
+            
+            <div id="dbErrorBox" class="hidden mt-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-sm text-red-200">
+                <p class="font-bold mb-2 flex items-center gap-2"><i class="ph ph-warning-circle text-lg"></i> Tabel Database Belum Tersedia!</p>
+                <p class="mb-3 text-xs text-red-300">Harap copy dan jalankan script SQL migrasi Anda di menu <b>SQL Editor</b> pada dashboard Supabase, kemudian klik tombol di bawah ini.</p>
+                <button onclick="window.location.reload()" class="w-full py-2 bg-red-500 hover:bg-red-400 text-white rounded font-medium transition">Muat Ulang</button>
+            </div>
+        </div>
+    </div>
+
+    <header class="h-16 shrink-0 bg-gray-900 border-b border-white/5 flex items-center justify-between px-4 z-40 shadow-md">
+        <div class="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity group" onclick="toggleSidebar()" title="Sembunyikan/Tampilkan Menu">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+                <i class="ph ph-list text-white text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-white font-bold text-lg leading-tight">ResepApp</h1>
+                <p class="text-xs text-blue-400">Panel Admin</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <!-- Tombol Toggle Theme Ditambahkan Disini -->
+            <button onclick="toggleTheme()" id="themeToggleBtn" class="flex items-center justify-center w-9 h-9 bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 rounded-lg transition-colors border border-yellow-500/20" title="Beralih ke Mode Terang">
+                <i class="ph ph-sun text-lg"></i>
+            </button>
+            
+            <button onclick="fetchData(true)" class="flex items-center justify-center w-9 h-9 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-colors border border-blue-500/20" title="Refresh Data">
+                <i class="ph ph-arrows-clockwise text-lg"></i>
+            </button>
+            <button onclick="doLogout()" class="flex items-center justify-center gap-2 px-4 h-9 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg text-sm font-medium transition-colors border border-red-500/20">
+                <i class="ph ph-sign-out text-base"></i> <span class="hidden sm:inline">Logout</span>
+            </button>
+        </div>
+    </header>
+
+    <div id="mainApp" class="flex-1 overflow-hidden relative" style="display: none;">
+        <aside id="sidebar" class="w-64 bg-gray-900 border-r border-white/5 flex flex-col shrink-0 z-30 shadow-2xl absolute md:relative h-full -translate-x-full md:translate-x-0 transition-transform md:transition-all">
+            <nav class="flex-1 p-4 space-y-2 overflow-y-auto mt-2">
+                <button onclick="navigate('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+                    <i class="ph ph-squares-four text-xl"></i> <span class="font-medium text-sm whitespace-nowrap">Dashboard</span>
+                </button>
+                <div class="pt-4 pb-2 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap overflow-hidden">Kalkulasi</div>
+                <button onclick="navigate('resep')" id="nav-resep" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+                    <i class="ph ph-notebook text-xl"></i> <span class="font-medium text-sm whitespace-nowrap">Resep & Modal</span>
+                </button>
+                <button onclick="navigate('konversi')" id="nav-konversi" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+                    <i class="ph ph-arrows-left-right text-xl"></i> <span class="font-medium text-sm whitespace-nowrap">Konversi Satuan</span>
+                </button>
+                
+                <div class="pt-4 pb-2 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap overflow-hidden">Master Data</div>
+                <button onclick="navigate('bahan')" id="nav-bahan" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+                    <i class="ph ph-carrot text-xl"></i> <span class="font-medium text-sm whitespace-nowrap">Bahan Baku</span>
+                </button>
+                <button onclick="navigate('unit')" id="nav-unit" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+                    <i class="ph ph-scales text-xl"></i> <span class="font-medium text-sm whitespace-nowrap">Satuan Ukur</span>
+                </button>
+            </nav>
+        </aside>
+
+        <main class="flex-1 h-full overflow-y-auto bg-[#111827] relative pb-24" id="mainScrollArea">
+            <div class="p-4 md:p-8 max-w-7xl mx-auto w-full">
+                
+                <section id="view-dashboard" class="page-view active">
+                    <h2 class="text-2xl font-bold text-white mb-6">Overview Dashboard</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="glass-panel p-6 rounded-2xl border border-white/5 flex items-center gap-4 hover:-translate-y-1 transition-transform">
+                            <div class="w-14 h-14 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 text-2xl border border-blue-500/30 shrink-0"><i class="ph ph-notebook"></i></div>
+                            <div><p class="text-gray-400 text-xs uppercase tracking-wider">Total Resep</p><h3 class="text-2xl font-bold text-white" id="dash-resep">0</h3></div>
+                        </div>
+                        <div class="glass-panel p-6 rounded-2xl border border-white/5 flex items-center gap-4 hover:-translate-y-1 transition-transform">
+                            <div class="w-14 h-14 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-2xl border border-emerald-500/30 shrink-0"><i class="ph ph-carrot"></i></div>
+                            <div><p class="text-gray-400 text-xs uppercase tracking-wider">Bahan Baku</p><h3 class="text-2xl font-bold text-white" id="dash-bahan">0</h3></div>
+                        </div>
+                        <div class="glass-panel p-6 rounded-2xl border border-white/5 flex items-center gap-4 hover:-translate-y-1 transition-transform">
+                            <div class="w-14 h-14 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-2xl border border-purple-500/30 shrink-0"><i class="ph ph-scales"></i></div>
+                            <div><p class="text-gray-400 text-xs uppercase tracking-wider">Satuan Ukur</p><h3 class="text-2xl font-bold text-white" id="dash-unit">0</h3></div>
+                        </div>
+                        <div class="glass-panel p-6 rounded-2xl border border-white/5 flex items-center gap-4 hover:-translate-y-1 transition-transform">
+                            <div class="w-14 h-14 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-400 text-2xl border border-yellow-500/30 shrink-0"><i class="ph ph-arrows-left-right"></i></div>
+                            <div><p class="text-gray-400 text-xs uppercase tracking-wider">Aturan Konversi</p><h3 class="text-2xl font-bold text-white" id="dash-konversi">0</h3></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="view-unit" class="page-view">
+                    <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+                        <h2 class="text-2xl font-bold text-white">Master Satuan Ukur</h2>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <button onclick="exportUnitExcel()" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-3 py-2 rounded-lg text-xs flex items-center gap-1.5 font-medium transition-all">
+                                <i class="ph ph-file-xls text-base"></i> Export
+                            </button>
+                            <button onclick="document.getElementById('importUnitFile').click()" class="bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 px-3 py-2 rounded-lg text-xs flex items-center gap-1.5 font-medium transition-all">
+                                <i class="ph ph-upload-simple text-base"></i> Import
+                            </button>
+                            <input type="file" id="importUnitFile" class="hidden" accept=".xlsx,.xls,.csv" onchange="importUnitExcel(event)">
+                            <button onclick="openForm('unit')" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 shadow-[0_0_10px_rgba(147,51,234,0.4)] transition-all">
+                                <i class="ph ph-plus font-bold"></i> Satuan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-panel rounded-xl overflow-hidden shadow-xl border border-white/5 flex flex-col">
+                        <div class="p-4 bg-white/5 border-b border-white/10 flex justify-between items-center">
+                            <div class="flex items-center w-full max-w-sm">
+                                <i class="ph ph-magnifying-glass text-gray-400 mr-2"></i>
+                                <input type="text" id="searchUnit" oninput="renderUnit()" placeholder="Cari nama satuan..." class="bg-transparent border-none outline-none text-white text-sm w-full">
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <span class="text-xs text-gray-400">Tampil:</span>
+                                <select onchange="changeLimit('unit', this.value)" class="glass-input rounded px-2 py-1 text-xs bg-gray-800">
+                                    <option value="10">10</option><option value="50">50</option><option value="100">100</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm whitespace-nowrap">
+                                <thead class="bg-white/5 text-gray-400 border-b border-white/10">
+                                    <tr>
+                                        <th class="px-6 py-4 w-16">No</th>
+                                        <th class="px-6 py-4">Nama Satuan</th>
+                                        <th class="px-6 py-4">Simbol</th>
+                                        <th class="px-6 py-4 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-unit" class="text-gray-200 divide-y divide-white/5"></tbody>
+                            </table>
+                        </div>
+                        <div id="pg-unit"></div>
+                    </div>
+                </section>
+
+                <section id="view-bahan" class="page-view">
+                    <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+                        <h2 class="text-2xl font-bold text-white">Master Bahan Baku</h2>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <button onclick="exportBahanExcel()" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-3 py-2 rounded-lg text-xs flex items-center gap-1.5 font-medium transition-all">
+                                <i class="ph ph-file-xls text-base"></i> Export
+                            </button>
+                            <button onclick="document.getElementById('importBahanFile').click()" class="bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 px-3 py-2 rounded-lg text-xs flex items-center gap-1.5 font-medium transition-all">
+                                <i class="ph ph-upload-simple text-base"></i> Import
+                            </button>
+                            <input type="file" id="importBahanFile" class="hidden" accept=".xlsx,.xls,.csv" onchange="importBahanExcel(event)">
+                            <button onclick="openForm('bahan')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 shadow-[0_0_10px_rgba(16,185,129,0.4)] transition-all">
+                                <i class="ph ph-plus font-bold"></i>Bahan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-panel rounded-xl overflow-hidden shadow-xl border border-white/5 flex flex-col">
+                        <div class="p-4 bg-white/5 border-b border-white/10 flex justify-between items-center">
+                            <div class="flex items-center w-full max-w-sm">
+                                <i class="ph ph-magnifying-glass text-gray-400 mr-2"></i>
+                                <input type="text" id="searchBahan" oninput="renderBahan()" placeholder="Cari nama bahan..." class="bg-transparent border-none outline-none text-white text-sm w-full">
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <span class="text-xs text-gray-400">Tampil:</span>
+                                <select onchange="changeLimit('bahan', this.value)" class="glass-input rounded px-2 py-1 text-xs bg-gray-800">
+                                    <option value="10">10</option><option value="50">50</option><option value="100">100</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm whitespace-nowrap">
+                                <thead class="bg-white/5 text-gray-400 border-b border-white/10">
+                                    <tr>
+                                        <th class="px-6 py-4 w-12">No</th>
+                                        <th class="px-6 py-4">Nama Bahan</th>
+                                        <th class="px-6 py-4">Satuan Dasar</th>
+                                        <th class="px-6 py-4 text-right">Harga Beli</th>
+                                        <th class="px-6 py-4 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-bahan" class="text-gray-200 divide-y divide-white/5"></tbody>
+                            </table>
+                        </div>
+                        <div id="pg-bahan"></div>
+                    </div>
+                </section>
+                
+                <section id="view-konversi" class="page-view">
+                    <h2 class="text-2xl font-bold text-white mb-6">Alat Konversi & Aturan Dasar</h2>
+                    
+                    <div class="glass-panel p-6 rounded-xl border border-white/10 mb-8 max-w-2xl bg-gray-800/80 shadow-2xl">
+                        <div class="mb-4">
+                            <label class="block text-xs text-gray-400 mb-1">Pilih Kategori</label>
+                            <select id="calcCategory" class="glass-input w-full text-sm rounded block p-2.5 focus:border-yellow-500 bg-gray-800">
+                                <option value="massa">Massa</option>
+                                <option value="volume">Volume</option>
+                                <option value="lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="flex-1 flex flex-col gap-2">
+                                <input type="number" id="calcInput" value="1" oninput="calculateConversion()" class="glass-input text-white text-xl text-center rounded block w-full p-3 focus:border-yellow-500 transition-colors">
+                                <select id="calcUnitFrom" onchange="calculateConversion()" class="glass-input w-full text-sm rounded p-2.5 focus:border-yellow-500 bg-gray-800"></select>
+                            </div>
+                            <div class="text-xl font-bold text-gray-400">=</div>
+                            <div class="flex-1 flex flex-col gap-2">
+                                <input type="text" id="calcOutput" value="0" readonly class="bg-gray-800 border border-gray-600 text-white text-xl text-center rounded block w-full p-3 outline-none">
+                                <select id="calcUnitTo" onchange="calculateConversion()" class="glass-input w-full text-sm rounded p-2.5 focus:border-yellow-500 bg-gray-800"></select>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 mt-6">
+                            <span class="bg-yellow-500 text-gray-900 text-xs font-bold px-2 py-1 rounded">Formula</span>
+                            <span id="calcFormulaText" class="text-sm text-gray-300">Pilih satuan untuk melihat formula</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
+                        <h3 class="text-lg font-medium text-white">Daftar Aturan Konversi Sistem</h3>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <button onclick="exportKonversiExcel()" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-3 py-2 rounded-lg text-xs flex items-center gap-1.5 font-medium transition-all">
+                                <i class="ph ph-file-xls text-base"></i> Export
+                            </button>
+                            <button onclick="document.getElementById('importKonversiFile').click()" class="bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 px-3 py-2 rounded-lg text-xs flex items-center gap-1.5 font-medium transition-all">
+                                <i class="ph ph-upload-simple text-base"></i> Import
+                            </button>
+                            <input type="file" id="importKonversiFile" class="hidden" accept=".xlsx,.xls,.csv" onchange="importKonversiExcel(event)">
+                            <button onclick="openForm('konversi')" class="bg-yellow-600 hover:bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-[0_0_10px_rgba(202,138,4,0.4)] transition-all">
+                                <i class="ph ph-plus font-bold"></i> Konversi
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl overflow-hidden shadow-xl border border-white/5 flex flex-col">
+                        <div class="p-4 bg-white/5 border-b border-white/10 flex justify-between items-center">
+                            <div class="flex items-center w-full max-w-sm">
+                                <i class="ph ph-magnifying-glass text-gray-400 mr-2"></i>
+                                <input type="text" id="searchKonversi" oninput="renderKonversi()" placeholder="Cari dari/ke satuan..." class="bg-transparent border-none outline-none text-white text-sm w-full">
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <span class="text-xs text-gray-400">Tampil:</span>
+                                <select onchange="changeLimit('konversi', this.value)" class="glass-input rounded px-2 py-1 text-xs bg-gray-800">
+                                    <option value="10">10</option><option value="50">50</option><option value="100">100</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm whitespace-nowrap">
+                                <thead class="bg-white/5 text-gray-400 border-b border-white/10">
+                                    <tr>
+                                        <th class="px-6 py-4 w-12">No</th>
+                                        <th class="px-6 py-4">Satuan Awal (Dari)</th>
+                                        <th class="px-6 py-4">Satuan Tujuan (Ke)</th>
+                                        <th class="px-6 py-4">Pengali</th>
+                                        <th class="px-6 py-4 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-konversi" class="text-gray-200 divide-y divide-white/5"></tbody>
+                            </table>
+                        </div>
+                        <div id="pg-konversi"></div>
+                    </div>
+                </section>
+
+                <section id="view-resep" class="page-view">
+                    <h2 class="text-2xl font-bold text-white mb-6">Kalkulasi Kebutuhan Resep</h2>
+                    
+                    <div class="glass-panel p-6 rounded-xl mb-6 flex flex-col md:flex-row justify-between items-center gap-4 shadow-xl border border-white/5">
+                        <div class="w-full md:w-auto">
+                            <label class="block text-xs text-gray-400 mb-1">Pilih Master Resep</label>
+                            <select id="recipeSelect" onchange="calcRecipe()" class="glass-input rounded-lg px-4 py-2.5 text-sm w-full md:w-64 bg-gray-800 [&>option]:bg-gray-800">
+                                <option value="">-- Pilih Resep --</option>
+                            </select>
+                        </div>
+                        <div class="flex gap-4 items-end w-full md:w-auto">
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">Target Kebutuhan (Porsi/Pcs)</label>
+                                <input type="number" id="recipeTarget" value="10" oninput="calcRecipe()" class="glass-input rounded-lg px-4 py-2.5 text-sm w-full md:w-48 text-center font-bold">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="pdfPrintArea" class="glass-panel rounded-xl overflow-hidden shadow-2xl mb-6 border border-white/10 bg-gray-900">
+                        <div id="recipeHeaderInfo" class="p-6 border-b border-white/10 hidden">
+                            <h3 id="rH_nama" class="text-xl font-bold text-white"></h3>
+                            <p id="rH_info" class="text-sm text-gray-400 mt-1"></p>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm whitespace-nowrap">
+                                <thead class="bg-white/5 text-gray-300 border-b border-white/10">
+                                    <tr>
+                                        <th class="px-6 py-4 border-r border-white/5">Bahan Baku</th>
+                                        <th class="px-6 py-4 border-r border-white/5">Qty Dasar</th>
+                                        <th class="px-6 py-4 text-blue-400 border-r border-white/5">Target Kebutuhan</th>
+                                        <th class="px-6 py-4 text-right">Estimasi Harga</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="calcRecipeBody" class="text-gray-200 divide-y divide-white/5">
+                                    <tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">Pilih resep terlebih dahulu</td></tr>
+                                </tbody>
+                                <tfoot id="calcRecipeFoot" class="hidden">
+                                    <tr class="bg-black/20 border-t border-white/10">
+                                        <td colspan="3" class="px-6 py-3 text-right font-medium text-gray-300">Total Modal (HPP) :</td>
+                                        <td id="calcTotModal" class="px-6 py-3 text-right font-bold text-white text-base">Rp 0</td>
+                                    </tr>
+                                    <tr class="bg-black/20">
+                                        <td colspan="3" class="px-6 py-3 text-right font-bold text-gray-300">Margin Keuntungan 
+                                            <input type="number" id="calcMargin" value="40" oninput="calcRecipe()" class="glass-input w-16 text-center text-xs py-1 rounded border-none bg-gray-800 focus:ring-1 focus:ring-blue-500 outline-none">% :
+                                        </td>
+                                        <td id="calcTotMargin" class="px-6 py-3 text-right font-medium text-emerald-400">+ Rp 0</td>
+                                    </tr>
+                                    <tr class="bg-white/5 border-t border-white/10">
+                                        <td colspan="3" class="px-6 py-4 text-right font-bold text-white">Saran Harga Jual (Total) :</td>
+                                        <td id="calcTotJual" class="px-6 py-4 text-right font-bold text-yellow-400 text-lg">Rp 0</td>
+                                    </tr>
+                                    <tr class="bg-white/5 border-t border-white/10">
+                                        <td colspan="3" class="px-6 py-3 text-right font-bold text-white-400">Harga Jual per Porsi:</td>
+                                        <td id="calcTotJualPerPorsi" class="px-6 py-3 text-right font-bold text-blue-500 text-lg">Rp 0</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        
+                        <div id="recipeInstructionBox" class="hidden p-6 bg-black/30 border-t border-white/10">
+                            <h4 class="text-sm font-bold text-blue-400 mb-2 uppercase tracking-wide">Cara Memasak :</h4>
+                            <div id="rH_cara" class="text-gray-300 text-sm whitespace-pre-wrap font-sans leading-relaxed"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end mb-12" id="pdfBtnContainer" style="display:none;">
+                        <button onclick="downloadPDF()" class="bg-red-500 hover:bg-red-400 text-white font-semibold px-5 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all">
+                            <i class="ph ph-file-pdf text-lg"></i> Cetak Laporan PDF
+                        </button>
+                    </div>
+
+                    <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+                        <h3 class="text-lg font-medium text-white">Kelola Master Data Resep</h3>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <button onclick="exportResepExcel()" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-3 py-2 rounded-lg text-xs flex items-center gap-1.5 font-medium transition-all">
+                                <i class="ph ph-file-xls text-base"></i> Export
+                            </button>
+                            <button onclick="document.getElementById('importResepFile').click()" class="bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 px-3 py-2 rounded-lg text-xs flex items-center gap-1.5 font-medium transition-all">
+                                <i class="ph ph-upload-simple text-base"></i> Import
+                            </button>
+                            <input type="file" id="importResepFile" class="hidden" accept=".xlsx,.xls,.csv" onchange="importResepExcel(event)">
+                            <button onclick="openForm('resep')" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 shadow-[0_0_10px_rgba(37,99,235,0.4)] transition-all">
+                                <i class="ph ph-plus font-bold"></i> Resep Baru
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-panel rounded-xl overflow-hidden shadow-xl border border-white/5 flex flex-col">
+                        <div class="p-4 bg-white/5 border-b border-white/10 flex justify-between items-center">
+                            <div class="flex items-center w-full max-w-sm">
+                                <i class="ph ph-magnifying-glass text-gray-400 mr-2"></i>
+                                <input type="text" id="searchResep" oninput="renderResepTable()" placeholder="Cari nama resep..." class="bg-transparent border-none outline-none text-white text-sm w-full">
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <span class="text-xs text-gray-400">Tampil:</span>
+                                <select onchange="changeLimit('resep', this.value)" class="glass-input rounded px-2 py-1 text-xs bg-gray-800">
+                                    <option value="10">10</option><option value="50">50</option><option value="100">100</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm whitespace-nowrap">
+                                <thead class="bg-white/5 text-gray-400 border-b border-white/10">
+                                    <tr>
+                                        <th class="px-6 py-4 w-12">No</th>
+                                        <th class="px-6 py-4">Nama Resep</th>
+                                        <th class="px-6 py-4">Porsi Dasar</th>
+                                        <th class="px-6 py-4 text-center">Total Komposisi</th>
+                                        <th class="px-6 py-4 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-resep" class="text-gray-200 divide-y divide-white/5"></tbody>
+                            </table>
+                        </div>
+                        <div id="pg-resep"></div>
+                    </div>
+                </section>
+                
+            </div>
+        </main>
+    </div>
+
+    <div id="modalOverlay" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity opacity-0">
+        <div class="glass-panel p-6 rounded-2xl w-full max-w-lg shadow-2xl relative mx-4 border-t-4 border-t-blue-500 bg-gray-900 transform scale-95 transition-transform duration-300">
+            <button type="button" onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"><i class="ph ph-x text-xl"></i></button>
+            <h3 id="modalTitle" class="text-lg font-bold text-white mb-6">Form</h3>
+            
+            <form id="modalForm" onsubmit="handleModalSubmit(event)">
+                <div id="modalBody" class="space-y-4"></div>
+                <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-white/10">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg text-sm bg-gray-700 text-white hover:bg-gray-600 transition-colors">Batal</button>
+                    <button type="submit" id="modalSubmitBtn" class="px-5 py-2 rounded-lg text-sm font-semibold bg-blue-500 hover:bg-blue-400 text-white shadow-[0_0_10px_rgba(59,130,246,0.4)] transition-colors">Simpan</button>
+                </div>
+            </form>
+
+            <div id="modalAlternativeContent" class="hidden"></div>
+        </div>
+    </div>
+
+    <div id="customConfirmModal" class="fixed inset-0 z-[200] hidden flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity opacity-0">
+        <div class="glass-panel p-6 rounded-2xl w-full max-w-sm shadow-2xl relative mx-4 border-t-4 border-t-red-500 bg-gray-900 transform scale-95 transition-transform duration-300 text-center">
+            <i class="ph ph-warning-circle text-5xl text-red-400 mb-3"></i>
+            <h3 class="text-lg font-bold text-white mb-2">Konfirmasi Hapus</h3>
+            <p id="confirmMessage" class="text-sm text-gray-300 mb-6">Anda yakin ingin menghapus data ini?</p>
+            <div class="flex justify-center gap-3">
+                <button type="button" onclick="closeConfirm()" class="px-4 py-2 rounded-lg text-sm bg-gray-700 text-white hover:bg-gray-600 transition-colors">Batal</button>
+                <button type="button" id="confirmActionBtn" class="px-5 py-2 rounded-lg text-sm font-semibold bg-red-500 hover:bg-red-400 text-white transition-colors shadow-[0_0_10px_rgba(239,68,68,0.4)]">Ya, Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://pphpawzqxuoquabfykga.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_YGpsmOytSLV1uV63Q1y7yA_vFRde6tc';
+        const supabaseApp = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let db = { ukurans: [], bahans: [], reseps: [], resep_bahans: [], konversis: [] };
+        
+        let pageState = {
+            unit: { page: 1, limit: 10 },
+            bahan: { page: 1, limit: 10 },
+            konversi: { page: 1, limit: 10 },
+            resep: { page: 1, limit: 10 }
+        };
+
+        let currentModalContext = { type: null, id: null };
+        let isSidebarCollapsed = false;
+        let confirmCallback = null;
+
+        const fRupiah = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+
+        function applyTheme(theme) {
+            const body = document.body;
+            const btn = document.getElementById('themeToggleBtn');
+            if (!btn) return;
+            const icon = btn.querySelector('i');
+
+            if (theme === 'light') {
+                body.classList.add('light-mode');
+                icon.className = 'ph ph-moon text-lg';
+                btn.className = 'flex items-center justify-center w-9 h-9 bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20 rounded-lg transition-colors border border-indigo-500/20';
+                btn.title = 'Beralih ke Mode Gelap';
+            } else {
+                body.classList.remove('light-mode');
+                icon.className = 'ph ph-sun text-lg';
+                btn.className = 'flex items-center justify-center w-9 h-9 bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 rounded-lg transition-colors border border-yellow-500/20';
+                btn.title = 'Beralih ke Mode Terang';
+            }
+            localStorage.setItem('theme', theme);
+        }
+
+        function toggleTheme() {
+            const isLight = document.body.classList.contains('light-mode');
+            applyTheme(isLight ? 'dark' : 'light');
+        }
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            applyTheme(savedTheme);
+        }
+
+        function showToast(msg, type='success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const color = type === 'success' ? 'emerald' : type === 'error' ? 'red' : 'blue';
+            const icon = type === 'success' ? 'check-circle' : 'warning-circle';
+            
+            // Tambahkan class background solid untuk kompatibilitas light/dark mode yang lebih baik di toast
+            toast.className = `bg-${color}-500/20 border border-${color}-500/50 text-${color}-300 px-4 py-3 rounded-lg flex items-center gap-3 shadow-lg transform transition-all translate-x-full opacity-0 backdrop-blur-md`;
+            toast.innerHTML = `<i class="ph ph-${icon} text-xl"></i> <span class="text-sm font-medium">${msg}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.remove('translate-x-full', 'opacity-0'), 10);
+            setTimeout(() => { 
+                toast.classList.add('opacity-0'); 
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function customConfirm(msg, callback) {
+            document.getElementById('confirmMessage').innerText = msg;
+            confirmCallback = callback;
+            const m = document.getElementById('customConfirmModal');
+            m.classList.remove('hidden');
+            setTimeout(() => { m.classList.remove('opacity-0'); m.querySelector('.glass-panel').classList.remove('scale-95'); }, 10);
+        }
+
+        function closeConfirm() {
+            const m = document.getElementById('customConfirmModal');
+            m.classList.add('opacity-0'); m.querySelector('.glass-panel').classList.add('scale-95');
+            setTimeout(() => { m.classList.add('hidden'); confirmCallback = null; }, 300);
+        }
+
+        document.getElementById('confirmActionBtn').addEventListener('click', () => {
+            if(confirmCallback) confirmCallback();
+            closeConfirm();
+        });
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            isSidebarCollapsed = !isSidebarCollapsed;
+            
+            if(window.innerWidth < 768) {
+                if(isSidebarCollapsed) sidebar.classList.remove('-translate-x-full');
+                else sidebar.classList.add('-translate-x-full');
+            } else {
+                sidebar.classList.toggle('collapsed');
+            }
+        }
+
+        async function checkAuthSession() {
+            const { data: { session } } = await supabaseApp.auth.getSession();
+            if (session) {
+                proceedToApp();
+            } else {
+                document.getElementById('loginScreen').classList.add('active');
+            }
+        }
+
+        async function doLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const btn = document.getElementById('btnLogin');
+
+            if(!email || !password) return showToast('Harap isi Email dan Password!', 'error');
+
+            btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> Memproses...`;
+            btn.disabled = true;
+
+            const { data, error } = await supabaseApp.auth.signInWithPassword({ email: email, password: password });
+
+            if (error) {
+                showToast(error.message, 'error');
+                btn.innerHTML = `Masuk <i class="ph ph-sign-in ml-1"></i>`;
+                btn.disabled = false;
+            } else {
+                showToast('Login Berhasil!');
+                proceedToApp();
+            }
+        }
+
+        async function doLogout() {
+            await supabaseApp.auth.signOut();
+            window.location.reload(); 
+        }
+
+        async function proceedToApp() {
+            document.getElementById('loginScreen').classList.remove('active');
+            setTimeout(() => {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'flex';
+                void document.getElementById('mainApp').offsetWidth;
+                document.getElementById('mainApp').classList.add('active');
+            }, 300);
+            
+            await fetchData(); 
+            navigate('dashboard');
+        }
+
+        function navigate(view) {
+            document.querySelectorAll('section.page-view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('bg-white/10', 'text-white', 'border-l-2', 'border-blue-500');
+            });
+            
+            document.getElementById('view-' + view)?.classList.add('active');
+            
+            const activeBtn = document.getElementById('nav-' + view);
+            if(activeBtn) activeBtn.classList.add('bg-white/10', 'text-white', 'border-l-2', 'border-blue-500');
+
+            if(view === 'dashboard') updateDashboard();
+            
+            if(window.innerWidth < 768 && document.getElementById('sidebar').classList.contains('-translate-x-full') === false) {
+                toggleSidebar();
+            }
+        }
+
+        async function fetchData(isRefresh = false) {
+            try {
+                const [u, b, r, rb, k] = await Promise.all([
+                    supabaseApp.from('ukurans').select('*').order('nama'),
+                    supabaseApp.from('bahans').select('*, ukurans(*)').order('nama'),
+                    supabaseApp.from('reseps').select('*').order('nama'),
+                    supabaseApp.from('resep_bahans').select('*, bahans(*, ukurans(*))'),
+                    supabaseApp.from('konversis').select('*').order('id')
+                ]);
+                
+                if (u.error && u.error.code === '42P01') {
+                    document.getElementById('loginFormContainer').classList.add('hidden');
+                    document.getElementById('dbErrorBox').classList.remove('hidden');
+                    return;
+                }
+                if (u.error) throw u.error;
+
+                db.ukurans = u.data || [];
+                db.bahans = b.data || [];
+                db.reseps = r.data || [];
+                db.resep_bahans = rb.data || []; 
+                db.konversis = k.data || [];
+
+                renderUnit();
+                renderBahan();
+                renderKonversi();
+                renderResepTable();
+                populateRecipeSelect();
+                populateKonversiSelect();
+                updateDashboard();
+
+                if(isRefresh) showToast('Data berhasil disinkronkan!');
+            } catch (err) {
+                showToast('Gagal memuat data: ' + err.message, 'error');
+            }
+        }
+
+        function updateDashboard() {
+            document.getElementById('dash-resep').textContent = db.reseps.length;
+            document.getElementById('dash-bahan').textContent = db.bahans.length;
+            document.getElementById('dash-unit').textContent = db.ukurans.length;
+            document.getElementById('dash-konversi').textContent = db.konversis.length;
+        }
+
+        function changeLimit(module, limit) {
+            pageState[module].limit = parseInt(limit);
+            pageState[module].page = 1;
+            callRender(module);
+        }
+
+        function changePage(module, diff) {
+            pageState[module].page += diff;
+            callRender(module);
+        }
+        
+        function callRender(module) {
+            if(module === 'unit') renderUnit();
+            if(module === 'bahan') renderBahan();
+            if(module === 'resep') renderResepTable();
+            if(module === 'konversi') renderKonversi();
+        }
+
+        function getPaginationHTML(module, total) {
+            const state = pageState[module];
+            const totalPages = Math.ceil(total / state.limit) || 1;
+            const start = total === 0 ? 0 : (state.page - 1) * state.limit + 1;
+            const end = Math.min(state.page * state.limit, total);
+            
+            return `
+                <div class="flex justify-between items-center p-4 bg-white/5 border-t border-white/10 text-sm">
+                    <span class="text-gray-400">Hal ${state.page} dr ${totalPages} &nbsp;|&nbsp; Menampilkan ${start}-${end} dari ${total} data</span>
+                    <div class="flex gap-2">
+                        <button onclick="changePage('${module}', -1)" ${state.page === 1 ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-300 disabled:opacity-40 hover:bg-gray-700 border border-gray-600 transition-colors">&laquo; Prev</button>
+                        <button onclick="changePage('${module}', 1)" ${state.page >= totalPages ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-300 disabled:opacity-40 hover:bg-gray-700 border border-gray-600 transition-colors">Next &raquo;</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function paginateArray(array, module) {
+            const state = pageState[module];
+            const totalPages = Math.ceil(array.length / state.limit);
+            if (state.page > totalPages && totalPages > 0) state.page = totalPages;
+            
+            const start = (state.page - 1) * state.limit;
+            return array.slice(start, start + state.limit);
+        }
+
+        function renderUnit() {
+            const search = document.getElementById('searchUnit')?.value.toLowerCase() || '';
+            const filtered = db.ukurans.filter(u => u.nama.toLowerCase().includes(search));
+            const paginated = paginateArray(filtered, 'unit');
+            const startNo = (pageState.unit.page - 1) * pageState.unit.limit;
+
+            const html = paginated.map((u, i) => `
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="px-6 py-3 text-gray-500">${startNo + i + 1}</td>
+                    <td class="px-6 py-3 font-medium text-purple-400">${u.nama}</td>
+                    <td class="px-6 py-3">${u.simbol || '-'}</td>
+                    <td class="px-6 py-3 text-center flex justify-center gap-2">
+                        <button onclick="openForm('unit', ${u.id})" class="text-blue-400 hover:text-blue-300 p-1 bg-white/5 rounded" title="Edit"><i class="ph ph-pencil-simple text-lg"></i></button>
+                        <button onclick="deleteData('ukurans', ${u.id})" class="text-red-400 hover:text-red-300 p-1 bg-white/5 rounded" title="Hapus"><i class="ph ph-trash text-lg"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('table-unit').innerHTML = html || `<tr><td colspan="4" class="text-center py-6 text-gray-500">Data tidak ditemukan</td></tr>`;
+            document.getElementById('pg-unit').innerHTML = getPaginationHTML('unit', filtered.length);
+        }
+
+        function renderBahan() {
+            const search = document.getElementById('searchBahan')?.value.toLowerCase() || '';
+            const filtered = db.bahans.filter(b => b.nama.toLowerCase().includes(search));
+            const paginated = paginateArray(filtered, 'bahan');
+            const startNo = (pageState.bahan.page - 1) * pageState.bahan.limit;
+            
+            const html = paginated.map((b, i) => `
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="px-6 py-3 text-gray-500">${startNo + i + 1}</td>
+                    <td class="px-6 py-3 font-medium">${b.nama}</td>
+                    <td class="px-6 py-3">${b.jumlah_dasar} ${b.ukurans?.nama || ''}</td>
+                    <td class="px-6 py-3 text-right text-emerald-400">${fRupiah(b.harga_beli)}</td>
+                    <td class="px-6 py-3 text-center flex justify-center gap-2">
+                        <button onclick="openForm('bahan', ${b.id})" class="text-blue-400 hover:text-blue-300 p-1 bg-white/5 rounded" title="Edit"><i class="ph ph-pencil-simple text-lg"></i></button>
+                        <button onclick="deleteData('bahans', ${b.id})" class="text-red-400 hover:text-red-300 p-1 bg-white/5 rounded" title="Hapus"><i class="ph ph-trash text-lg"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('table-bahan').innerHTML = html || `<tr><td colspan="5" class="text-center py-6 text-gray-500">Data tidak ditemukan</td></tr>`;
+            document.getElementById('pg-bahan').innerHTML = getPaginationHTML('bahan', filtered.length);
+        }
+
+        function renderKonversi() {
+            const search = document.getElementById('searchKonversi')?.value.toLowerCase() || '';
+            const mappedKonversi = db.konversis.map(k => {
+                const dari = db.ukurans.find(u => u.id === k.dari_ukuran_id);
+                const ke = db.ukurans.find(u => u.id === k.ke_ukuran_id);
+                return { ...k, dariName: dari?.nama || '-', keName: ke?.nama || '-' };
+            });
+
+            const filtered = mappedKonversi.filter(k => k.dariName.toLowerCase().includes(search) || k.keName.toLowerCase().includes(search));
+            const paginated = paginateArray(filtered, 'konversi');
+            const startNo = (pageState.konversi.page - 1) * pageState.konversi.limit;
+
+            const html = paginated.map((k, i) => `
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="px-6 py-3 text-gray-500">${startNo + i + 1}</td>
+                    <td class="px-6 py-3 font-medium text-yellow-400">${k.dariName}</td>
+                    <td class="px-6 py-3">${k.keName}</td>
+                    <td class="px-6 py-3 font-mono text-gray-300">${k.pengali}</td>
+                    <td class="px-6 py-3 text-center flex justify-center gap-2">
+                        <button onclick="openForm('konversi', ${k.id})" class="text-blue-400 hover:text-blue-300 p-1 bg-white/5 rounded" title="Edit"><i class="ph ph-pencil-simple text-lg"></i></button>
+                        <button onclick="deleteData('konversis', ${k.id})" class="text-red-400 hover:text-red-300 p-1 bg-white/5 rounded" title="Hapus"><i class="ph ph-trash text-lg"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('table-konversi').innerHTML = html || `<tr><td colspan="5" class="text-center py-6 text-gray-500">Data tidak ditemukan</td></tr>`;
+            document.getElementById('pg-konversi').innerHTML = getPaginationHTML('konversi', filtered.length);
+            
+            populateKonversiSelect();
+            calculateConversion(); 
+        }
+
+        function renderResepTable() {
+            const search = document.getElementById('searchResep')?.value.toLowerCase() || '';
+            const filtered = db.reseps.filter(r => r.nama.toLowerCase().includes(search));
+            const paginated = paginateArray(filtered, 'resep');
+            const startNo = (pageState.resep.page - 1) * pageState.resep.limit;
+            
+            const html = paginated.map((r, i) => {
+                const count = db.resep_bahans.filter(rb => rb.resep_id === r.id).length;
+                return `
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="px-6 py-3 text-gray-500">${startNo + i + 1}</td>
+                    <td class="px-6 py-3 font-medium text-blue-400">${r.nama}</td>
+                    <td class="px-6 py-3">${r.porsi_dasar} Porsi</td>
+                    <td class="px-6 py-3 text-center"><span class="bg-blue-500/20 text-blue-400 px-2 py-1 rounded text-xs">${count} Bahan</span></td>
+                    <td class="px-6 py-3 text-center flex justify-center gap-2">
+                        <button onclick="manageResepBahan(${r.id})" class="text-emerald-400 hover:text-emerald-300 p-1 bg-white/5 rounded" title="Kelola Komposisi"><i class="ph ph-list-plus text-lg"></i></button>
+                        <button onclick="openForm('resep', ${r.id})" class="text-blue-400 hover:text-blue-300 p-1 bg-white/5 rounded" title="Edit Master Resep"><i class="ph ph-pencil-simple text-lg"></i></button>
+                        <button onclick="deleteData('reseps', ${r.id})" class="text-red-400 hover:text-red-300 p-1 bg-white/5 rounded" title="Hapus"><i class="ph ph-trash text-lg"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+            
+            document.getElementById('table-resep').innerHTML = html || `<tr><td colspan="5" class="text-center py-6 text-gray-500">Data kosong</td></tr>`;
+            document.getElementById('pg-resep').innerHTML = getPaginationHTML('resep', filtered.length);
+        }
+
+        function openModal() {
+            const m = document.getElementById('modalOverlay');
+            m.classList.remove('hidden');
+            setTimeout(() => { m.classList.remove('opacity-0'); m.querySelector('.glass-panel').classList.remove('scale-95'); }, 10);
+            
+            setTimeout(() => {
+                const firstInput = m.querySelector('input:not([type=hidden]), select, textarea');
+                if(firstInput) firstInput.focus();
+            }, 300);
+        }
+        
+        function closeModal() {
+            const m = document.getElementById('modalOverlay');
+            m.classList.add('opacity-0'); m.querySelector('.glass-panel').classList.add('scale-95');
+            setTimeout(() => { m.classList.add('hidden'); }, 300);
+        }
+
+        function openForm(type, id = null) {
+            currentModalContext = { type, id };
+            const body = document.getElementById('modalBody');
+            let html = '';
+            let item = null;
+            let titleColor = 'blue';
+            
+            if(type === 'unit') {
+                titleColor = 'purple';
+                if (id) item = db.ukurans.find(u => u.id === id);
+                document.getElementById('modalTitle').innerHTML = id ? `Edit Satuan` : `Tambah Satuan Baru`;
+                html = `
+                    <input type="text" id="f_nama" placeholder="Nama Satuan (cth: Kilogram)" value="${item ? item.nama : ''}" class="glass-input w-full rounded-lg p-3 text-sm mb-3" required>
+                    <input type="text" id="f_simbol" placeholder="Simbol (cth: kg)" value="${item?.simbol ? item.simbol : ''}" class="glass-input w-full rounded-lg p-3 text-sm">
+                `;
+            }
+            else if(type === 'bahan') {
+                titleColor = 'emerald';
+                if (id) item = db.bahans.find(b => b.id === id);
+                document.getElementById('modalTitle').innerHTML = id ? `Edit Bahan Baku` : `Tambah Bahan Baru`;
+                const opt = db.ukurans.map(u => `<option value="${u.id}" ${item && item.ukuran_id === u.id ? 'selected' : ''}>${u.nama}</option>`).join('');
+                html = `
+                    <input type="text" id="f_nama" placeholder="Nama Bahan" value="${item ? item.nama : ''}" class="glass-input w-full rounded-lg p-3 text-sm mb-3" required>
+                    <div class="flex gap-3 mb-3">
+                        <input type="number" step="0.01" id="f_qty" placeholder="Jumlah Dasar" value="${item ? item.jumlah_dasar : ''}" class="glass-input w-1/2 rounded-lg p-3 text-sm" required>
+                        <select id="f_unit" class="glass-input w-1/2 rounded-lg p-3 text-sm bg-gray-800">${opt}</select>
+                    </div>
+                    <input type="number" id="f_harga" placeholder="Harga Beli Total (Rp)" value="${item ? item.harga_beli : ''}" class="glass-input w-full rounded-lg p-3 text-sm" required>
+                `;
+            }
+            else if(type === 'konversi') {
+                titleColor = 'yellow';
+                if (id) item = db.konversis.find(k => k.id === id);
+                document.getElementById('modalTitle').innerHTML = id ? `Edit Aturan Konversi` : `Buat Aturan Konversi`;
+                const optU = db.ukurans.map(u => `<option value="${u.id}">${u.nama}</option>`).join('');
+                html = `
+                    <select id="f_kat" class="glass-input w-full rounded-lg p-3 text-sm mb-3 bg-gray-800">
+                        <option value="massa" ${item?.kategori === 'massa' ? 'selected':''}>Massa</option>
+                        <option value="volume" ${item?.kategori === 'volume' ? 'selected':''}>Volume</option>
+                        <option value="lainnya" ${item?.kategori === 'lainnya' ? 'selected':''}>Lainnya</option>
+                    </select>
+                    <div class="flex gap-3 items-center mb-3">
+                        <select id="f_dari" class="glass-input flex-1 rounded-lg p-3 text-sm bg-gray-800"><option value="" disabled selected>Dari...</option>${optU}</select>
+                        <span class="text-gray-400 font-bold">=</span>
+                        <select id="f_ke" class="glass-input flex-1 rounded-lg p-3 text-sm bg-gray-800"><option value="" disabled selected>Ke...</option>${optU}</select>
+                    </div>
+                    <input type="number" step="0.000001" id="f_kali" placeholder="Nilai Pengali (Multiplier)" value="${item ? item.pengali : ''}" class="glass-input w-full rounded-lg p-3 text-sm mb-3 text-yellow-500 font-mono" required>
+                `;
+                setTimeout(() => {
+                    if(item) {
+                        document.getElementById('f_dari').value = item.dari_ukuran_id;
+                        document.getElementById('f_ke').value = item.ke_ukuran_id;
+                    }
+                }, 50);
+            }
+            else if(type === 'resep') {
+                titleColor = 'blue';
+                if (id) item = db.reseps.find(r => r.id === id);
+                document.getElementById('modalTitle').innerHTML = id ? `Pengaturan Master Resep` : `Buat Resep Baru`;
+                html = `
+                    <input type="text" id="f_nama" placeholder="Nama Resep / Menu" value="${item ? item.nama : ''}" class="glass-input w-full rounded-lg p-3 text-sm mb-3" required>
+                    <input type="number" step="0.1" id="f_qty" placeholder="Porsi Dasar Output (cth: 1)" value="${item ? item.porsi_dasar : ''}" class="glass-input w-full rounded-lg p-3 text-sm mb-3" required>
+                    <textarea id="f_cara" placeholder="Cara memasak atau catatan instruksi..." rows="4" class="glass-input w-full rounded-lg p-3 text-sm">${item && item.cara_masak ? item.cara_masak : ''}</textarea>
+                `;
+            }
+
+            const mPanel = document.querySelector('#modalOverlay .glass-panel');
+            mPanel.className = mPanel.className.replace(/border-t-[a-z]+-500/, `border-t-${titleColor}-500`);
+            
+            const btn = document.getElementById('modalSubmitBtn');
+            btn.className = btn.className.replace(/bg-[a-z]+-500 hover:bg-[a-z]+-400/, `bg-${titleColor}-500 hover:bg-${titleColor}-400`);
+            btn.innerHTML = `Simpan`;
+
+            document.getElementById('modalForm').classList.remove('hidden');
+            document.getElementById('modalAlternativeContent').classList.add('hidden');
+            body.innerHTML = html;
+            openModal();
+        }
+
+        function manageResepBahan(resepId) {
+            currentModalContext = { type: 'pivot_inline', id: resepId };
+            const resep = db.reseps.find(r => r.id === resepId);
+            const myBahans = db.resep_bahans.filter(rb => rb.resep_id === resepId);
+            const availableBahans = db.bahans.filter(b => !myBahans.some(mb => mb.bahan_id === b.id));
+            
+            document.getElementById('modalTitle').innerHTML = `Komposisi: <span class="text-blue-500">${resep.nama}</span>`;
+            
+            let html = '<div class="space-y-2 max-h-64 overflow-y-auto pr-2 mb-4">';
+            if(myBahans.length > 0) {
+                myBahans.forEach(rb => {
+                    const b = rb.bahans;
+                    const qty = rb.jumlah_dibutuhkan;
+                    const unit = b.ukurans?.nama || '';
+                    html += `
+                    <div class="bg-gray-800 border border-gray-700 p-3 rounded-lg flex justify-between items-center group transition-colors">
+                        <div class="text-sm text-gray-300">
+                            ${b.nama} <span class="text-blue-500 font-medium">(${qty} ${unit})</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="openEditPivot(${rb.id}, ${resepId}, '${b.nama.replace(/'/g, "\\'")}', ${qty}, '${unit}')" class="text-gray-400 hover:text-blue-500 p-1 transition" title="Edit Takaran"><i class="ph ph-pencil-simple text-lg"></i></button>
+                            <button type="button" onclick="deletePivot(${rb.id}, ${resepId})" class="text-gray-400 hover:text-red-500 p-1 transition" title="Hapus Bahan"><i class="ph ph-x-circle text-lg"></i></button>
+                        </div>
+                    </div>`;
+                });
+            } else {
+                html += `<div class="text-center py-5 text-gray-500 text-sm border border-dashed border-gray-600 rounded-lg">Belum ada bahan ditambahkan.</div>`;
+            }
+            html += `</div>`;
+
+            html += `
+            <div class="flex gap-3 items-center border-t border-gray-600 pt-4 mt-2">
+                <select id="p_bahan" class="glass-input flex-1 rounded-lg p-2.5 text-sm bg-gray-800 border-gray-600 outline-none" required>
+                    <option value="" disabled selected>-- Cari / Pilih Bahan --</option>
+                    ${availableBahans.map(b => `<option value="${b.id}">${b.nama}</option>`).join('')}
+                </select>
+                <input type="number" step="0.01" id="p_qty" placeholder="Qty" class="glass-input w-24 rounded-lg p-2.5 text-sm text-center bg-gray-800 border-gray-600 outline-none" required>
+            </div>
+            `;
+
+            document.getElementById('modalBody').innerHTML = html;
+            
+            const mPanel = document.querySelector('#modalOverlay .glass-panel');
+            mPanel.className = mPanel.className.replace(/border-t-[a-z]+-500/, `border-t-blue-500`);
+            
+            const btn = document.getElementById('modalSubmitBtn');
+            btn.className = btn.className.replace(/bg-[a-z]+-500 hover:bg-[a-z]+-400/, `bg-blue-500 hover:bg-blue-400`);
+            btn.innerHTML = `Simpan`;
+
+            document.getElementById('modalForm').classList.remove('hidden');
+            document.getElementById('modalAlternativeContent').classList.add('hidden');
+            
+            openModal();
+        }
+
+        function openEditPivot(pivotId, resepId, bahanName, currentQty, unitName) {
+            const container = document.getElementById('modalAlternativeContent');
+            if(!container) return;
+
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <p class="text-sm text-gray-400">Ubah takaran untuk <b class="text-blue-500">${bahanName}</b>:</p>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Takaran Baru (${unitName})</label>
+                        <input type="number" step="0.01" id="edit_pivot_qty" value="${currentQty}" class="glass-input w-full rounded-lg p-3 text-sm font-bold text-center outline-none focus:border-blue-500" required onkeydown="if(event.key === 'Enter') saveEditPivot(${pivotId}, ${resepId})">
+                    </div>
+                    <div class="flex justify-end gap-3 pt-4 border-t border-white/10 mt-4">
+                        <button type="button" onclick="manageResepBahan(${resepId})" class="px-4 py-2 rounded-lg text-sm bg-gray-700 text-white hover:bg-gray-600 transition-colors">Batal</button>
+                        <button type="button" onclick="saveEditPivot(${pivotId}, ${resepId})" class="px-5 py-2 rounded-lg text-sm font-semibold bg-blue-500 hover:bg-blue-400 text-white shadow-[0_0_10px_rgba(59,130,246,0.4)] transition-colors">Simpan</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('modalForm').classList.add('hidden');
+            container.classList.remove('hidden');
+            
+            setTimeout(() => {
+                const input = document.getElementById('edit_pivot_qty');
+                if (input) { input.focus(); input.select(); }
+            }, 50);
+        }
+
+        async function saveEditPivot(pivotId, resepId) {
+            const qty = document.getElementById('edit_pivot_qty').value;
+            if(!qty) return showToast('Harap isi takaran!', 'error');
+
+            const { error } = await supabaseApp.from('resep_bahans').update({ jumlah_dibutuhkan: qty, updated_at: new Date().toISOString() }).eq('id', pivotId);
+            
+            if (error) {
+                showToast(error.message, 'error');
+            } else {
+                showToast('Takaran diperbarui!');
+                await fetchData();
+                manageResepBahan(resepId);
+            }
+        }
+
+        async function deletePivot(pivotId, resepId) {
+            customConfirm('Hapus bahan ini dari komposisi resep?', async () => {
+                const { error } = await supabaseApp.from('resep_bahans').delete().eq('id', pivotId);
+                if (error) return showToast(error.message, 'error');
+                
+                showToast('Bahan dihapus!');
+                await fetchData();
+                manageResepBahan(resepId);
+            });
+        }
+
+        async function handleModalSubmit(event) {
+            event.preventDefault();
+            
+            let { type, id } = currentModalContext;
+            let table = '';
+            let payload = {};
+            let editId = id; 
+
+            if (type === 'unit') {
+                table = 'ukurans';
+                payload = { nama: document.getElementById('f_nama').value, simbol: document.getElementById('f_simbol').value };
+            } 
+            else if (type === 'bahan') {
+                table = 'bahans';
+                payload = { 
+                    nama: document.getElementById('f_nama').value, 
+                    jumlah_dasar: document.getElementById('f_qty').value, 
+                    ukuran_id: document.getElementById('f_unit').value, 
+                    harga_beli: document.getElementById('f_harga').value 
+                };
+            }
+            else if (type === 'konversi') {
+                table = 'konversis';
+                payload = {
+                    kategori: document.getElementById('f_kat').value,
+                    dari_ukuran_id: document.getElementById('f_dari').value,
+                    ke_ukuran_id: document.getElementById('f_ke').value,
+                    pengali: document.getElementById('f_kali').value
+                };
+            }
+            else if (type === 'resep') {
+                table = 'reseps';
+                payload = { 
+                    nama: document.getElementById('f_nama').value, 
+                    porsi_dasar: document.getElementById('f_qty').value, 
+                    cara_masak: document.getElementById('f_cara').value 
+                };
+            }
+            else if (type === 'pivot_inline') {
+                const pBahanVal = document.getElementById('p_bahan').value;
+                if(!pBahanVal) {
+                    showToast("Silakan pilih bahan baku!", "error");
+                    return;
+                }
+                payload = {
+                    resep_id: id,
+                    bahan_id: pBahanVal,
+                    jumlah_dibutuhkan: document.getElementById('p_qty').value
+                };
+                
+                savePivotInline(payload, id);
+                return;
+            }
+
+            await saveData(table, payload, editId);
+        }
+
+        async function savePivotInline(payload, resepId) {
+            payload.created_at = new Date().toISOString();
+            payload.updated_at = new Date().toISOString();
+
+            const response = await supabaseApp.from('resep_bahans').insert([payload]);
+
+            if(response.error) { 
+                showToast(response.error.message, 'error'); 
+                return; 
+            }
+            
+            showToast('Bahan berhasil ditambahkan!');
+            await fetchData();
+            manageResepBahan(resepId);
+        }
+
+        async function saveData(table, payload, id = null) {
+            payload.updated_at = new Date().toISOString();
+
+            let response;
+            if (id) {
+                response = await supabaseApp.from(table).update(payload).eq('id', id);
+            } else {
+                payload.created_at = new Date().toISOString();
+                response = await supabaseApp.from(table).insert([payload]);
+            }
+
+            if(response.error) { 
+                showToast(response.error.message, 'error'); 
+                return; 
+            }
+            
+            showToast(id ? 'Perubahan berhasil disimpan!' : 'Berhasil ditambahkan!');
+            closeModal();
+            fetchData();
+        }
+
+        async function deleteData(table, id) {
+            customConfirm('Yakin ingin menghapus data master ini secara permanen?', async () => {
+                const { error } = await supabaseApp.from(table).delete().eq('id', id);
+                if(error) { showToast(error.message, 'error'); return; }
+                showToast('Data berhasil dihapus!');
+                fetchData();
+            });
+        }
+
+        function populateRecipeSelect() {
+            const sel = document.getElementById('recipeSelect');
+            sel.innerHTML = `<option value="">-- Pilih Resep --</option>` + db.reseps.map(r => `<option value="${r.id}">${r.nama}</option>`).join('');
+        }
+
+        function calcRecipe() {
+            const id = parseInt(document.getElementById('recipeSelect').value);
+            const target = parseFloat(document.getElementById('recipeTarget').value) || 0;
+            const margin = parseFloat(document.getElementById('calcMargin').value) || 0;
+            
+            const body = document.getElementById('calcRecipeBody');
+            const foot = document.getElementById('calcRecipeFoot');
+            const boxCara = document.getElementById('recipeInstructionBox');
+            const btnPdf = document.getElementById('pdfBtnContainer');
+
+            if(!id) {
+                body.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">Pilih resep terlebih dahulu</td></tr>`;
+                foot.classList.add('hidden'); 
+                boxCara.classList.add('hidden');
+                btnPdf.style.display = 'none';
+                document.getElementById('recipeHeaderInfo').classList.add('hidden');
+                return;
+            }
+
+            const resep = db.reseps.find(r => r.id === id);
+            const myBahans = db.resep_bahans.filter(rb => rb.resep_id === id);
+            const porsiDasar = parseFloat(resep.porsi_dasar) || 1;
+            const multiplier = target / porsiDasar;
+            let totalCost = 0;
+
+            document.getElementById('rH_nama').textContent = resep.nama;
+            document.getElementById('rH_info').innerHTML = `Resep Dasar: ${porsiDasar} porsi &nbsp;|&nbsp; Target Kebutuhan: <b class="text-blue-500">${target} porsi</b>`;
+            document.getElementById('recipeHeaderInfo').classList.remove('hidden');
+
+            if(myBahans.length > 0) {
+                body.innerHTML = myBahans.map(rb => {
+                    const b = rb.bahans;
+                    const jDasar = parseFloat(rb.jumlah_dibutuhkan);
+                    const jTarget = jDasar * multiplier;
+                    const qMaster = parseFloat(b.jumlah_dasar) || 1;
+                    const estHarga = (jTarget / qMaster) * parseFloat(b.harga_beli);
+                    totalCost += estHarga;
+
+                    return `
+                        <tr>
+                            <td class="px-6 py-3 font-medium border-r border-white/5">${b.nama}</td>
+                            <td class="px-6 py-3 text-gray-500 border-r border-white/5">${jDasar.toFixed(2).replace(/\.00$/,'')} ${b.ukurans?.nama||''}</td>
+                            <td class="px-6 py-3 text-blue-500 font-bold border-r border-white/5">${jTarget.toFixed(2).replace(/\.00$/,'')} ${b.ukurans?.nama||''}</td>
+                            <td class="px-6 py-3 text-right text-gray-400">${fRupiah(estHarga)}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } else {
+                body.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500 border border-dashed border-gray-600 rounded">Belum ada komposisi bahan ditambahkan.</td></tr>`;
+            }
+
+            const untung = totalCost * (margin/100);
+            const saranHargaJualTotal = totalCost + untung;
+            const hargaJualPerPorsi = target > 0 ? saranHargaJualTotal / target : 0;
+
+            document.getElementById('calcTotModal').textContent = fRupiah(totalCost);
+            document.getElementById('calcTotMargin').textContent = `+ ${fRupiah(untung)}`;
+            document.getElementById('calcTotJual').textContent = fRupiah(saranHargaJualTotal);
+            document.getElementById('calcTotJualPerPorsi').textContent = fRupiah(hargaJualPerPorsi);
+            
+            if(resep.cara_masak) {
+                document.getElementById('rH_cara').textContent = resep.cara_masak;
+                boxCara.classList.remove('hidden');
+            } else { boxCara.classList.add('hidden'); }
+            
+            foot.classList.remove('hidden');
+            btnPdf.style.display = 'flex';
+        }
+
+        function populateKonversiSelect() {
+            const opts = db.ukurans.map(u => `<option value="${u.id}">${u.nama} ${u.simbol ? '('+u.simbol+')':''}</option>`).join('');
+            document.getElementById('calcUnitFrom').innerHTML = opts;
+            document.getElementById('calcUnitTo').innerHTML = opts;
+        }
+
+        function calculateConversion() {
+            if(db.konversis.length === 0) return;
+            
+            const inputVal = parseFloat(document.getElementById('calcInput').value) || 0;
+            const fromId = parseInt(document.getElementById('calcUnitFrom').value);
+            const toId = parseInt(document.getElementById('calcUnitTo').value);
+            const cat = document.getElementById('calcCategory').value;
+            
+            const outputEl = document.getElementById('calcOutput');
+            const textEl = document.getElementById('calcFormulaText');
+
+            if (fromId === toId) {
+                outputEl.value = inputVal;
+                textEl.textContent = 'Satuan sama, tidak ada perubahan.'; return;
+            }
+
+            let rule = db.konversis.find(k => k.dari_ukuran_id === fromId && k.ke_ukuran_id === toId && k.kategori === cat);
+            let multiplier = 0;
+            
+            if (rule) {
+                multiplier = parseFloat(rule.pengali);
+                textEl.textContent = `Kalikan nilai dengan ${multiplier}`;
+            } else {
+                rule = db.konversis.find(k => k.dari_ukuran_id === toId && k.ke_ukuran_id === fromId && k.kategori === cat);
+                if(rule) {
+                    multiplier = 1 / parseFloat(rule.pengali);
+                    textEl.textContent = `Bagi nilai dengan ${rule.pengali}`;
+                }
+            }
+
+            if (multiplier > 0) {
+                let result = inputVal * multiplier;
+                outputEl.value = Number.isInteger(result) ? result : result.toPrecision(5).replace(/\.?0+$/, '');
+            } else {
+                outputEl.value = "N/A";
+                textEl.textContent = "Belum ada aturan konversi untuk satuan ini.";
+            }
+        }
+
+        function downloadPDF() {
+            const element = document.getElementById('pdfPrintArea');
+            const resepName = document.getElementById('rH_nama').textContent;
+
+            const opt = {
+                margin: 0.5, 
+                filename: `Kalkulasi_${resepName.replace(/\s/g, '_')}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            
+            const originalClasses = element.className;
+            
+            element.className = 'p-6 bg-white text-black'; 
+            element.style.backgroundColor = '#ffffff';
+
+            const allElements = element.querySelectorAll('*');
+            allElements.forEach(el => {
+                el.dataset.originalColor = el.style.color || '';
+                el.dataset.originalBg = el.style.backgroundColor || '';
+                el.dataset.originalBorder = el.style.borderColor || '';
+
+                el.style.color = '#1f2937'; 
+
+                if (el.tagName === 'TR' || el.tagName === 'TH' || el.tagName === 'TD' || el.classList.contains('border-t') || el.classList.contains('border-b') || el.classList.contains('border-r')) {
+                    el.style.borderColor = '#d1d5db'; 
+                }
+                
+                if (el.classList.contains('bg-black/20') || el.classList.contains('bg-white/5') || el.classList.contains('bg-black/30') || el.classList.contains('bg-gray-800')) {
+                    el.style.backgroundColor = 'transparent';
+                }
+            });
+
+            document.getElementById('calcTotModal').style.color = '#000000';
+            document.getElementById('calcTotJual').style.color = '#059669'; 
+            document.getElementById('calcTotJualPerPorsi').style.color = '#059669';
+
+            showToast('Menyiapkan Laporan PDF...');
+            
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.className = originalClasses;
+                element.style.backgroundColor = '';
+
+                allElements.forEach(el => {
+                    el.style.color = el.dataset.originalColor;
+                    el.style.backgroundColor = el.dataset.originalBg;
+                    el.style.borderColor = el.dataset.originalBorder;
+                });
+            });
+        }
+
+        function exportUnitExcel() {
+            const list = db.ukurans.map((u, i) => ({
+                'No': i + 1, 'ID Satuan': u.id, 'Nama Satuan': u.nama, 'Simbol': u.simbol || ''
+            }));
+            const ws = XLSX.utils.json_to_sheet(list);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Satuan Ukur");
+            XLSX.writeFile(wb, "Data_Satuan_Ukur.xlsx");
+        }
+
+        function exportBahanExcel() {
+            const list = db.bahans.map((b, i) => ({
+                'No': i + 1, 'ID Bahan': b.id, 'Nama Bahan': b.nama, 'Jumlah Dasar': b.jumlah_dasar, 'Satuan': b.ukurans?.nama || '', 'ID Ukuran': b.ukuran_id, 'Harga Beli': b.harga_beli
+            }));
+            const ws = XLSX.utils.json_to_sheet(list);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Bahan Baku");
+            XLSX.writeFile(wb, "Data_Bahan_Baku.xlsx");
+        }
+
+        function exportKonversiExcel() {
+            const list = db.konversis.map((k, i) => {
+                const dari = db.ukurans.find(u => u.id === k.dari_ukuran_id)?.nama || '';
+                const ke = db.ukurans.find(u => u.id === k.ke_ukuran_id)?.nama || '';
+                return {
+                    'No': i + 1, 'Kategori': k.kategori, 'Dari Satuan': dari, 'ID Dari': k.dari_ukuran_id, 'Ke Satuan': ke, 'ID Ke': k.ke_ukuran_id, 'Pengali': k.pengali, 'Catatan': k.catatan || ''
+                };
+            });
+            const ws = XLSX.utils.json_to_sheet(list);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Konversi");
+            XLSX.writeFile(wb, "Data_Konversi.xlsx");
+        }
+
+        function exportResepExcel() {
+            const list = db.reseps.map((r, i) => ({
+                'No': i + 1, 'Nama Resep': r.nama, 'Porsi Dasar': r.porsi_dasar, 'Cara Masak': r.cara_masak || ''
+            }));
+            const ws = XLSX.utils.json_to_sheet(list);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Resep Dasar");
+            XLSX.writeFile(wb, "Data_Resep_Dasar.xlsx");
+        }
+
+        function importUnitExcel(event) { processImport(event, 'ukurans'); }
+        function importBahanExcel(event) { processImport(event, 'bahans'); }
+        function importKonversiExcel(event) { processImport(event, 'konversis'); }
+        function importResepExcel(event) { processImport(event, 'reseps'); }
+
+        function processImport(event, table) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const data = new Uint8Array(e.target.result);
+                const wb = XLSX.read(data, { type: 'array' });
+                const ws = wb.Sheets[wb.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(ws);
+                if (jsonData.length === 0) return showToast("File Excel kosong!", "error");
+                
+                showToast(`Mengimpor data ${table}...`);
+                try {
+                    for(const r of jsonData) {
+                        let payload = {};
+                        if(table === 'ukurans' && r['Nama Satuan']) {
+                            payload = { nama: r['Nama Satuan'], simbol: r['Simbol'] || '' };
+                        } else if(table === 'bahans' && r['Nama Bahan']) {
+                            payload = { nama: r['Nama Bahan'], jumlah_dasar: r['Jumlah Dasar']||1, harga_beli: r['Harga Beli']||0, ukuran_id: r['ID Ukuran']||1 };
+                        } else if(table === 'konversis' && r['ID Dari'] && r['ID Ke']) {
+                            payload = { kategori: r['Kategori']||'massa', dari_ukuran_id: r['ID Dari'], ke_ukuran_id: r['ID Ke'], pengali: r['Pengali']||1, catatan: r['Catatan']||'' };
+                        } else if(table === 'reseps' && r['Nama Resep']) {
+                            payload = { nama: r['Nama Resep'], porsi_dasar: r['Porsi Dasar']||1, cara_masak: r['Cara Masak']||'' };
+                        }
+                        
+                        if(Object.keys(payload).length > 0) {
+                            payload.created_at = new Date().toISOString();
+                            payload.updated_at = new Date().toISOString();
+                            await supabaseApp.from(table).insert([payload]);
+                        }
+                    }
+                    showToast("Import selesai!");
+                    fetchData();
+                } catch(err) {
+                    showToast("Terjadi kesalahan import: " + err.message, "error");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            event.target.value = '';
+        }
+
+        // Mulai aplikasi
+        window.addEventListener('DOMContentLoaded', () => {
+            initTheme(); // Set tema saat halaman pertama dimuat
+            checkAuthSession();
+        });
+    </script>
+</body>
+</html>
