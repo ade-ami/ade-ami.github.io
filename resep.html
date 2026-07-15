@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link href="img/logo.jpg" rel="icon">
     <title>Admin - Manajemen Resep & Kalkulasi</title>
     
     <!-- Tailwind CSS -->
@@ -31,57 +30,34 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
 
         #sidebar { transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease; }
         #sidebar.collapsed { width: 0; padding-left: 0; padding-right: 0; opacity: 0; overflow: hidden; border: none; }
 
-        /* --- OVERRIDE UNTUK LIGHT MODE --- */
-        body.light-mode { background-color: #f3f4f6 !important; color: #1f2937 !important; }
-        .light-mode .bg-\[\#111827\] { background-color: #f3f4f6 !important; }
-        .light-mode .bg-gray-900 { background-color: #ffffff !important; }
-        .light-mode .bg-gray-800, .light-mode .bg-\[\#1f2937\], .light-mode .bg-\[\#374151\] { background-color: #f9fafb !important; }
-        
-        .light-mode .glass-panel { background: rgba(255, 255, 255, 0.95) !important; border-color: rgba(0,0,0,0.1) !important; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1) !important; }
-        .light-mode .glass-input { background: #ffffff !important; border-color: #d1d5db !important; color: #1f2937 !important; }
-        .light-mode .glass-input:focus { border-color: #3b82f6 !important; box-shadow: 0 0 0 1px #3b82f6 !important; }
-        
+        /* LIGHT MODE OVERRIDES */
+        body.light-mode { background-color: #f3f4f6; color: #1f2937; }
+        .light-mode .glass-panel { background: rgba(255, 255, 255, 0.9); border-color: rgba(0, 0, 0, 0.1); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .light-mode .glass-input { background: #ffffff; border-color: #d1d5db; color: #1f2937; }
+        .light-mode header, .light-mode #sidebar { background-color: #ffffff; border-color: #e5e7eb; }
+        .light-mode header h1 { color: #111827; }
+        .light-mode .nav-btn { color: #4b5563; }
+        .light-mode .nav-btn:hover, .light-mode .nav-btn.bg-white\/10 { background-color: #f3f4f6; color: #111827; border-color: #3b82f6; }
         .light-mode .text-white { color: #111827 !important; }
-        .light-mode .text-gray-500 { color: #6b7280 !important; }
-        .light-mode .text-gray-400 { color: #4b5563 !important; }
-        .light-mode .text-gray-300 { color: #374151 !important; }
-        .light-mode .text-gray-200 { color: #1f2937 !important; }
-        
-        .light-mode .text-emerald-400 { color: #059669 !important; }
-        .light-mode .text-emerald-300 { color: #047857 !important; }
-        .light-mode .text-red-400 { color: #dc2626 !important; }
-        .light-mode .text-red-300 { color: #b91c1c !important; }
-        .light-mode .text-blue-400 { color: #2563eb !important; }
-        .light-mode .text-blue-300 { color: #1d4ed8 !important; }
-        .light-mode .text-yellow-400 { color: #d97706 !important; }
-        .light-mode .text-purple-400 { color: #7e22ce !important; }
-
-        .light-mode .bg-white\/5 { background-color: rgba(0, 0, 0, 0.03) !important; }
-        .light-mode .hover\:bg-white\/5:hover { background-color: rgba(0, 0, 0, 0.06) !important; }
-        .light-mode .border-white\/5 { border-color: rgba(0, 0, 0, 0.06) !important; }
-        .light-mode .border-white\/10 { border-color: rgba(0, 0, 0, 0.12) !important; }
-        .light-mode .divide-white\/5 > :not([hidden]) ~ :not([hidden]) { border-color: rgba(0, 0, 0, 0.06) !important; }
-        
-        .light-mode #loginScreen { background: radial-gradient(ellipse at top, #f3f4f6, #e5e7eb, #d1d5db) !important; }
-        .light-mode .nav-btn.bg-white\/10 { background-color: rgba(0,0,0,0.08) !important; color: #2563eb !important; border-left-color: #2563eb !important; }
-        .light-mode .bg-black\/20 { background-color: rgba(0,0,0,0.04) !important; }
-        .light-mode .bg-black\/30 { background-color: rgba(0,0,0,0.06) !important; }
-        .light-mode .border-gray-700 { border-color: #e5e7eb !important; }
-        .light-mode .border-gray-600 { border-color: #d1d5db !important; }
-        .light-mode .bg-gray-700 { background-color: #f3f4f6 !important; color: #1f2937 !important; border: 1px solid #d1d5db; }
-        .light-mode .hover\:bg-gray-600:hover { background-color: #e5e7eb !important; }
-        .light-mode option { background-color: #ffffff !important; color: #1f2937 !important; }
-		
-        .light-mode ::-webkit-scrollbar-track { background: #f3f4f6; }
-        .light-mode ::-webkit-scrollbar-thumb { background: #cbd5e1; }
-        .light-mode ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .light-mode .text-gray-400 { color: #6b7280 !important; }
+        .light-mode .text-gray-300 { color: #4b5563 !important; }
+        .light-mode .text-gray-200 { color: #374151 !important; }
+        .light-mode .bg-gray-900 { background-color: #ffffff !important; }
+        .light-mode .bg-gray-800 { background-color: #f9fafb !important; }
+        .light-mode .bg-white\/5 { background-color: rgba(0,0,0,0.03) !important; }
+        .light-mode .border-white\/5, .light-mode .border-white\/10 { border-color: rgba(0,0,0,0.1) !important; }
+        .light-mode .divide-white\/5 > :not([hidden]) ~ :not([hidden]) { border-color: rgba(0,0,0,0.1) !important; }
+        /* Fix untuk background options pada select dropdown di light mode */
+        .light-mode select option { background-color: #ffffff !important; color: #1f2937 !important; }
+        .light-mode #loginScreen { background: #f3f4f6; }
+        .light-mode .hover\:bg-gray-500\/20:hover { background-color: rgba(0,0,0,0.06) !important; }
     </style>
 </head>
 <body class="overflow-hidden h-screen flex flex-col relative bg-[#111827]">
@@ -129,16 +105,15 @@
                 <p class="text-xs text-blue-400">Panel Admin</p>
             </div>
         </div>
-        <div class="flex items-center gap-3">
-            <!-- Tombol Toggle Theme Ditambahkan Disini -->
-            <button onclick="toggleTheme()" id="themeToggleBtn" class="flex items-center justify-center w-9 h-9 bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 rounded-lg transition-colors border border-yellow-500/20" title="Beralih ke Mode Terang">
+        <div class="flex items-center gap-2">
+            <!-- Tombol Theme Toggle -->
+            <button onclick="toggleTheme()" id="themeToggleBtn" class="flex items-center justify-center w-9 h-9 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 rounded-lg transition-colors border border-purple-500/20" title="Ganti Tema">
                 <i class="ph ph-sun text-lg"></i>
             </button>
-            
             <button onclick="fetchData(true)" class="flex items-center justify-center w-9 h-9 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-colors border border-blue-500/20" title="Refresh Data">
                 <i class="ph ph-arrows-clockwise text-lg"></i>
             </button>
-            <button onclick="doLogout()" class="flex items-center justify-center gap-2 px-4 h-9 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg text-sm font-medium transition-colors border border-red-500/20">
+            <button onclick="doLogout()" class="flex items-center justify-center gap-2 px-4 h-9 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg text-sm font-medium transition-colors border border-red-500/20 ml-1">
                 <i class="ph ph-sign-out text-base"></i> <span class="hidden sm:inline">Logout</span>
             </button>
         </div>
@@ -168,7 +143,7 @@
             </nav>
         </aside>
 
-        <main class="flex-1 h-full overflow-y-auto bg-[#111827] relative pb-24" id="mainScrollArea">
+        <main class="flex-1 h-full overflow-y-auto relative pb-24" id="mainScrollArea">
             <div class="p-4 md:p-8 max-w-7xl mx-auto w-full">
                 
                 <section id="view-dashboard" class="page-view active">
@@ -225,11 +200,16 @@
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm whitespace-nowrap">
-                                <thead class="bg-white/5 text-gray-400 border-b border-white/10">
+                                <!-- Modifikasi: Thead Tabel Satuan (Dengan Sort) -->
+                                <thead class="bg-white/5 text-gray-400 border-b border-white/10 select-none">
                                     <tr>
                                         <th class="px-6 py-4 w-16">No</th>
-                                        <th class="px-6 py-4">Nama Satuan</th>
-                                        <th class="px-6 py-4">Simbol</th>
+                                        <th class="px-6 py-4 cursor-pointer hover:bg-gray-500/20 transition-colors" onclick="handleSort('unit', 'nama')">
+                                            <div class="flex items-center gap-2">Nama Satuan <span id="icon-unit-nama" class="text-gray-500"><i class="ph ph-arrows-down-up"></i></span></div>
+                                        </th>
+                                        <th class="px-6 py-4 cursor-pointer hover:bg-gray-500/20 transition-colors" onclick="handleSort('unit', 'simbol')">
+                                            <div class="flex items-center gap-2">Simbol <span id="icon-unit-simbol" class="text-gray-500"><i class="ph ph-arrows-down-up"></i></span></div>
+                                        </th>
                                         <th class="px-6 py-4 text-center">Aksi</th>
                                     </tr>
                                 </thead>
@@ -272,12 +252,19 @@
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm whitespace-nowrap">
-                                <thead class="bg-white/5 text-gray-400 border-b border-white/10">
+                                <!-- Modifikasi: Thead Tabel Bahan (Dengan Sort) -->
+                                <thead class="bg-white/5 text-gray-400 border-b border-white/10 select-none">
                                     <tr>
                                         <th class="px-6 py-4 w-12">No</th>
-                                        <th class="px-6 py-4">Nama Bahan</th>
-                                        <th class="px-6 py-4">Satuan Dasar</th>
-                                        <th class="px-6 py-4 text-right">Harga Beli</th>
+                                        <th class="px-6 py-4 cursor-pointer hover:bg-gray-500/20 transition-colors" onclick="handleSort('bahan', 'nama')">
+                                            <div class="flex items-center gap-2">Nama Bahan <span id="icon-bahan-nama" class="text-gray-500"><i class="ph ph-arrows-down-up"></i></span></div>
+                                        </th>
+                                        <th class="px-6 py-4 cursor-pointer hover:bg-gray-500/20 transition-colors" onclick="handleSort('bahan', 'satuan')">
+                                            <div class="flex items-center gap-2">Satuan Dasar <span id="icon-bahan-satuan" class="text-gray-500"><i class="ph ph-arrows-down-up"></i></span></div>
+                                        </th>
+                                        <th class="px-6 py-4 text-right cursor-pointer hover:bg-gray-500/20 transition-colors" onclick="handleSort('bahan', 'harga')">
+                                            <div class="flex items-center justify-end gap-2">Harga Beli <span id="icon-bahan-harga" class="text-gray-500"><i class="ph ph-arrows-down-up"></i></span></div>
+                                        </th>
                                         <th class="px-6 py-4 text-center">Aksi</th>
                                     </tr>
                                 </thead>
@@ -307,7 +294,7 @@
                             </div>
                             <div class="text-xl font-bold text-gray-400">=</div>
                             <div class="flex-1 flex flex-col gap-2">
-                                <input type="text" id="calcOutput" value="0" readonly class="bg-gray-800 border border-gray-600 text-white text-xl text-center rounded block w-full p-3 outline-none">
+                                <input type="text" id="calcOutput" value="0" readonly class="bg-gray-800/50 border border-gray-600 text-white text-xl text-center rounded block w-full p-3 outline-none">
                                 <select id="calcUnitTo" onchange="calculateConversion()" class="glass-input w-full text-sm rounded p-2.5 focus:border-yellow-500 bg-gray-800"></select>
                             </div>
                         </div>
@@ -348,12 +335,19 @@
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm whitespace-nowrap">
-                                <thead class="bg-white/5 text-gray-400 border-b border-white/10">
+                                <!-- Modifikasi: Thead Tabel Konversi (Dengan Sort) -->
+                                <thead class="bg-white/5 text-gray-400 border-b border-white/10 select-none">
                                     <tr>
                                         <th class="px-6 py-4 w-12">No</th>
-                                        <th class="px-6 py-4">Satuan Awal (Dari)</th>
-                                        <th class="px-6 py-4">Satuan Tujuan (Ke)</th>
-                                        <th class="px-6 py-4">Pengali</th>
+                                        <th class="px-6 py-4 cursor-pointer hover:bg-gray-500/20 transition-colors" onclick="handleSort('konversi', 'dari')">
+                                            <div class="flex items-center gap-2">Satuan Awal (Dari) <span id="icon-konversi-dari" class="text-gray-500"><i class="ph ph-arrows-down-up"></i></span></div>
+                                        </th>
+                                        <th class="px-6 py-4 cursor-pointer hover:bg-gray-500/20 transition-colors" onclick="handleSort('konversi', 'ke')">
+                                            <div class="flex items-center gap-2">Satuan Tujuan (Ke) <span id="icon-konversi-ke" class="text-gray-500"><i class="ph ph-arrows-down-up"></i></span></div>
+                                        </th>
+                                        <th class="px-6 py-4 cursor-pointer hover:bg-gray-500/20 transition-colors" onclick="handleSort('konversi', 'pengali')">
+                                            <div class="flex items-center gap-2">Pengali <span id="icon-konversi-pengali" class="text-gray-500"><i class="ph ph-arrows-down-up"></i></span></div>
+                                        </th>
                                         <th class="px-6 py-4 text-center">Aksi</th>
                                     </tr>
                                 </thead>
@@ -370,7 +364,7 @@
                     <div class="glass-panel p-6 rounded-xl mb-6 flex flex-col md:flex-row justify-between items-center gap-4 shadow-xl border border-white/5">
                         <div class="w-full md:w-auto">
                             <label class="block text-xs text-gray-400 mb-1">Pilih Master Resep</label>
-                            <select id="recipeSelect" onchange="calcRecipe()" class="glass-input rounded-lg px-4 py-2.5 text-sm w-full md:w-64 bg-gray-800 [&>option]:bg-gray-800">
+                            <select id="recipeSelect" onchange="calcRecipe()" class="glass-input rounded-lg px-4 py-2.5 text-sm w-full md:w-64 bg-gray-800">
                                 <option value="">-- Pilih Resep --</option>
                             </select>
                         </div>
@@ -417,7 +411,7 @@
                                         <td id="calcTotJual" class="px-6 py-4 text-right font-bold text-yellow-400 text-lg">Rp 0</td>
                                     </tr>
                                     <tr class="bg-white/5 border-t border-white/10">
-                                        <td colspan="3" class="px-6 py-3 text-right font-bold text-white-400">Harga Jual per Porsi:</td>
+                                        <td colspan="3" class="px-6 py-3 text-right font-bold text-white-400">Harga Jual per Porsi :</td>
                                         <td id="calcTotJualPerPorsi" class="px-6 py-3 text-right font-bold text-blue-500 text-lg">Rp 0</td>
                                     </tr>
                                 </tfoot>
@@ -467,12 +461,19 @@
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm whitespace-nowrap">
-                                <thead class="bg-white/5 text-gray-400 border-b border-white/10">
+                                <!-- Modifikasi: Thead Tabel Resep Dasar (Dengan Sort) -->
+                                <thead class="bg-white/5 text-gray-400 border-b border-white/10 select-none">
                                     <tr>
                                         <th class="px-6 py-4 w-12">No</th>
-                                        <th class="px-6 py-4">Nama Resep</th>
-                                        <th class="px-6 py-4">Porsi Dasar</th>
-                                        <th class="px-6 py-4 text-center">Total Komposisi</th>
+                                        <th class="px-6 py-4 cursor-pointer hover:bg-gray-500/20 transition-colors" onclick="handleSort('resep', 'nama')">
+                                            <div class="flex items-center gap-2">Nama Resep <span id="icon-resep-nama" class="text-gray-500"><i class="ph ph-arrows-down-up"></i></span></div>
+                                        </th>
+                                        <th class="px-6 py-4 cursor-pointer hover:bg-gray-500/20 transition-colors" onclick="handleSort('resep', 'porsi')">
+                                            <div class="flex items-center gap-2">Porsi Dasar <span id="icon-resep-porsi" class="text-gray-500"><i class="ph ph-arrows-down-up"></i></span></div>
+                                        </th>
+                                        <th class="px-6 py-4 text-center cursor-pointer hover:bg-gray-500/20 transition-colors" onclick="handleSort('resep', 'komposisi')">
+                                            <div class="flex items-center justify-center gap-2">Total Komposisi <span id="icon-resep-komposisi" class="text-gray-500"><i class="ph ph-arrows-down-up"></i></span></div>
+                                        </th>
                                         <th class="px-6 py-4 text-center">Aksi</th>
                                     </tr>
                                 </thead>
@@ -489,7 +490,7 @@
 
     <div id="modalOverlay" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity opacity-0">
         <div class="glass-panel p-6 rounded-2xl w-full max-w-lg shadow-2xl relative mx-4 border-t-4 border-t-blue-500 bg-gray-900 transform scale-95 transition-transform duration-300">
-            <button type="button" onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"><i class="ph ph-x text-xl"></i></button>
+            <button type="button" onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"><i class="ph ph-x text-xl"></i></button>
             <h3 id="modalTitle" class="text-lg font-bold text-white mb-6">Form</h3>
             
             <form id="modalForm" onsubmit="handleModalSubmit(event)">
@@ -530,41 +531,40 @@
             resep: { page: 1, limit: 10 }
         };
 
+        // State untuk Sort
+        let sortState = {
+            unit: { col: null, dir: 'asc' },
+            bahan: { col: null, dir: 'asc' },
+            konversi: { col: null, dir: 'asc' },
+            resep: { col: null, dir: 'asc' }
+        };
+
         let currentModalContext = { type: null, id: null };
         let isSidebarCollapsed = false;
         let confirmCallback = null;
 
-        const fRupiah = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
-
-        function applyTheme(theme) {
-            const body = document.body;
-            const btn = document.getElementById('themeToggleBtn');
-            if (!btn) return;
-            const icon = btn.querySelector('i');
-
-            if (theme === 'light') {
-                body.classList.add('light-mode');
-                icon.className = 'ph ph-moon text-lg';
-                btn.className = 'flex items-center justify-center w-9 h-9 bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20 rounded-lg transition-colors border border-indigo-500/20';
-                btn.title = 'Beralih ke Mode Gelap';
-            } else {
-                body.classList.remove('light-mode');
-                icon.className = 'ph ph-sun text-lg';
-                btn.className = 'flex items-center justify-center w-9 h-9 bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 rounded-lg transition-colors border border-yellow-500/20';
-                btn.title = 'Beralih ke Mode Terang';
-            }
-            localStorage.setItem('theme', theme);
-        }
-
-        function toggleTheme() {
-            const isLight = document.body.classList.contains('light-mode');
-            applyTheme(isLight ? 'dark' : 'light');
-        }
-
+        // Theme Setup
+        let isLightMode = localStorage.getItem('theme') === 'light';
         function initTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'dark';
-            applyTheme(savedTheme);
+            if (isLightMode) {
+                document.body.classList.add('light-mode');
+                document.getElementById('themeToggleBtn').innerHTML = '<i class="ph ph-sun text-lg"></i>';
+            }
         }
+        function toggleTheme() {
+            isLightMode = !isLightMode;
+            if (isLightMode) {
+                document.body.classList.add('light-mode');
+                localStorage.setItem('theme', 'light');
+                document.getElementById('themeToggleBtn').innerHTML = '<i class="ph ph-sun text-lg"></i>';
+            } else {
+                document.body.classList.remove('light-mode');
+                localStorage.setItem('theme', 'dark');
+                document.getElementById('themeToggleBtn').innerHTML = '<i class="ph ph-moon text-lg"></i>';
+            }
+        }
+
+        const fRupiah = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
 
         function showToast(msg, type='success') {
             const container = document.getElementById('toastContainer');
@@ -572,8 +572,7 @@
             const color = type === 'success' ? 'emerald' : type === 'error' ? 'red' : 'blue';
             const icon = type === 'success' ? 'check-circle' : 'warning-circle';
             
-            // Tambahkan class background solid untuk kompatibilitas light/dark mode yang lebih baik di toast
-            toast.className = `bg-${color}-500/20 border border-${color}-500/50 text-${color}-300 px-4 py-3 rounded-lg flex items-center gap-3 shadow-lg transform transition-all translate-x-full opacity-0 backdrop-blur-md`;
+            toast.className = `bg-${color}-500/20 border border-${color}-500/50 text-${color}-300 px-4 py-3 rounded-lg flex items-center gap-3 shadow-lg transform transition-all translate-x-full opacity-0`;
             toast.innerHTML = `<i class="ph ph-${icon} text-xl"></i> <span class="text-sm font-medium">${msg}</span>`;
             
             container.appendChild(toast);
@@ -726,6 +725,36 @@
             document.getElementById('dash-konversi').textContent = db.konversis.length;
         }
 
+        // Logic Sort Header Tabel
+        function handleSort(module, col) {
+            if (sortState[module].col === col) {
+                sortState[module].dir = sortState[module].dir === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortState[module].col = col;
+                sortState[module].dir = 'asc';
+            }
+            pageState[module].page = 1; // Reset ke halaman 1 saat kolom disortir
+            updateSortIcons(module);
+            callRender(module);
+        }
+
+        function updateSortIcons(module) {
+            const allIcons = document.querySelectorAll(`[id^="icon-${module}-"]`);
+            allIcons.forEach(el => {
+                el.innerHTML = '<i class="ph ph-arrows-down-up"></i>';
+                el.className = 'text-gray-500 transition-colors';
+            });
+
+            const col = sortState[module].col;
+            if (col) {
+                const iconEl = document.getElementById(`icon-${module}-${col}`);
+                if (iconEl) {
+                    iconEl.innerHTML = sortState[module].dir === 'asc' ? '<i class="ph ph-sort-ascending"></i>' : '<i class="ph ph-sort-descending"></i>';
+                    iconEl.className = 'text-blue-500 font-bold transition-colors';
+                }
+            }
+        }
+
         function changeLimit(module, limit) {
             pageState[module].limit = parseInt(limit);
             pageState[module].page = 1;
@@ -772,7 +801,16 @@
 
         function renderUnit() {
             const search = document.getElementById('searchUnit')?.value.toLowerCase() || '';
-            const filtered = db.ukurans.filter(u => u.nama.toLowerCase().includes(search));
+            let filtered = db.ukurans.filter(u => u.nama.toLowerCase().includes(search));
+            
+            if(sortState.unit.col) {
+                filtered.sort((a, b) => {
+                    let vA = a[sortState.unit.col] || '';
+                    let vB = b[sortState.unit.col] || '';
+                    return sortState.unit.dir === 'asc' ? vA.localeCompare(vB) : vB.localeCompare(vA);
+                });
+            }
+
             const paginated = paginateArray(filtered, 'unit');
             const startNo = (pageState.unit.page - 1) * pageState.unit.limit;
 
@@ -793,7 +831,20 @@
 
         function renderBahan() {
             const search = document.getElementById('searchBahan')?.value.toLowerCase() || '';
-            const filtered = db.bahans.filter(b => b.nama.toLowerCase().includes(search));
+            let filtered = db.bahans.filter(b => b.nama.toLowerCase().includes(search));
+            
+            if(sortState.bahan.col) {
+                filtered.sort((a, b) => {
+                    let vA, vB;
+                    if(sortState.bahan.col === 'nama') { vA = a.nama; vB = b.nama; }
+                    else if(sortState.bahan.col === 'satuan') { vA = a.ukurans?.nama || ''; vB = b.ukurans?.nama || ''; }
+                    else if(sortState.bahan.col === 'harga') { vA = parseFloat(a.harga_beli) || 0; vB = parseFloat(b.harga_beli) || 0; }
+                    
+                    if(typeof vA === 'string') return sortState.bahan.dir === 'asc' ? vA.localeCompare(vB) : vB.localeCompare(vA);
+                    return sortState.bahan.dir === 'asc' ? vA - vB : vB - vA;
+                });
+            }
+
             const paginated = paginateArray(filtered, 'bahan');
             const startNo = (pageState.bahan.page - 1) * pageState.bahan.limit;
             
@@ -821,7 +872,20 @@
                 return { ...k, dariName: dari?.nama || '-', keName: ke?.nama || '-' };
             });
 
-            const filtered = mappedKonversi.filter(k => k.dariName.toLowerCase().includes(search) || k.keName.toLowerCase().includes(search));
+            let filtered = mappedKonversi.filter(k => k.dariName.toLowerCase().includes(search) || k.keName.toLowerCase().includes(search));
+            
+            if(sortState.konversi.col) {
+                filtered.sort((a, b) => {
+                    let vA, vB;
+                    if(sortState.konversi.col === 'dari') { vA = a.dariName; vB = b.dariName; }
+                    else if(sortState.konversi.col === 'ke') { vA = a.keName; vB = b.keName; }
+                    else if(sortState.konversi.col === 'pengali') { vA = parseFloat(a.pengali) || 0; vB = parseFloat(b.pengali) || 0; }
+
+                    if(typeof vA === 'string') return sortState.konversi.dir === 'asc' ? vA.localeCompare(vB) : vB.localeCompare(vA);
+                    return sortState.konversi.dir === 'asc' ? vA - vB : vB - vA;
+                });
+            }
+
             const paginated = paginateArray(filtered, 'konversi');
             const startNo = (pageState.konversi.page - 1) * pageState.konversi.limit;
 
@@ -846,7 +910,23 @@
 
         function renderResepTable() {
             const search = document.getElementById('searchResep')?.value.toLowerCase() || '';
-            const filtered = db.reseps.filter(r => r.nama.toLowerCase().includes(search));
+            let filtered = db.reseps.filter(r => r.nama.toLowerCase().includes(search));
+            
+            if(sortState.resep.col) {
+                filtered.sort((a, b) => {
+                    let vA, vB;
+                    if(sortState.resep.col === 'nama') { vA = a.nama; vB = b.nama; }
+                    else if(sortState.resep.col === 'porsi') { vA = parseFloat(a.porsi_dasar) || 0; vB = parseFloat(b.porsi_dasar) || 0; }
+                    else if(sortState.resep.col === 'komposisi') { 
+                        vA = db.resep_bahans.filter(rb => rb.resep_id === a.id).length; 
+                        vB = db.resep_bahans.filter(rb => rb.resep_id === b.id).length; 
+                    }
+
+                    if(typeof vA === 'string') return sortState.resep.dir === 'asc' ? vA.localeCompare(vB) : vB.localeCompare(vA);
+                    return sortState.resep.dir === 'asc' ? vA - vB : vB - vA;
+                });
+            }
+
             const paginated = paginateArray(filtered, 'resep');
             const startNo = (pageState.resep.page - 1) * pageState.resep.limit;
             
@@ -930,10 +1010,10 @@
                     </select>
                     <div class="flex gap-3 items-center mb-3">
                         <select id="f_dari" class="glass-input flex-1 rounded-lg p-3 text-sm bg-gray-800"><option value="" disabled selected>Dari...</option>${optU}</select>
-                        <span class="text-gray-400 font-bold">=</span>
+                        <span class="text-white font-bold">=</span>
                         <select id="f_ke" class="glass-input flex-1 rounded-lg p-3 text-sm bg-gray-800"><option value="" disabled selected>Ke...</option>${optU}</select>
                     </div>
-                    <input type="number" step="0.000001" id="f_kali" placeholder="Nilai Pengali (Multiplier)" value="${item ? item.pengali : ''}" class="glass-input w-full rounded-lg p-3 text-sm mb-3 text-yellow-500 font-mono" required>
+                    <input type="number" step="0.000001" id="f_kali" placeholder="Nilai Pengali (Multiplier)" value="${item ? item.pengali : ''}" class="glass-input w-full rounded-lg p-3 text-sm mb-3 text-yellow-400 font-mono" required>
                 `;
                 setTimeout(() => {
                     if(item) {
@@ -972,7 +1052,7 @@
             const myBahans = db.resep_bahans.filter(rb => rb.resep_id === resepId);
             const availableBahans = db.bahans.filter(b => !myBahans.some(mb => mb.bahan_id === b.id));
             
-            document.getElementById('modalTitle').innerHTML = `Komposisi: <span class="text-blue-500">${resep.nama}</span>`;
+            document.getElementById('modalTitle').innerHTML = `Komposisi: <span class="text-blue-400">${resep.nama}</span>`;
             
             let html = '<div class="space-y-2 max-h-64 overflow-y-auto pr-2 mb-4">';
             if(myBahans.length > 0) {
@@ -981,13 +1061,13 @@
                     const qty = rb.jumlah_dibutuhkan;
                     const unit = b.ukurans?.nama || '';
                     html += `
-                    <div class="bg-gray-800 border border-gray-700 p-3 rounded-lg flex justify-between items-center group transition-colors">
-                        <div class="text-sm text-gray-300">
-                            ${b.nama} <span class="text-blue-500 font-medium">(${qty} ${unit})</span>
+                    <div class="bg-gray-800/50 border border-gray-700 p-3 rounded-lg flex justify-between items-center group transition-colors">
+                        <div class="text-sm text-gray-400 font-medium">
+                            ${b.nama} <span class="text-blue-400 font-bold ml-1">(${qty} ${unit})</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button type="button" onclick="openEditPivot(${rb.id}, ${resepId}, '${b.nama.replace(/'/g, "\\'")}', ${qty}, '${unit}')" class="text-gray-400 hover:text-blue-500 p-1 transition" title="Edit Takaran"><i class="ph ph-pencil-simple text-lg"></i></button>
-                            <button type="button" onclick="deletePivot(${rb.id}, ${resepId})" class="text-gray-400 hover:text-red-500 p-1 transition" title="Hapus Bahan"><i class="ph ph-x-circle text-lg"></i></button>
+                            <button type="button" onclick="openEditPivot(${rb.id}, ${resepId}, '${b.nama.replace(/'/g, "\\'")}', ${qty}, '${unit}')" class="text-gray-400 hover:text-blue-400 p-1 transition" title="Edit Takaran"><i class="ph ph-pencil-simple text-lg"></i></button>
+                            <button type="button" onclick="deletePivot(${rb.id}, ${resepId})" class="text-gray-400 hover:text-red-400 p-1 transition" title="Hapus Bahan"><i class="ph ph-x-circle text-lg"></i></button>
                         </div>
                     </div>`;
                 });
@@ -998,11 +1078,11 @@
 
             html += `
             <div class="flex gap-3 items-center border-t border-gray-600 pt-4 mt-2">
-                <select id="p_bahan" class="glass-input flex-1 rounded-lg p-2.5 text-sm bg-gray-800 border-gray-600 outline-none" required>
+                <select id="p_bahan" class="glass-input flex-1 rounded-lg p-2.5 text-sm bg-gray-800 outline-none" required>
                     <option value="" disabled selected>-- Cari / Pilih Bahan --</option>
                     ${availableBahans.map(b => `<option value="${b.id}">${b.nama}</option>`).join('')}
                 </select>
-                <input type="number" step="0.01" id="p_qty" placeholder="Qty" class="glass-input w-24 rounded-lg p-2.5 text-sm text-center bg-gray-800 border-gray-600 outline-none" required>
+                <input type="number" step="0.01" id="p_qty" placeholder="Qty" class="glass-input w-24 rounded-lg p-2.5 text-sm text-center bg-gray-800 outline-none" required>
             </div>
             `;
 
@@ -1027,7 +1107,7 @@
 
             container.innerHTML = `
                 <div class="space-y-4">
-                    <p class="text-sm text-gray-400">Ubah takaran untuk <b class="text-blue-500">${bahanName}</b>:</p>
+                    <p class="text-sm text-gray-500">Ubah takaran untuk <b class="text-blue-500">${bahanName}</b>:</p>
                     <div>
                         <label class="block text-xs text-gray-400 mb-1">Takaran Baru (${unitName})</label>
                         <input type="number" step="0.01" id="edit_pivot_qty" value="${currentQty}" class="glass-input w-full rounded-lg p-3 text-sm font-bold text-center outline-none focus:border-blue-500" required onkeydown="if(event.key === 'Enter') saveEditPivot(${pivotId}, ${resepId})">
@@ -1222,10 +1302,10 @@
 
                     return `
                         <tr>
-                            <td class="px-6 py-3 font-medium border-r border-white/5">${b.nama}</td>
-                            <td class="px-6 py-3 text-gray-500 border-r border-white/5">${jDasar.toFixed(2).replace(/\.00$/,'')} ${b.ukurans?.nama||''}</td>
+                            <td class="px-6 py-3 font-medium text-gray-500 border-r border-white/5">${b.nama}</td>
+                            <td class="px-6 py-3 text-gray-400 border-r border-white/5">${jDasar.toFixed(2).replace(/\.00$/,'')} ${b.ukurans?.nama||''}</td>
                             <td class="px-6 py-3 text-blue-500 font-bold border-r border-white/5">${jTarget.toFixed(2).replace(/\.00$/,'')} ${b.ukurans?.nama||''}</td>
-                            <td class="px-6 py-3 text-right text-gray-400">${fRupiah(estHarga)}</td>
+                            <td class="px-6 py-3 text-right text-gray-500">${fRupiah(estHarga)}</td>
                         </tr>
                     `;
                 }).join('');
@@ -1310,7 +1390,7 @@
             
             const originalClasses = element.className;
             
-            element.className = 'p-6 bg-white text-black'; 
+            element.className = 'p-6 bg-white'; 
             element.style.backgroundColor = '#ffffff';
 
             const allElements = element.querySelectorAll('*');
@@ -1325,7 +1405,7 @@
                     el.style.borderColor = '#d1d5db'; 
                 }
                 
-                if (el.classList.contains('bg-black/20') || el.classList.contains('bg-white/5') || el.classList.contains('bg-black/30') || el.classList.contains('bg-gray-800')) {
+                if (el.classList.contains('bg-black/20') || el.classList.contains('bg-white/5') || el.classList.contains('bg-black/30') || el.classList.contains('bg-gray-800/50')) {
                     el.style.backgroundColor = 'transparent';
                 }
             });
@@ -1435,13 +1515,13 @@
                 }
             };
             reader.readAsArrayBuffer(file);
-            event.target.value = '';
+            event.target.value = ''; // Reset input
         }
 
-        // Mulai aplikasi
+        // Mulai aplikasi saat diload
         window.addEventListener('DOMContentLoaded', () => {
-            initTheme(); // Set tema saat halaman pertama dimuat
-            checkAuthSession();
+            initTheme(); // Set tema (Light/Dark) dari localStorage
+            checkAuthSession(); // Cek login supabase
         });
     </script>
 </body>
