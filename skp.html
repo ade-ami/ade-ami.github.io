@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instrumen Akreditasi RS - Sasaran Keselamatan Pasien</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- html2pdf.js untuk Export PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+
+    <style>
+        /* Memastikan border collapse untuk tabel */
+        table { border-collapse: collapse; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans p-4 md:p-8">
+
+    <!-- Tombol Aksi Export -->
+    <div class="max-w-7xl mx-auto mb-4 flex flex-wrap gap-4 justify-end">
+        <button onclick="exportPDF()" class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd" />
+            </svg>
+            Unduh PDF
+        </button>
+        
+        <button onclick="exportExcel()" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H4.5A1.5 1.5 0 003 6.5v7A1.5 1.5 0 004.5 15h7a1.5 1.5 0 001.5-1.5v-2a1 1 0 112 0v2A3.5 3.5 0 0111.5 17h-7A3.5 3.5 0 011 13.5v-7A3.5 3.5 0 014.5 3z" clip-rule="evenodd" />
+                <path fill-rule="evenodd" d="M12.646 5.646a.5.5 0 01.708 0l3 3a.5.5 0 010 .708l-3 3a.5.5 0 01-.708-.708L14.793 9.5H8.5a.5.5 0 010-1h6.293l-2.147-2.146a.5.5 0 010-.708z" clip-rule="evenodd" />
+            </svg>
+            Export Excel
+        </button>
+    </div>
+
+    <!-- Area Konten yang akan di-export ke PDF -->
+    <div id="contentToExport" class="max-w-7xl mx-auto bg-white shadow-xl rounded-xl overflow-hidden border border-slate-200">
+        
+        <!-- Header -->
+        <div class="bg-blue-700 text-white p-6">
+            <h1 class="text-2xl font-bold">Instrumen Akreditasi Rumah Sakit</h1>
+            <p class="text-blue-100 mt-1">Kelompok Sasaran Keselamatan Pasien (SKP 1 - SKP 6.1)</p>
+        </div>
+
+        <!-- Table Container -->
+        <div class="overflow-x-auto p-4">
+            <table id="skpTable" class="w-full text-sm text-left border border-slate-300">
+                
+                <!-- Table Head -->
+                <thead class="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider text-xs border-b-2 border-slate-300">
+                    <tr>
+                        <th class="border border-slate-300 p-3 w-1/3">Elemen Penilaian</th>
+                        <th class="border border-slate-300 p-3 w-16 text-center">Kode</th>
+                        <th class="border border-slate-300 p-3 w-1/2">Kelengkapan Bukti</th>
+                        <th class="border border-slate-300 p-3 w-20 text-center">Skoring</th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-slate-200">
+
+                    <!-- SKP 1 -->
+                    <tr class="bg-indigo-50">
+                        <td colspan="4" class="p-3 font-bold text-indigo-900 text-base border border-slate-300">
+                            SKP 1: Mengidentifikasi Pasien dengan Benar
+                        </td>
+                    </tr>
+
+                    <!-- SKP 1 - EP 1 -->
+                    <tr class="hover:bg-slate-50 transition">
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top leading-relaxed">
+                            1) Rumah sakit telah menetapkan regulasi terkait Sasaran keselamatan pasien meliputi poin 1 – 6 pada gambaran umum.
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-center font-bold text-blue-700">
+                            <div>R</div>
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-slate-700">
+                            <div>
+                                <span ></span> 
+                                Penetapan sasaran keselamatan pasien meliputi poin 1 – 6 pada gambaran umum.
+                            </div>
+                        </td>
+                        <td class="border border-slate-300 p-2 text-center align-middle font-bold text-emerald-600 bg-emerald-50">10</td>
+                    </tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-amber-500 bg-amber-50">-</td></tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-red-500 bg-red-50">0</td></tr>
+
+                    <!-- SKP 1 - EP 2 -->
+                    <tr class="hover:bg-slate-50 transition">
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top leading-relaxed">
+                            2) Rumah sakit telah menerapkan proses identifikasi pasien menggunakan minimal 2 (dua) identitas, dapat memenuhi tujuan identifikasi pasien dan sesuai dengan ketentuan rumah sakit.
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-center font-bold text-blue-700">
+                            <div class="mb-3">O</div>
+                            <div class="mb-3">W</div><br>
+                            <div class="mb-3">S</div><br>
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-slate-700">
+                            <div class="mb-4">
+                                <span ></span> 
+                                Penerapan proses identifikasi pasien menggunakan minimal 2 (dua) identitas.
+                            </div>
+                            <div class="mb-4">
+                                <span ></span> 
+                                <ul class="list-disc ml-8 mt-1 space-y-1">
+                                    <li>PPA</li>
+                                    <li>Pasien / keluarga</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <span ></span> 
+                                Proses identifikasi pasien
+                            </div>
+                        </td>
+                        <td class="border border-slate-300 p-2 text-center align-middle font-bold text-emerald-600 bg-emerald-50">10</td>
+                    </tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-amber-500 bg-amber-50">5</td></tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-red-500 bg-red-50">0</td></tr>
+
+                    <!-- SKP 1 - EP 3 -->
+                    <tr class="hover:bg-slate-50 transition">
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top leading-relaxed">
+                            3) Pasien telah diidentifikasi menggunakan minimal dua jenis identitas meliputi poin 1) - 4) dalam maksud dan tujuan.
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-center font-bold text-blue-700">
+                            <div class="mb-3">O</div><br>
+                            <div class="mb-3">S</div><br>
+                            <div>W</div>
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-slate-700">
+                            <div class="mb-4">
+                                <span ></span> 
+                                Identifikasi pasien menggunakan minimal dua jenis identitas meliputi poin 1) - 4) dalam maksud dan tujuan.
+                            </div>
+                            <div class="mb-4">
+                                <span ></span> 
+                                Pelaksanaan Identifikasi pasien menggunakan minimal dua jenis identitas meliputi poin 1) - 4) dalam maksud dan tujuan.
+                            </div>
+                            <div>
+                                <span ></span> 
+                                <ul class="list-disc ml-8 mt-1 space-y-1">
+                                    <li>PPA</li>
+                                    <li>Pasien / keluarga</li>
+                                </ul>
+                            </div>
+                        </td>
+                        <td class="border border-slate-300 p-2 text-center align-middle font-bold text-emerald-600 bg-emerald-50">10</td>
+                    </tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-amber-500 bg-amber-50">5</td></tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-red-500 bg-red-50">0</td></tr>
+
+                    <!-- SKP 1 - EP 4 -->
+                    <tr class="hover:bg-slate-50 transition">
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top leading-relaxed">
+                            4) Rumah sakit memastikan pasien teridentifikasi dengan tepat pada situasi khusus, dan penggunaan label seperti tercantum dalam maksud dan tujuan
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-center font-bold text-blue-700">
+                            <div class="mb-3">D</div><br>
+                            <div>W</div>
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-slate-700">
+                            <div class="mb-4">
+                                <span ></span> 
+                                Bukti pelaksanaan identifikasi pasien pada situasi khusus, dan penggunaan label seperti tercantum dalam maksud dan tujuan.
+                            </div>
+                            <div>
+                                <span ></span> 
+                                <ul class="list-disc ml-8 mt-1 space-y-1">
+                                    <li>PPA</li>
+                                    <li>Staf unit terkait</li>
+                                </ul>
+                            </div>
+                        </td>
+                        <td class="border border-slate-300 p-2 text-center align-middle font-bold text-emerald-600 bg-emerald-50">10</td>
+                    </tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-amber-500 bg-amber-50">5</td></tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-red-500 bg-red-50">0</td></tr>
+
+                    <!-- SKP 2 -->
+                    <tr class="bg-indigo-50">
+                        <td colspan="4" class="p-3 font-bold text-indigo-900 text-base border border-slate-300">
+                            SKP 2: Meningkatkan Komunikasi Yang Efektif
+                        </td>
+                    </tr>
+
+                    <!-- SKP 2 - EP 1 -->
+                    <tr class="hover:bg-slate-50 transition">
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top leading-relaxed">
+                            1) Rumah sakit telah menerapkan komunikasi saat menerima instruksi melalui telepon: menulis/menginput ke komputer - membacakan - konfirmasi kembali” (writedown, read back, confirmation dan SBAR saat melaporkan kondisi pasien kepada DPJP serta di dokumentasikan dalam rekam medik.
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-center font-bold text-blue-700">
+                            <div class="mb-3">D</div><br>
+                            <div class="mb-3">S</div><br>
+                            <div>W</div>
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-slate-700">
+                            <div class="mb-4">
+                                <span ></span> 
+                                Bukti rekam medis: penerapan komunikasi saat menerima instruksi melalui telepon dan saat melaporkan kondisi pasien kepada DPJP.
+                            </div>
+                            <div class="mb-4">
+                                <span ></span> 
+                                Menerima instruksi melalui telepon dan saat melaporkan kondisi pasien kepada DPJP.
+                            </div>
+                            <div>
+                                <span ></span> 
+                                PPA
+                            </div>
+                        </td>
+                        <td class="border border-slate-300 p-2 text-center align-middle font-bold text-emerald-600 bg-emerald-50">10</td>
+                    </tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-amber-500 bg-amber-50">5</td></tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-red-500 bg-red-50">0</td></tr>
+
+                    <!-- SKP 2 - EP 2 -->
+                    <tr class="hover:bg-slate-50 transition">
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top leading-relaxed">
+                            2) Rumah sakit telah menerapkan komunikasi saat pelaporan hasil kritis pemeriksaan penunjang diagnostic melalui telepon: menulis/menginput ke komputer – membacakan – konfirmasi kembali” (writedown, read back, confirmation dan di dokumentasikan dalam rekam medik.
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-center font-bold text-blue-700">
+                            <div class="mb-3">R</div>
+                            <div class="mb-3">D</div>
+                            <div class="mb-3">S</div><br>
+                            <div>W</div>
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-slate-700">
+                            <div class="mb-4">
+                                <span ></span> 
+                                Penetapan hasil kritis pemeriksaan penunjang diagnostic.
+                            </div>
+                            <div class="mb-4">
+                                <span ></span> 
+                                Bukti rekam medis: komunikasi pelaporan hasil kritis.
+                            </div>
+                            <div class="mb-4">
+                                <span ></span> 
+                                Pelaporan hasil kritis pemeriksaan penunjang diagnostik melalui telepon.
+                            </div>
+                            <div>
+                                <span ></span> 
+                                <ul class="list-disc ml-8 mt-1 space-y-1">
+                                    <li>PPA</li>
+                                    <li>Staf Laboratorium</li>
+                                    <li>Staf radiologi</li>
+                                </ul>
+                            </div>
+                        </td>
+                        <td class="border border-slate-300 p-2 text-center align-middle font-bold text-emerald-600 bg-emerald-50">10</td>
+                    </tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-amber-500 bg-amber-50">5</td></tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-red-500 bg-red-50">0</td></tr>
+
+                    <!-- SKP 2 - EP 3 -->
+                    <tr class="hover:bg-slate-50 transition">
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top leading-relaxed">
+                            3) Rumah sakit telah menerapkan komunikasi saat serah terima sesuai dengan jenis serah terima meliputi poin 1) - 3) dalam maksud dan tujuan.
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-center font-bold text-blue-700">
+                            <div class="mb-3">D</div><br>
+                            <div class="mb-3">S</div>
+                            <div>W</div>
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-slate-700">
+                            <div class="mb-4">
+                                <span ></span> 
+                                Bukti rekam medis: serah terima sesuai dengan jenis serah terima meliputi poin 1) - 3) dalam maksud dan tujuan.
+                            </div>
+                            <div class="mb-4">
+                                <span ></span> 
+                                Pelaksanaan serah terima.
+                            </div>
+                            <div>
+                                <span ></span> 
+                                PPA
+                            </div>
+                        </td>
+                        <td class="border border-slate-300 p-2 text-center align-middle font-bold text-emerald-600 bg-emerald-50">10</td>
+                    </tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-amber-500 bg-amber-50">5</td></tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-red-500 bg-red-50">0</td></tr>
+
+                    <!-- SKP 3 -->
+                    <tr class="bg-indigo-50">
+                        <td colspan="4" class="p-3 font-bold text-indigo-900 text-base border border-slate-300">
+                            SKP 3: Meningkatkan keamanan obat-obatan yang harus diwaspadai
+                        </td>
+                    </tr>
+
+                    <!-- SKP 3 - EP 1 -->
+                    <tr class="hover:bg-slate-50 transition">
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top leading-relaxed">
+                            1) Rumah sakit menetapkan daftar obat kewaspadaan tinggi (High Alert) termasuk obat Look -Alike Sound Alike (LASA)/Nama Obat Rupa Ucapan Mirip (NORUM).
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-center font-bold text-blue-700">
+                            <div>R</div>
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-slate-700">
+                            <div>
+                                <span ></span> 
+                                Penetapan daftar obat kewaspadaan tinggi (High Alert) termasuk obat Look -Alike Sound Alike (LASA)/ Nama Obat Rupa Ucapan Mirip (NORUM).
+                            </div>
+                        </td>
+                        <td class="border border-slate-300 p-2 text-center align-middle font-bold text-emerald-600 bg-emerald-50">10</td>
+                    </tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-amber-500 bg-amber-50">-</td></tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-red-500 bg-red-50">0</td></tr>
+
+                    <!-- SKP 3 - EP 2 -->
+                    <tr class="hover:bg-slate-50 transition">
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top leading-relaxed">
+                            2) Rumah sakit menerapkan pengelolaan obat kewaspadaan tinggi (High Alert) termasuk obat Look -Alike Sound Alike (LASA) secara seragam di seluruh area rumah sakit untuk mengurangi risiko dan cedera.
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-center font-bold text-blue-700">
+                            <div class="mb-3">O</div><br>
+                            <div>W</div>
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-slate-700">
+                            <div class="mb-4">
+                                <span ></span> 
+                                Penerapan pengelolaan obat kewaspadaan tinggi (High Alert) termasuk obat Look -Alike Sound Alike (LASA)/ Nama Obat Rupa Ucapan Mirip (NORUM) secara seragam.
+                            </div>
+                            <div>
+                                <span ></span> 
+                                Kepala Instalasi Farmasi/ Apoteker
+                            </div>
+                        </td>
+                        <td class="border border-slate-300 p-2 text-center align-middle font-bold text-emerald-600 bg-emerald-50">10</td>
+                    </tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-amber-500 bg-amber-50">5</td></tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-red-500 bg-red-50">0</td></tr>
+
+                    <!-- SKP 3 - EP 3 -->
+                    <tr class="hover:bg-slate-50 transition">
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top leading-relaxed">
+                            3) Rumah sakit mengevaluasi dan memperbaharui daftar obat High-Alert dan obat Look -Alike Sound Alike (LASA) yang sekurang-kurangnya 1 (satu) tahun sekali berdasarkan laporan insiden lokal, nasional dan internasional.
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-center font-bold text-blue-700">
+                            <div class="mb-3">D</div><br><br>
+                            <div>W</div>
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-slate-700">
+                            <div class="mb-4">
+                                <span ></span> 
+                                Bukti evaluasi dan pembaharuan daftar obat High- Alert dan obat Look -Alike Sound Alike (LASA)/ Nama Obat Rupa Ucapan Mirip (NORUM) sekurang- kurangnya 1 (satu) tahun sekali berdasarkan laporan insiden lokal, nasional dan internasional.
+                            </div>
+                            <div>
+                                <span ></span> 
+                                Komite Farmasi dan Terapi
+                            </div>
+                        </td>
+                        <td class="border border-slate-300 p-2 text-center align-middle font-bold text-emerald-600 bg-emerald-50">10</td>
+                    </tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-amber-500 bg-amber-50">5</td></tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-red-500 bg-red-50">0</td></tr>
+
+                    <!-- SKP 3.1 -->
+                    <tr class="bg-indigo-50">
+                        <td colspan="4" class="p-3 font-bold text-indigo-900 text-base border border-slate-300">
+                            SKP 3.1: Elektrolit Konsentrat
+                        </td>
+                    </tr>
+
+                    <!-- SKP 3.1 - EP 1 -->
+                    <tr class="hover:bg-slate-50 transition">
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top leading-relaxed">
+                            1) Rumah sakit menerapkan proses penyimpanan elektrolit konsentrat tertentu hanya di Instalasi Farmasi, kecuali di unit pelayanan dengan pertimbangan klinis untuk mengurangi risiko dan cedera pada penggunaan elektrolit konsentrat.
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-center font-bold text-blue-700">
+                            <div>R</div>
+                        </td>
+                        <td rowspan="3" class="border border-slate-300 p-3 align-top text-slate-700">
+                            <div>
+                                <span ></span> 
+                                Penetapan daftar elektrolit konsentrat yang dapat disimpan diluar instalasi farmasi.
+                            </div>
+                        </td>
+                        <td class="border border-slate-300 p-2 text-center align-middle font-bold text-emerald-600 bg-emerald-50">10</td>
+                    </tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-amber-500 bg-amber-50">-</td></tr>
+                    <tr><td class="border border-slate-300 p-2 text-center align-middle font-bold text-red-500 bg-red-50">0</td></tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Script Export Logic -->
+    <script>
+        // Fungsi Export PDF dengan html2pdf.js
+        function exportPDF() {
+            const element = document.getElementById('contentToExport');
+            
+            // Konfigurasi html2pdf
+            const opt = {
+                margin:       10,
+                filename:     'Instrumen_Akreditasi_RS_SKP.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+
+            // Menjalankan proses pembuatan PDF
+            html2pdf().set(opt).from(element).save();
+        }
+
+        // Fungsi Export Excel dengan xlsx-js-style agar bisa menyertakan border
+        function exportExcel() {
+            // 1. Ambil elemen tabel
+            const table = document.getElementById('skpTable');
+            
+            // 2. Konversi tabel HTML menjadi workbook Excel
+            const wb = XLSX.utils.table_to_book(table, { sheet: "Data SKP" });
+            const ws = wb.Sheets["Data SKP"];
+
+            // 3. Mendapatkan rentang (range) tabel untuk perulangan
+            const range = XLSX.utils.decode_range(ws['!ref']);
+
+            // 4. Looping untuk menambahkan styling (Border & Alignment) pada setiap sel
+            for (let R = range.s.r; R <= range.e.r; ++R) {
+                for (let C = range.s.c; C <= range.e.c; ++C) {
+                    const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+                    
+                    // Jika cell kosong (akibat dari rowspan/colspan), kita buat object kosong
+                    // supaya cell sisanya tetap bisa digambar border
+                    if (!ws[cellAddress]) {
+                        ws[cellAddress] = { t: 's', v: '' }; 
+                    }
+
+                    // Inisialisasi properti style (s) jika belum ada
+                    if (!ws[cellAddress].s) ws[cellAddress].s = {};
+                    
+                    // Mengatur garis batas (Border)
+                    ws[cellAddress].s.border = {
+                        top: { style: "thin", color: { rgb: "000000" } },
+                        bottom: { style: "thin", color: { rgb: "000000" } },
+                        left: { style: "thin", color: { rgb: "000000" } },
+                        right: { style: "thin", color: { rgb: "000000" } }
+                    };
+
+                    // Mengatur posisi teks (Alignment & Wrap) agar mirip HTML
+                    ws[cellAddress].s.alignment = {
+                        vertical: "top",
+                        wrapText: true
+                    };
+                    
+                    // Memberikan efek bold/background ke header (Baris 0)
+                    if (R === 0) {
+                        ws[cellAddress].s.font = { bold: true };
+                        ws[cellAddress].s.fill = { fgColor: { rgb: "F1F5F9" } }; // Warna slate-100
+                    }
+                }
+            }
+
+            // 5. Mengatur Lebar Kolom agar hasil unduhan bisa langsung terbaca
+            ws['!cols'] = [
+                { wch: 50 }, // Kolom Elemen Penilaian
+                { wch: 10 }, // Kolom Kode
+                { wch: 60 }, // Kolom Kelengkapan Bukti
+                { wch: 10 }  // Kolom Skoring
+            ];
+
+            // 6. Menyimpan dan Mengunduh file Excel
+            XLSX.writeFile(wb, 'Instrumen_Akreditasi_RS_SKP.xlsx');
+        }
+    </script>
+</body>
+</html>
