@@ -41,6 +41,7 @@
         #sidebar { transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease; }
         #sidebar.collapsed { width: 0; padding-left: 0; padding-right: 0; opacity: 0; overflow: hidden; border: none; }
 
+        /* Custom styling for POS Category buttons */
         .cat-btn { background-color: transparent; border: 1px solid #4b5563; color: #9ca3af; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; }
         .cat-btn:hover { border-color: #6b7280; color: #d1d5db; }
         .cat-btn.active { border-color: #eab308; color: #eab308; background-color: rgba(234, 179, 8, 0.1); }
@@ -83,7 +84,6 @@
         .light-mode .ts-dropdown { background-color: #ffffff !important; border-color: #d1d5db !important; color: #1f2937 !important; }
         .light-mode .ts-dropdown .option:hover, .light-mode .ts-dropdown .option.active { background-color: #f3f4f6 !important; color: #1f2937 !important; }
         
-        /* Mobile Navigation Bottom */
         #mobileBottomNav { padding-bottom: env(safe-area-inset-bottom); }
     </style>
 </head>
@@ -141,10 +141,9 @@
         </aside>
 
         <main class="flex-1 h-full overflow-y-auto relative pb-28 md:pb-8" id="mainScrollArea">
-            <div class="p-4 md:p-8 max-w-7xl mx-auto w-full">
+            <div class="p-4 md:p-8 max-w-7xl mx-auto w-full h-full flex flex-col">
                 
-                <!-- SECTION DASHBOARD & SOP PENGUMUMAN -->
-                <section id="view-dashboard" class="page-view active">
+                <section id="view-dashboard" class="page-view active shrink-0">
                     <div class="mb-8"><h2 class="text-3xl font-bold text-white mb-2">SOP & Peraturan Karyawan</h2><p class="text-gray-400 text-sm">Ketentuan wajib yang harus dilaksanakan pada saat operasional.</p></div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
                         <div class="glass-panel p-6 rounded-2xl border-t-4 border-t-blue-500 bg-gradient-to-br from-blue-900/40 to-transparent relative overflow-hidden flex items-start gap-5 shadow-lg">
@@ -194,7 +193,7 @@
                     </div>
                 </section>
 
-                <section id="view-menu" class="page-view">
+                <section id="view-menu" class="page-view shrink-0">
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                         <div class="glass-panel p-5 rounded-2xl border border-white/5 flex flex-col justify-center items-center text-center shadow-lg"><div class="text-blue-400 mb-1"><i class="ph ph-book-open-text text-2xl"></i></div><h3 class="text-2xl font-bold text-white" id="dash-menu">0</h3><p class="text-gray-400 text-xs uppercase tracking-wider mt-1">Menu Jual</p></div>
                         <div class="glass-panel p-5 rounded-2xl border border-white/5 flex flex-col justify-center items-center text-center shadow-lg"><div class="text-emerald-400 mb-1"><i class="ph ph-carrot text-2xl"></i></div><h3 class="text-2xl font-bold text-white" id="dash-bahan">0</h3><p class="text-gray-400 text-xs uppercase tracking-wider mt-1">Bahan Baku</p></div>
@@ -210,7 +209,7 @@
                         </div>
                     </div>
                     
-                    <div class="glass-panel rounded-xl overflow-hidden shadow-xl border border-white/5 flex flex-col">
+                    <div class="glass-panel rounded-xl overflow-hidden shadow-xl border border-white/5 flex flex-col mb-10">
                         <div class="p-4 bg-white/5 border-b border-white/10 flex justify-between items-center flex-wrap gap-4">
                             <div class="flex items-center w-full max-w-sm"><i class="ph ph-magnifying-glass text-gray-400 mr-2"></i><input type="text" id="searchMenu" oninput="renderMenuTable()" placeholder="Cari nama menu..." class="bg-transparent border-none outline-none text-white text-sm w-full"></div>
                             <div class="flex items-center gap-2 shrink-0"><span class="text-xs text-gray-400">Tampil:</span><select onchange="changeLimit('menu', this.value)" class="glass-input rounded px-2 py-1 text-xs bg-gray-800"><option value="10">10</option><option value="50">50</option><option value="100">100</option></select></div>
@@ -236,15 +235,17 @@
                     </div>
                 </section>
 
-                <section id="view-kasir" class="page-view h-full">
+                <section id="view-kasir" class="page-view h-full w-full flex-1">
                     <div class="h-full flex flex-col w-full">
 
+                        <!-- Main Split View Container -->
                         <div class="flex-1 flex overflow-hidden relative w-full h-[calc(100vh-140px)] pb-14 md:pb-0">
-                            <!-- Left: Menu Grid Area -->
-                            <div class="flex-1 flex flex-col h-full w-full lg:w-2/3 pr-0 lg:pr-6 overflow-hidden">
-                                <!-- Filters & Search -->
+                            
+                            <!-- Left: Menu Area (Independently Scrollable) -->
+                            <div class="flex-1 flex flex-col h-full w-full lg:w-[65%] pr-0 lg:pr-6 overflow-hidden">
+                                <!-- Filters & Search (Fixed at top of left pane) -->
                                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 shrink-0">
-                                    <div class="flex gap-0 overflow-x-auto pb-2 w-full md:w-auto hide-scrollbar" id="pos-category-filters">
+                                    <div class="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto hide-scrollbar" id="pos-category-filters">
                                         <button onclick="setPosCategory('Semua')" class="cat-btn active" data-cat="Semua">Semua</button>
                                         <button onclick="setPosCategory('Makanan')" class="cat-btn" data-cat="Makanan"><i class="ph ph-fork-knife"></i> Makanan</button>
                                         <button onclick="setPosCategory('Minuman')" class="cat-btn" data-cat="Minuman"><i class="ph ph-coffee"></i> Minuman</button>
@@ -256,35 +257,39 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Scrollable Grid -->
-                                <div class="flex-1 overflow-y-auto pr-2 pb-24 md:pb-2 hide-scrollbar" id="pos-menu-grid-container">
-                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4" id="pos-menu-grid"></div>
+                                <!-- Scrollable Grid Container -->
+                                <div class="flex-1 overflow-y-auto pr-2 pb-24 md:pb-2 hide-scrollbar w-full" id="pos-menu-grid-container">
+                                    <!-- Changed Grid structure here for horizontal cards -->
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full" id="pos-menu-grid"></div>
                                 </div>
                             </div>
 
                             <!-- Mobile Cart Overlay (Backdrop) -->
                             <div id="cartOverlay" onclick="toggleMobileCart()" class="fixed inset-0 bg-black/70 z-[60] hidden lg:hidden backdrop-blur-sm transition-opacity"></div>
 
-                            <!-- Right: Cart Sidebar Panel -->
-                            <div id="cartPanel" class="fixed inset-y-0 right-0 w-[85%] sm:w-[400px] lg:static lg:w-1/3 bg-[#1a2234] z-[90] transform translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col h-full shadow-2xl lg:shadow-none lg:rounded-2xl border-l lg:border border-white/5">
-                                <div class="p-4 md:p-5 border-b border-white/5 flex justify-between items-center bg-gray-900/50 shrink-0">
+                            <!-- Right: Cart Sidebar Panel (Independently Scrollable Items) -->
+                            <div id="cartPanel" class="fixed inset-y-0 right-0 w-[85%] sm:w-[400px] lg:static lg:w-[35%] bg-[#151b29] z-[90] transform translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col h-full shadow-2xl lg:shadow-none lg:rounded-2xl border-l lg:border border-white/5">
+                                <!-- Cart Header (Fixed) -->
+                                <div class="p-4 md:p-5 border-b border-white/5 flex justify-between items-center bg-gray-900/40 shrink-0">
                                     <div>
-                                        <p class="text-yellow-500 text-[10px] font-bold tracking-widest mb-1 uppercase">Dine In / Take Away</p>
+                                        <p class="text-yellow-500 text-[10px] font-bold tracking-widest mb-1 uppercase">TAKE AWAY / DINE IN</p>
                                         <h3 class="font-bold text-white text-lg md:text-xl">Pesanan Baru</h3>
                                     </div>
                                     <button onclick="toggleMobileCart()" class="lg:hidden text-gray-400 hover:text-white bg-gray-800 p-2 rounded-lg transition-colors"><i class="ph ph-x text-lg"></i></button>
                                 </div>
                                 
-                                <div class="flex-1 overflow-y-auto p-4 md:p-5 space-y-3 relative hide-scrollbar" id="pos-cart-items"></div>
+                                <!-- Cart Items (Scrollable) -->
+                                <div class="flex-1 overflow-y-auto p-4 md:p-5 space-y-2 relative hide-scrollbar" id="pos-cart-items"></div>
                                 
-                                <div class="p-4 md:p-5 bg-gray-900/80 border-t border-white/5 shrink-0">
+                                <!-- Cart Footer/Totals (Fixed) -->
+                                <div class="p-4 md:p-5 bg-gray-900/60 border-t border-white/5 shrink-0">
                                     <div class="flex justify-between text-gray-400 text-sm mb-1"><span>Subtotal:</span> <span id="pos-cart-subtotal">Rp 0</span></div>
-                                    <div class="flex justify-between text-gray-400 text-sm mb-1 border-b border-gray-700 pb-4"><span>PPN (11%):</span> <span id="pos-cart-ppn">Rp 0</span></div>
-                                    <div class="flex justify-between text-white font-bold text-2xl mb-2 items-center"><span>Total:</span> <span id="pos-cart-total" class="text-yellow-400">Rp 0</span></div>
+                                    <div class="flex justify-between text-gray-400 text-sm mb-4 border-b border-white/10 pb-4"><span>PPN (11%):</span> <span id="pos-cart-ppn">Rp 0</span></div>
+                                    <div class="flex justify-between text-white font-bold text-xl mb-4 items-center"><span>Total:</span> <span id="pos-cart-total" class="text-yellow-400 text-2xl">Rp 0</span></div>
                                     
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <button onclick="clearPosCart()" class="py-3.5 rounded-xl bg-gray-700 hover:bg-gray-600 text-white font-semibold transition-colors text-sm">Batal</button>
-                                        <button id="btn-checkout" onclick="openPaymentModal()" class="py-3.5 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold transition-all shadow-[0_0_15px_rgba(234,179,8,0.3)] disabled:opacity-50 disabled:cursor-not-allowed text-sm">
+                                    <div class="grid grid-cols-[1fr_2fr] gap-3">
+                                        <button onclick="clearPosCart()" class="py-3.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-medium transition-colors text-sm border border-white/10">Batal</button>
+                                        <button id="btn-checkout" onclick="openPaymentModal()" class="py-3.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm">
                                             Bayar
                                         </button>
                                     </div>
@@ -300,7 +305,7 @@
                     </div>
                 </section>
 
-                <section id="view-laporan" class="page-view">
+                <section id="view-laporan" class="page-view shrink-0">
                     <h2 class="text-2xl font-bold text-white mb-6">Laporan Penjualan (Sales)</h2>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -328,7 +333,7 @@
                         </button>
                     </div>
 
-                    <div class="glass-panel rounded-xl overflow-hidden shadow-xl border border-white/5 flex flex-col">
+                    <div class="glass-panel rounded-xl overflow-hidden shadow-xl border border-white/5 flex flex-col mb-10">
                         <div class="p-4 bg-white/5 border-b border-white/10 flex justify-between items-center flex-wrap gap-4">
                             <div class="flex items-center w-full max-w-sm"><i class="ph ph-magnifying-glass text-gray-400 mr-2"></i><input type="text" id="searchPenjualan" oninput="renderPenjualanTable()" placeholder="Cari Kode Trx / Isi Menu..." class="bg-transparent border-none outline-none text-white text-sm w-full"></div>
                             <div class="flex items-center gap-2 shrink-0"><span class="text-xs text-gray-400">Tampil:</span><select onchange="changeLimit('penjualan', this.value)" class="glass-input rounded px-2 py-1 text-xs bg-gray-800"><option value="10">10</option><option value="50">50</option><option value="100">100</option></select></div>
@@ -352,7 +357,7 @@
                     </div>
                 </section>
 
-                <section id="view-unit" class="page-view">
+                <section id="view-unit" class="page-view shrink-0">
                     <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
                         <h2 class="text-xl font-bold text-white">Master Satuan Ukur</h2>
                         <div class="flex items-center gap-2 flex-wrap">
@@ -363,7 +368,7 @@
                         </div>
                     </div>
                     
-                    <div class="glass-panel rounded-xl overflow-hidden shadow-xl border border-white/5 flex flex-col">
+                    <div class="glass-panel rounded-xl overflow-hidden shadow-xl border border-white/5 flex flex-col mb-10">
                         <div class="p-4 bg-white/5 border-b border-white/10 flex justify-between items-center">
                             <div class="flex items-center w-full max-w-sm"><i class="ph ph-magnifying-glass text-gray-400 mr-2"></i><input type="text" id="searchUnit" oninput="renderUnit()" placeholder="Cari nama satuan..." class="bg-transparent border-none outline-none text-white text-sm w-full"></div>
                             <div class="flex items-center gap-2 shrink-0"><span class="text-xs text-gray-400">Tampil:</span><select onchange="changeLimit('unit', this.value)" class="glass-input rounded px-2 py-1 text-xs bg-gray-800"><option value="10">10</option><option value="50">50</option><option value="100">100</option></select></div>
@@ -385,7 +390,7 @@
                     </div>
                 </section>
 
-                <section id="view-bahan" class="page-view">
+                <section id="view-bahan" class="page-view shrink-0">
                     <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
                         <h2 class="text-xl font-bold text-white">Master Bahan Baku</h2>
                         <div class="flex items-center gap-2 flex-wrap">
@@ -396,7 +401,7 @@
                         </div>
                     </div>
                     
-                    <div class="glass-panel rounded-xl overflow-hidden shadow-xl border border-white/5 flex flex-col">
+                    <div class="glass-panel rounded-xl overflow-hidden shadow-xl border border-white/5 flex flex-col mb-10">
                         <div class="p-4 bg-white/5 border-b border-white/10 flex justify-between items-center">
                             <div class="flex items-center w-full max-w-sm"><i class="ph ph-magnifying-glass text-gray-400 mr-2"></i><input type="text" id="searchBahan" oninput="renderBahan()" placeholder="Cari nama bahan..." class="bg-transparent border-none outline-none text-white text-sm w-full"></div>
                             <div class="flex items-center gap-2 shrink-0"><span class="text-xs text-gray-400">Tampil:</span><select onchange="changeLimit('bahan', this.value)" class="glass-input rounded px-2 py-1 text-xs bg-gray-800"><option value="10">10</option><option value="50">50</option><option value="100">100</option></select></div>
@@ -419,7 +424,7 @@
                     </div>
                 </section>
                 
-                <section id="view-konversi" class="page-view">
+                <section id="view-konversi" class="page-view shrink-0">
                     <h2 class="text-2xl font-bold text-white mb-6">Alat Konversi & Aturan Dasar</h2>
                     
                     <div class="glass-panel p-6 rounded-xl border border-white/10 mb-8 max-w-2xl bg-gray-800/80 shadow-2xl relative z-50">
@@ -445,7 +450,7 @@
                         </div>
                     </div>
 
-                    <div class="glass-panel rounded-xl overflow-hidden shadow-xl border border-white/5 flex flex-col">
+                    <div class="glass-panel rounded-xl overflow-hidden shadow-xl border border-white/5 flex flex-col mb-10">
                         <div class="p-4 bg-white/5 border-b border-white/10 flex justify-between items-center">
                             <div class="flex items-center w-full max-w-sm"><i class="ph ph-magnifying-glass text-gray-400 mr-2"></i><input type="text" id="searchKonversi" oninput="renderKonversi()" placeholder="Cari dari/ke satuan..." class="bg-transparent border-none outline-none text-white text-sm w-full"></div>
                             <div class="flex items-center gap-2 shrink-0"><span class="text-xs text-gray-400">Tampil:</span><select onchange="changeLimit('konversi', this.value)" class="glass-input rounded px-2 py-1 text-xs bg-gray-800"><option value="10">10</option><option value="50">50</option><option value="100">100</option></select></div>
@@ -468,7 +473,7 @@
                     </div>
                 </section>
 
-                <section id="view-resep" class="page-view">
+                <section id="view-resep" class="page-view shrink-0">
                     <h2 class="text-2xl font-bold text-white mb-6">Kalkulasi Kebutuhan Resep</h2>
                     
                     <div class="glass-panel p-6 rounded-xl mb-6 flex flex-col md:flex-row justify-between items-center gap-4 shadow-xl border border-white/5 relative z-50">
@@ -512,7 +517,7 @@
                         </div>
                     </div>
                     
-                    <div class="glass-panel rounded-xl overflow-hidden shadow-xl border border-white/5 flex flex-col">
+                    <div class="glass-panel rounded-xl overflow-hidden shadow-xl border border-white/5 flex flex-col mb-10">
                         <div class="p-4 bg-white/5 border-b border-white/10 flex justify-between items-center">
                             <div class="flex items-center w-full max-w-sm"><i class="ph ph-magnifying-glass text-gray-400 mr-2"></i><input type="text" id="searchResep" oninput="renderResepTable()" placeholder="Cari nama resep..." class="bg-transparent border-none outline-none text-white text-sm w-full"></div>
                             <div class="flex items-center gap-2 shrink-0"><span class="text-xs text-gray-400">Tampil:</span><select onchange="changeLimit('resep', this.value)" class="glass-input rounded px-2 py-1 text-xs bg-gray-800"><option value="10">10</option><option value="50">50</option><option value="100">100</option></select></div>
@@ -851,11 +856,25 @@
             grid.innerHTML = activeMenus.map(m => {
                 const fallbackImg = `https://placehold.co/400x300/1f2937/4b5563?text=${encodeURIComponent(m.reseps?.nama || 'No Image')}`;
                 const imgSrc = m.gambar ? m.gambar : fallbackImg;
-                return `<div class="glass-panel p-3 rounded-xl cursor-pointer hover:-translate-y-1 hover:bg-white/5 hover:border-yellow-500/50 transition-all border border-white/10 flex flex-col h-full shadow-lg group" onclick="addPosCart(${m.id})">
-                    <div class="w-full h-24 sm:h-32 mb-3 rounded-lg overflow-hidden relative border border-white/5 bg-gray-800 shrink-0"><img src="${imgSrc}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"><div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-60"></div></div>
-                    <div class="flex-1 flex flex-col mb-2"><h4 class="font-bold text-white text-xs sm:text-sm mb-1 leading-tight group-hover:text-yellow-400 transition-colors line-clamp-2 sm:line-clamp-1">${m.reseps?.nama || 'Menu'}</h4><p class="text-[10px] sm:text-[11px] text-gray-400 line-clamp-2 leading-snug hidden sm:block">${m.deskripsi || ''}</p></div>
-                    <div class="mt-auto flex justify-between items-center pt-2 border-t border-white/10 shrink-0"><p class="text-white font-bold text-xs sm:text-sm">${fRupiah(m.harga_jual)}</p></div>
-                </div>`}).join('');
+                
+                // Visual Check for items already in cart
+                const inCart = posCart.some(c => c.menu_id === m.id);
+                const borderClass = inCart ? 'border-yellow-500' : 'border-white/10 hover:border-white/30 hover:-translate-y-1';
+                const checkIndicator = inCart ? `<div class="absolute top-0 right-0 bg-yellow-500 text-black text-[10px] px-2 py-1 rounded-bl-lg font-bold shadow-md z-10"><i class="ph ph-check"></i></div>` : '';
+
+                // NEW Horizontal Card Design
+                return `<div class="glass-panel p-3 rounded-2xl cursor-pointer transition-all border ${borderClass} flex items-center gap-4 shadow-lg relative overflow-hidden bg-[#1f2937]/50" onclick="addPosCart(${m.id})">
+                    ${checkIndicator}
+                    <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden shrink-0 bg-gray-800 border border-white/5">
+                        <img src="${imgSrc}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1 flex flex-col justify-center py-1 overflow-hidden h-full">
+                        <h4 class="font-bold text-white text-sm sm:text-base mb-0.5 leading-tight truncate">${m.reseps?.nama || 'Menu'}</h4>
+                        <p class="text-[10px] text-gray-400 line-clamp-2 leading-snug mb-1">${m.deskripsi || ''}</p>
+                        <p class="text-white font-bold text-sm sm:text-base mt-auto">${fRupiah(m.harga_jual)}</p>
+                    </div>
+                </div>`
+            }).join('');
         }
 
         function addPosCart(menuId) {
@@ -864,10 +883,20 @@
             if(existingIndex > -1) posCart[existingIndex].qty += 1;
             else { const hpp = calculateRecipeModal(menu.resep_id, 1); posCart.push({ menu_id: menu.id, nama: menu.reseps?.nama, qty: 1, hpp: hpp, harga: parseFloat(menu.harga_jual) }); }
             renderPosCart();
+            renderKasirGrid(); // Refresh grid to show/hide yellow check
         }
 
-        function changePosCartQty(index, delta) { posCart[index].qty += delta; if(posCart[index].qty <= 0) posCart.splice(index, 1); renderPosCart(); }
-        function clearPosCart() { posCart = []; renderPosCart(); }
+        function changePosCartQty(index, delta) { 
+            posCart[index].qty += delta; 
+            if(posCart[index].qty <= 0) posCart.splice(index, 1); 
+            renderPosCart(); 
+            renderKasirGrid(); // Refresh grid
+        }
+        function clearPosCart() { 
+            posCart = []; 
+            renderPosCart(); 
+            renderKasirGrid(); // Refresh grid
+        }
 
         function renderPosCart() {
             const container = document.getElementById('pos-cart-items'); const btnCheckout = document.getElementById('btn-checkout');
@@ -881,21 +910,30 @@
             }
 
             if(posCart.length === 0) {
-                container.innerHTML = `<div class="text-center text-gray-500 py-10 flex flex-col items-center gap-2 mt-10"><i class="ph ph-shopping-cart text-4xl mb-2 text-gray-600"></i> Belum ada pesanan</div>`;
+                container.innerHTML = `<div class="text-center text-gray-500 h-full flex flex-col items-center justify-center gap-2 pb-10"><p class="text-sm">Belum ada pesanan</p></div>`;
                 document.getElementById('pos-cart-subtotal').textContent = 'Rp 0'; document.getElementById('pos-cart-ppn').textContent = 'Rp 0'; document.getElementById('pos-cart-total').textContent = 'Rp 0';
                 btnCheckout.disabled = true; 
                 btnCheckout.innerHTML = `Bayar`;
                 return;
             }
             let totalHpp = 0; let totalBayar = 0;
+            
+            // NEW Horizontal Cart Item Design
             container.innerHTML = posCart.map((c, i) => {
                 const subHpp = c.hpp * c.qty; const subBayar = c.harga * c.qty; totalHpp += subHpp; totalBayar += subBayar;
-                return `<div class="flex justify-between items-center pb-3 border-b border-white/5 last:border-0">
-                    <div class="flex-1 overflow-hidden pr-2"><h5 class="text-white text-sm font-bold truncate">${c.nama}</h5><p class="text-gray-400 text-xs mt-0.5">${fRupiah(c.harga)}</p></div>
-                    <div class="flex flex-col items-end gap-2 shrink-0">
-                        <div class="flex items-center bg-gray-900 rounded-lg border border-gray-700 overflow-hidden"><button onclick="changePosCartQty(${i}, -1)" class="px-2.5 py-1 hover:bg-gray-700 text-gray-300 transition"><i class="ph ph-minus text-xs"></i></button><span class="px-2 py-1 text-xs text-white font-bold min-w-[1.5rem] text-center">${c.qty}</span><button onclick="changePosCartQty(${i}, 1)" class="px-2.5 py-1 hover:bg-gray-700 text-gray-300 transition"><i class="ph ph-plus text-xs"></i></button></div>
-                        <p class="text-white font-bold text-sm">${fRupiah(subBayar)}</p>
-                    </div></div>`;
+                return `<div class="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-gray-800/40 hover:bg-gray-800/70 transition-colors">
+                    <div class="flex-1 overflow-hidden pr-2">
+                        <h5 class="text-white text-sm font-medium truncate">${c.nama}</h5>
+                    </div>
+                    <div class="flex items-center gap-4 shrink-0">
+                        <div class="flex items-center gap-1 bg-black/20 rounded border border-white/5 p-0.5">
+                            <button onclick="changePosCartQty(${i}, -1)" class="text-gray-400 hover:text-white transition w-6 h-6 flex items-center justify-center rounded hover:bg-white/10"><i class="ph ph-minus text-xs"></i></button>
+                            <span class="text-white font-bold w-5 text-center text-sm">${c.qty}</span>
+                            <button onclick="changePosCartQty(${i}, 1)" class="text-gray-400 hover:text-white transition w-6 h-6 flex items-center justify-center rounded hover:bg-white/10"><i class="ph ph-plus text-xs"></i></button>
+                        </div>
+                        <p class="text-yellow-400 font-bold text-sm w-[4.5rem] text-right">${fRupiah(subBayar)}</p>
+                    </div>
+                </div>`;
             }).join('');
 
             const ppn = totalBayar * 0.11; const grandTotal = totalBayar + ppn;
@@ -955,7 +993,7 @@
                 await fetchData(); 
                 viewStruk(kodePenjualan, document.getElementById('payUangDiterima').value);
                 setTimeout(() => printStruk(kodePenjualan), 500); 
-                posCart = []; renderPosCart();
+                clearPosCart(); // using the clear function to wipe it properly and reset grid
             }
         }
 
