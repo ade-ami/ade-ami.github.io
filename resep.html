@@ -163,7 +163,7 @@
             </nav>
         </aside>
 
-        <main class="flex-1 h-full overflow-y-auto relative w-full pb-0 md:pb-0" id="mainScrollArea">
+        <main class="flex-1 h-full overflow-y-auto relative w-full pb-20 md:pb-0" id="mainScrollArea">
             <div id="ptr-indicator" class="w-full bg-blue-500/10 text-blue-400 text-sm font-bold border-b border-blue-500/20">
                 <i class="ph ph-arrow-down text-xl mr-2" id="ptr-icon"></i> Tarik untuk Muat Ulang
             </div>
@@ -490,10 +490,11 @@
                             <label class="block text-xs text-gray-400 mb-1">Pilih Master Resep</label>
                             <select id="recipeSelect" onchange="calcRecipe()" class="glass-input rounded-lg px-4 py-2.5 text-sm w-full md:w-64 bg-gray-800"><option value="">-- Pilih Resep --</option></select>
                         </div>
-                        <div class="flex gap-4 items-end w-full md:w-auto">
-                            <div><label class="block text-xs text-gray-400 mb-1">Target Kebutuhan (Porsi/Pcs)</label><input type="number" id="recipeTarget" value="10" step="0.1" oninput="calcRecipe()" class="glass-input rounded-lg px-4 py-2.5 text-sm w-full md:w-48 text-center font-bold"></div>
-                        </div>
-                    </div>
+						<div class="w-full md:w-auto">
+                           <label class="block text-xs text-gray-400 mb-">Target Kebutuhan (Porsi/Pcs)</label>
+							<div class="glass-panel p-3 rounded-xl mb-8 flex flex-col md:flex-row justify-between items-center gap-4 shadow-xl border border-white/15 relative z-[45]"><input type="number" id="recipeTarget" value="10" step="0.1" oninput="calcRecipe()" class="glass-input rounded-lg px-4 py-2.5 text-sm w-full md:w-48 text-center font-bold"></div>
+						</div>
+					</div>
 
                     <div id="pdfPrintArea" class="glass-panel rounded-xl overflow-hidden shadow-2xl mb-6 border border-white/10 bg-gray-900">
                         <div id="recipeHeaderInfo" class="p-6 border-b border-white/10 hidden"><h3 id="rH_nama" class="text-xl font-bold text-white"></h3><p id="rH_info" class="text-sm text-gray-400 mt-1"></p></div>
@@ -507,9 +508,11 @@
                                     <tr class="bg-black/20 border-t border-white/10"><td colspan="3" class="px-6 py-3 text-right font-medium text-gray-300">Total Modal (HPP) :</td><td id="calcTotModal" class="px-6 py-3 text-right font-bold text-white text-base">Rp 0</td></tr>
                                     <tr class="bg-black/20"><td colspan="3" class="px-6 py-3 text-right font-bold text-gray-300">Margin Keuntungan <input type="number" id="calcMargin" value="40" oninput="calcRecipe()" class="glass-input w-16 text-center text-xs py-1 rounded border-none bg-gray-800 focus:ring-1 focus:ring-blue-500 outline-none">% :</td><td id="calcTotMargin" class="px-6 py-3 text-right font-medium text-emerald-400">+ Rp 0</td></tr>
                                     <tr class="bg-white/5 border-t border-white/10"><td colspan="3" class="px-6 py-4 text-right font-bold text-white">Saran Harga Jual (Total) :</td><td id="calcTotJual" class="px-6 py-4 text-right font-bold text-yellow-400 text-lg">Rp 0</td></tr>
+                                    <tr class="bg-white/5 border-t border-white/10"><td colspan="3" class="px-6 py-3 text-right font-bold text-gray-400">Harga Jual per Porsi :</td><td id="calcTotJualPerPorsi" class="px-6 py-3 text-right font-bold text-blue-400 text-lg">Rp 0</td></tr>
                                 </tfoot>
                             </table>
                         </div>
+                        <div id="recipeInstructionBox" class="hidden p-6 bg-black/30 border-t border-white/10"><h4 class="text-sm font-bold text-blue-400 mb-2 uppercase tracking-wide">Cara Membuat :</h4><div id="rH_cara" class="text-gray-300 text-sm whitespace-pre-wrap font-sans leading-relaxed"></div></div>
                     </div>
                     
                     <div class="flex justify-end mb-12" id="pdfBtnContainer" style="display:none;"><button onclick="downloadPDF()" class="bg-red-500 hover:bg-red-400 text-white font-semibold px-5 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all"><i class="ph ph-file-pdf text-lg"></i> Cetak PDF</button></div>
@@ -881,9 +884,9 @@
 
         function calcRecipe() {
             const id = parseInt(document.getElementById('recipeSelect').value); const target = parseFloat(document.getElementById('recipeTarget').value) || 0; const margin = parseFloat(document.getElementById('calcMargin').value) || 0;
-            const body = document.getElementById('calcRecipeBody'); const foot = document.getElementById('calcRecipeFoot'); const btnPdf = document.getElementById('pdfBtnContainer');
+            const body = document.getElementById('calcRecipeBody'); const foot = document.getElementById('calcRecipeFoot'); const boxCara = document.getElementById('recipeInstructionBox'); const btnPdf = document.getElementById('pdfBtnContainer');
 
-            if(!id) { body.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">Pilih resep terlebih dahulu</td></tr>`; foot.classList.add('hidden'); btnPdf.style.display = 'none'; document.getElementById('recipeHeaderInfo').classList.add('hidden'); return; }
+            if(!id) { body.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">Pilih resep terlebih dahulu</td></tr>`; foot.classList.add('hidden'); if(boxCara) boxCara.classList.add('hidden'); btnPdf.style.display = 'none'; document.getElementById('recipeHeaderInfo').classList.add('hidden'); return; }
 
             const resep = db.reseps.find(r => r.id === id); const myBahans = db.resep_bahans.filter(rb => rb.resep_id === id); const porsiDasar = parseFloat(resep.porsi_dasar) || 1; const multiplier = target / porsiDasar; let totalCost = 0;
             document.getElementById('rH_nama').textContent = resep.nama; document.getElementById('rH_info').innerHTML = `Resep Dasar: ${porsiDasar} porsi &nbsp;|&nbsp; Target Kebutuhan: <b class="text-blue-500">${target} porsi</b>`; document.getElementById('recipeHeaderInfo').classList.remove('hidden');
@@ -895,8 +898,11 @@
                 }).join('');
             } else { body.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500 border border-dashed border-gray-600 rounded">Belum ada komposisi bahan ditambahkan.</td></tr>`; }
 
-            const untung = totalCost * (margin/100); const saranHargaJualTotal = totalCost + untung; 
+            const untung = totalCost * (margin/100); const saranHargaJualTotal = totalCost + untung; const hargaJualPerPorsi = target > 0 ? saranHargaJualTotal / target : 0;
             document.getElementById('calcTotModal').textContent = fRupiah(totalCost); document.getElementById('calcTotMargin').textContent = `+ ${fRupiah(untung)}`; document.getElementById('calcTotJual').textContent = fRupiah(saranHargaJualTotal); 
+            if(document.getElementById('calcTotJualPerPorsi')) document.getElementById('calcTotJualPerPorsi').textContent = fRupiah(hargaJualPerPorsi);
+            
+            if(boxCara) { if(resep.cara_masak) { document.getElementById('rH_cara').textContent = resep.cara_masak; boxCara.classList.remove('hidden'); } else { boxCara.classList.add('hidden'); } }
             foot.classList.remove('hidden'); btnPdf.style.display = 'flex';
         }
 
