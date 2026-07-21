@@ -69,6 +69,13 @@
             .light-mode tr { background: #ffffff; border-color: rgba(0,0,0,0.1); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
             .light-mode td::before { color: #6b7280; }
             .light-mode td { border-bottom: 1px solid rgba(0,0,0,0.05) !important; }
+            
+            /* Fix Footer (Tfoot) di Kalkulasi Resep agar rata kiri-kanan (sejajar) */
+            tfoot tr { display: flex !important; justify-content: space-between; align-items: center; padding: 1rem !important; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem; }
+            tfoot td { padding: 0 !important; min-height: auto; border: none !important; display: block !important; width: auto !important; }
+            tfoot td::before { display: none !important; }
+            tfoot td[colspan="3"] { text-align: left !important; }
+            tfoot td:last-child { text-align: right !important; }
         }
 
         /* Light Mode Styling */
@@ -156,7 +163,7 @@
             </nav>
         </aside>
 
-        <main class="flex-1 h-full overflow-y-auto relative w-full pb-20 md:pb-0" id="mainScrollArea">
+        <main class="flex-1 h-full overflow-y-auto relative w-full pb-0 md:pb-0" id="mainScrollArea">
             <div id="ptr-indicator" class="w-full bg-blue-500/10 text-blue-400 text-sm font-bold border-b border-blue-500/20">
                 <i class="ph ph-arrow-down text-xl mr-2" id="ptr-icon"></i> Tarik untuk Muat Ulang
             </div>
