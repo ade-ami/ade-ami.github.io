@@ -1,0 +1,931 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gmail Generator & Alias Builder</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar design for premium feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(241, 245, 249, 1);
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 1);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(203, 213, 225, 1);
+            border-radius: 9999px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(71, 85, 105, 1);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 1);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
+
+<header class="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="p-2.5 bg-red-500 text-white rounded-xl shadow-md shadow-red-500/20">
+                <i data-lucide="mail" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <span class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-red-500 via-orange-500 to-amber-500 bg-clip-text text-transparent">
+                    Gmail Generator
+                </span>
+                <span class="text-xs block text-slate-500 dark:text-slate-400 font-medium -mt-1">Dot & Plus Trick Utility</span>
+            </div>
+        </div>
+        
+        <div class="flex items-center space-x-3">
+            <!-- Theme Toggle Button -->
+            <button id="themeToggleBtn" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm" aria-label="Toggle Theme">
+                <i data-lucide="sun" id="sunIcon" class="w-5 h-5 hidden"></i>
+                <i data-lucide="moon" id="moonIcon" class="w-5 h-5"></i>
+            </button>
+            <a href="#faq" class="hidden sm:inline-flex items-center space-x-1.5 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                <i data-lucide="help-circle" class="w-4 h-4 text-slate-400"></i>
+                <span>Panduan</span>
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- Toast Notification -->
+<div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-10 opacity-0 pointer-events-none transition-all duration-300 flex items-center space-x-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-3 rounded-xl shadow-2xl border border-slate-800 dark:border-slate-200">
+    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500"></i>
+    <span id="toastMessage" class="text-sm font-semibold">Berhasil disalin!</span>
+</div>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Hero Section -->
+    <div class="text-center max-w-3xl mx-auto mb-12">
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900 dark:text-white leading-tight">
+            Satu Gmail, <span class="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">Ribuan Variasi</span> Alamat Inbox
+        </h1>
+        <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
+            Buat alamat email alternatif secara instan menggunakan fitur "Dot Trick" (.) dan "Plus Trick" (+) bawaan Google. Semua email akan tetap masuk ke inbox utama Anda secara aman.
+        </p>
+    </div>
+
+    <!-- Two Column Layout: Controls on Left, Results on Right -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Interactive Controls (Left Side) -->
+        <div class="lg:col-span-5 space-y-6">
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-xl border border-slate-100 dark:border-slate-800/80 transition-all">
+                <div class="flex items-center space-x-2 mb-6">
+                    <div class="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-950/50 flex items-center justify-center text-orange-500 dark:text-orange-400">
+                        <i data-lucide="sliders" class="w-4.5 h-4.5"></i>
+                    </div>
+                    <h2 class="text-lg font-bold">Pengaturan Generator</h2>
+                </div>
+
+                <form id="generatorForm" class="space-y-5" onsubmit="event.preventDefault();">
+                    <!-- Base Email Input -->
+                    <div>
+                        <label for="baseEmail" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                            Masukkan Username Gmail Anda
+                        </label>
+                        <div class="relative">
+                            <input type="text" id="baseEmail" name="baseEmail" placeholder="contoh: budi.sudrajat" value="budisudrajat"
+                                class="w-full pl-4 pr-32 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-orange-500 focus:border-transparent transition-all font-medium text-slate-800 dark:text-slate-100">
+                            
+                            <div class="absolute right-2 top-2 bottom-2 flex items-center px-3 bg-slate-200/60 dark:bg-slate-800 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 select-none">
+                                @gmail.com
+                            </div>
+                        </div>
+                        <p class="mt-1.5 text-xs text-slate-400 dark:text-slate-500 flex items-center space-x-1">
+                            <i data-lucide="info" class="w-3.5 h-3.5 inline"></i>
+                            <span>Masukkan tanpa bagian @gmail.com (akan dihapus otomatis jika disalin ke sini).</span>
+                        </p>
+                    </div>
+
+                    <!-- Mode Select Cards -->
+                    <div>
+                        <span class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2.5">Pilih Tipe Generator</span>
+                        <div class="grid grid-cols-1 gap-3">
+                            <!-- Option 1: Dot Trick -->
+                            <label class="relative flex p-4 rounded-2xl border cursor-pointer focus:outline-none transition-all border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-slate-50 dark:hover:bg-slate-950/50" id="optionDotLabel">
+                                <input type="radio" name="genMode" value="dot" checked class="sr-only" id="modeDot">
+                                <div class="flex items-center justify-between w-full">
+                                    <div class="flex items-center space-x-3.5">
+                                        <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/30 text-blue-500 dark:text-blue-400 flex items-center justify-center font-bold text-xl">
+                                            .
+                                        </div>
+                                        <div>
+                                            <span class="block text-sm font-bold text-slate-900 dark:text-white">Gmail Dot Trick (.)</span>
+                                            <span class="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">Sisipkan tanda titik di antara huruf.</span>
+                                        </div>
+                                    </div>
+                                    <div class="radio-indicator w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-700 flex items-center justify-center">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-red-500 scale-0 transition-transform duration-200"></div>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <!-- Option 2: Plus Trick -->
+                            <label class="relative flex p-4 rounded-2xl border cursor-pointer focus:outline-none transition-all border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-slate-50 dark:hover:bg-slate-950/50" id="optionPlusLabel">
+                                <input type="radio" name="genMode" value="plus" class="sr-only" id="modePlus">
+                                <div class="flex items-center justify-between w-full">
+                                    <div class="flex items-center space-x-3.5">
+                                        <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/30 text-purple-500 dark:text-purple-400 flex items-center justify-center font-bold text-xl">
+                                            +
+                                        </div>
+                                        <div>
+                                            <span class="block text-sm font-bold text-slate-900 dark:text-white">Smart Aliases (+)</span>
+                                            <span class="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">Tambah tag filter cerdas (misal: +newsletter).</span>
+                                        </div>
+                                    </div>
+                                    <div class="radio-indicator w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-700 flex items-center justify-center">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-red-500 scale-0 transition-transform duration-200"></div>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <!-- Option 3: Combination -->
+                            <label class="relative flex p-4 rounded-2xl border cursor-pointer focus:outline-none transition-all border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-slate-50 dark:hover:bg-slate-950/50" id="optionComboLabel">
+                                <input type="radio" name="genMode" value="combo" class="sr-only" id="modeCombo">
+                                <div class="flex items-center justify-between w-full">
+                                    <div class="flex items-center space-x-3.5">
+                                        <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500 dark:text-emerald-400 flex items-center justify-center font-bold text-lg">
+                                            .+
+                                        </div>
+                                        <div>
+                                            <span class="block text-sm font-bold text-slate-900 dark:text-white">Kombinasi (. & +)</span>
+                                            <span class="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">Gabungkan titik-titik acak dan tag kustom.</span>
+                                        </div>
+                                    </div>
+                                    <div class="radio-indicator w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-700 flex items-center justify-center">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-red-500 scale-0 transition-transform duration-200"></div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Domain Select Option -->
+                    <div>
+                        <label for="domainSelect" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Pilih Domain</label>
+                        <select id="domainSelect" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-orange-500 transition-all font-semibold text-slate-700 dark:text-slate-300">
+                            <option value="gmail.com">@gmail.com</option>
+                            <option value="googlemail.com">@googlemail.com</option>
+                        </select>
+                        <p class="mt-1.5 text-xs text-slate-400 dark:text-slate-500">Google mengalihkan kedua domain ini ke kotak pesan Anda secara sama rata.</p>
+                    </div>
+
+                    <!-- Smart Aliases (+) Tag Builder Panel -->
+                    <div id="plusTagPanel" class="hidden space-y-3.5 border-t border-slate-100 dark:border-slate-800 pt-4">
+                        <span class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Tag Pintar Kustom</span>
+                        
+                        <!-- Predefined Fast Presets -->
+                        <div class="flex flex-wrap gap-1.5" id="presetContainer">
+                            <!-- Presets will be loaded in JS -->
+                        </div>
+
+                        <!-- Custom Tag Inputs with Add button -->
+                        <div class="flex space-x-2">
+                            <input type="text" id="customTagInput" placeholder="Masukkan tag baru... (misal: bank)"
+                                class="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-orange-500 transition-all text-sm font-medium">
+                            <button type="button" id="addTagBtn" class="px-4 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-950 text-sm font-bold rounded-xl hover:bg-slate-800 dark:hover:bg-slate-100 transition-all active:scale-95 flex items-center space-x-1">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                                <span>Tambah</span>
+                            </button>
+                        </div>
+                        <div id="activeTagsContainer" class="flex flex-wrap gap-2 pt-1">
+                            <!-- Selected/Created dynamic tags go here -->
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <button type="button" id="generateBtn" class="w-full py-4 bg-gradient-to-r from-red-500 via-orange-500 to-amber-500 text-white font-bold rounded-2xl shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 active:scale-[0.99] transition-all flex items-center justify-center space-x-2.5 text-base">
+                        <i data-lucide="zap" class="w-5 h-5 fill-current"></i>
+                        <span>Mulai Generate Variasi</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Quick Statistics Mini Card -->
+            <div class="bg-gradient-to-br from-slate-900 to-slate-850 dark:from-slate-900/40 dark:to-slate-950/60 rounded-3xl p-6 text-white border border-slate-800 shadow-xl relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl"></div>
+                <div class="flex justify-between items-start mb-4">
+                    <div class="space-y-1">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Variasi Terkalkulasi</span>
+                        <div class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400" id="statCountText">0</div>
+                    </div>
+                    <div class="p-2.5 bg-white/10 rounded-xl text-orange-400">
+                        <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed font-normal">
+                    Setiap variasi email ini didukung secara resmi oleh algoritma pengalihan Google. Anda tidak perlu mendaftarkan email baru ini di Google.
+                </p>
+            </div>
+        </div>
+
+        <!-- Output Results Container (Right Side) -->
+        <div class="lg:col-span-7 space-y-4">
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-xl border border-slate-100 dark:border-slate-800/80 transition-all flex flex-col min-h-[640px]">
+                
+                <!-- Results Header Actions -->
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-5 border-b border-slate-100 dark:border-slate-800 mb-5">
+                    <div class="flex items-center space-x-2.5">
+                        <div class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping"></div>
+                        <h3 class="text-lg font-bold">Hasil Variasi Email</h3>
+                        <span id="resultsBadge" class="px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">0 Alamat</span>
+                    </div>
+
+                    <!-- Actions Export -->
+                    <div class="flex flex-wrap gap-2">
+                        <button id="copyAllBtn" class="px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center space-x-1.5 active:scale-95 shadow-sm">
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                            <span>Salin Semua</span>
+                        </button>
+                        <button id="downloadTxtBtn" class="px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center space-x-1.5 active:scale-95 shadow-sm">
+                            <i data-lucide="file-text" class="w-3.5 h-3.5 text-blue-500"></i>
+                            <span>TXT</span>
+                        </button>
+                        <button id="downloadCsvBtn" class="px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center space-x-1.5 active:scale-95 shadow-sm">
+                            <i data-lucide="table" class="w-3.5 h-3.5 text-emerald-500"></i>
+                            <span>CSV</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live Filtering Searchbox -->
+                <div class="mb-4 relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                        <i data-lucide="search" class="w-4 h-4"></i>
+                    </span>
+                    <input type="text" id="searchFilterInput" placeholder="Cari variasi hasil spesifik..."
+                        class="w-full pl-9 pr-4 py-2.5 bg-slate-50/50 dark:bg-slate-950/40 border border-slate-150 dark:border-slate-850 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-400 dark:focus:ring-slate-600 transition-all text-sm font-medium">
+                </div>
+
+                <!-- Warning Performance Message -->
+                <div id="perfWarning" class="hidden mb-4 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-xl text-xs text-amber-700 dark:text-amber-400 flex items-start space-x-2">
+                    <i data-lucide="alert-triangle" class="w-4.5 h-4.5 flex-shrink-0 mt-0.5"></i>
+                    <span><strong>Catatan Performa:</strong> Username Anda cukup panjang. Untuk mencegah browser Anda mengalami hang, generator membatasi tampilan pada 2048 kombinasi variasi dot pertama.</span>
+                </div>
+
+                <!-- Results Scroll Container -->
+                <div class="flex-1 overflow-y-auto max-h-[500px] border border-slate-100 dark:border-slate-800 rounded-2xl p-2 bg-slate-50/30 dark:bg-slate-950/10" id="resultsScrollBox">
+                    <div id="emptyState" class="flex flex-col items-center justify-center py-20 text-center">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800/50 flex items-center justify-center text-slate-400 dark:text-slate-600 mb-4">
+                            <i data-lucide="mail-search" class="w-8 h-8"></i>
+                        </div>
+                        <h4 class="font-bold text-slate-700 dark:text-slate-300">Belum ada variasi dibuat</h4>
+                        <p class="text-xs text-slate-400 max-w-xs mt-1 leading-normal">Ketikkan nama Gmail Anda di sebelah kiri lalu klik tombol "Mulai Generate Variasi" untuk memulai.</p>
+                    </div>
+
+                    <div id="resultsList" class="hidden space-y-2">
+                        <!-- Iterative variations inject here via javascript -->
+                    </div>
+                </div>
+
+                <!-- Quick Tutorial/Tips at Bottom of Box -->
+                <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-400 flex items-center justify-between">
+                    <span>💡 Klik email untuk menyalin alamat secara instan.</span>
+                    <span class="flex items-center space-x-1">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>
+                        <span>Privasi Terjaga (Proses Lokal)</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ and Detailed Guide Section -->
+    <section id="faq" class="mt-16 border-t border-slate-200 dark:border-slate-800 pt-16">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-center mb-2 tracking-tight">Cara Kerja & Panduan Gmail Generator</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 text-center mb-10">Pelajari selengkapnya mengenai taktik email ini untuk meningkatkan produktivitas serta menjaga privasi Anda.</p>
+
+            <div class="space-y-4">
+                <!-- FAQ Item 1 -->
+                <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-150 dark:border-slate-850 overflow-hidden transition-all duration-300">
+                    <button class="faq-trigger w-full px-6 py-5 text-left flex items-center justify-between font-bold text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-850/40 transition-colors">
+                        <span>Bagaimana Cara Kerja "Gmail Dot Trick"?</span>
+                        <i data-lucide="chevron-down" class="faq-icon w-5 h-5 text-slate-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+                        <div class="px-6 pb-5 text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-slate-800/60 pt-4 space-y-2">
+                            <p>
+                                Google memiliki aturan unik di mana mereka **mengabaikan titik (.)** dalam username alamat Gmail Anda. 
+                                Ini berarti semua format di bawah ini akan diarahkan ke satu kotak masuk yang sama:
+                            </p>
+                            <ul class="list-disc pl-5 space-y-1 font-mono text-xs text-orange-600 dark:text-orange-400 bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-100 dark:border-slate-800/80">
+                                <li>budisudrajat@gmail.com</li>
+                                <li>budi.sudrajat@gmail.com</li>
+                                <li>b.u.d.i.s.u.d.r.a.j.a.t@gmail.com</li>
+                            </ul>
+                            <p>
+                                Anda dapat mendaftarkan variasi ini pada berbagai situs web berbeda yang mungkin melarang pendaftaran ganda menggunakan email yang sama. Dengan begitu, Anda tetap bisa mendapatkan notifikasi hanya di satu kotak pesan utama Anda tanpa repot.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-150 dark:border-slate-850 overflow-hidden transition-all duration-300">
+                    <button class="faq-trigger w-full px-6 py-5 text-left flex items-center justify-between font-bold text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-850/40 transition-colors">
+                        <span>Apa Saja Kegunaan "Smart Aliases / Plus Trick" (+)?</span>
+                        <i data-lucide="chevron-down" class="faq-icon w-5 h-5 text-slate-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+                        <div class="px-6 pb-5 text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-slate-800/60 pt-4 space-y-2">
+                            <p>
+                                Gmail memungkinkan Anda menambahkan tanda plus (<code class="font-semibold text-red-500 bg-red-500/10 px-1 py-0.5 rounded">+</code>) diikuti dengan kata atau huruf apa pun setelah username Anda. Contoh:
+                            </p>
+                            <p class="font-mono text-xs text-orange-600 dark:text-orange-400 bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-100 dark:border-slate-800/80">
+                                budisudrajat+newsletter@gmail.com<br>
+                                budisudrajat+belanja@gmail.com<br>
+                                budisudrajat+sosmed@gmail.com
+                            </p>
+                            <p>
+                                Fitur ini sangat berguna untuk:
+                            </p>
+                            <ul class="list-decimal pl-5 space-y-1.5">
+                                <li><strong>Mengetahui Siapa yang Membocorkan Data Anda:</strong> Jika Anda mendaftar di situs X dengan email <code class="font-mono text-xs px-1 py-0.5 bg-slate-100 dark:bg-slate-800 rounded">budi+situsX@gmail.com</code>, lalu Anda tiba-tiba menerima spam promosi obat ke alamat tersebut, Anda langsung tahu bahwa situs X telah menjual data Anda.</li>
+                                <li><strong>Kemudahan Membuat Filter:</strong> Anda bisa langsung menyaring email otomatis yang dikirim ke penanda tertentu untuk dimasukkan langsung ke folder arsip atau diberi label khusus.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-150 dark:border-slate-850 overflow-hidden transition-all duration-300">
+                    <button class="faq-trigger w-full px-6 py-5 text-left flex items-center justify-between font-bold text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-850/40 transition-colors">
+                        <span>Bagaimana Cara Membuat Filter Otomatis di Gmail?</span>
+                        <i data-lucide="chevron-down" class="faq-icon w-5 h-5 text-slate-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+                        <div class="px-6 pb-5 text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-slate-800/60 pt-4 space-y-3">
+                            <p>Setelah Anda menyalin atau menggunakan salah satu email hasil generator untuk mendaftar, Anda dapat membuat aturan penyaringan otomatis di Gmail:</p>
+                            <ol class="list-decimal pl-5 space-y-2">
+                                <li>Buka akun Gmail Anda di Komputer/Browser.</li>
+                                <li>Klik ikon roda gigi (<strong>Setelan / Settings</strong>) di pojok kanan atas, lalu klik <strong>"Lihat semua setelan"</strong>.</li>
+                                <li>Masuk ke tab <strong>"Filter dan Alamat yang Diblokir"</strong> lalu klik <strong>"Buat filter baru"</strong>.</li>
+                                <li>Pada kolom <strong>"Kepada" (To)</strong>, masukkan alamat email alias Anda (contoh: <code class="font-mono text-xs px-1 py-0.5 bg-slate-100 dark:bg-slate-800 rounded">budi+belanja@gmail.com</code>).</li>
+                                <li>Klik <strong>"Buat Filter"</strong>.</li>
+                                <li>Pilih tindakan otomatis yang Anda inginkan (misal: "Lewati Kotak Masuk", "Terapkan label: Belanja", atau "Bintangi").</li>
+                                <li>Klik tombol <strong>"Buat Filter"</strong> untuk menyimpan pengaturan tersebut.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 4 -->
+                <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-150 dark:border-slate-850 overflow-hidden transition-all duration-300">
+                    <button class="faq-trigger w-full px-6 py-5 text-left flex items-center justify-between font-bold text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-850/40 transition-colors">
+                        <span>Apakah Alat ini Aman Digunakan?</span>
+                        <i data-lucide="chevron-down" class="faq-icon w-5 h-5 text-slate-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+                        <div class="px-6 pb-5 text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-slate-800/60 pt-4 space-y-2">
+                            <p>
+                                **Sangat Aman.** Proses pengacakan dan pembuatan email ini dilakukan sepenuhnya di browser lokal Anda menggunakan kode JavaScript sisi klien.
+                            </p>
+                            <p>
+                                Kami tidak pernah merekam, mengirim, atau menyimpan nama email yang Anda masukkan ke server luar mana pun. Data Anda tetap sepenuhnya menjadi milik Anda pribadi.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="mt-24 border-t border-slate-200 dark:border-slate-800 py-8 bg-white dark:bg-slate-900 transition-all text-center">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p class="text-xs text-slate-400 dark:text-slate-500 font-medium">&copy; 2026 Gmail Generator Utility. Semua hak cipta dilindungi undang-undang.</p>
+        <p class="text-xs text-slate-400 dark:text-slate-500">
+            Dibuat secara profesional untuk memaksimalkan keamanan inbox email Anda.
+        </p>
+    </div>
+</footer>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Icons setup
+    lucide.createIcons();
+
+    // Elements
+    const themeToggleBtn = document.getElementById("themeToggleBtn");
+    const sunIcon = document.getElementById("sunIcon");
+    const moonIcon = document.getElementById("moonIcon");
+    
+    const baseEmailInput = document.getElementById("baseEmail");
+    const domainSelect = document.getElementById("domainSelect");
+    const plusTagPanel = document.getElementById("plusTagPanel");
+    
+    const modeDot = document.getElementById("modeDot");
+    const modePlus = document.getElementById("modePlus");
+    const modeCombo = document.getElementById("modeCombo");
+    
+    const optionDotLabel = document.getElementById("optionDotLabel");
+    const optionPlusLabel = document.getElementById("optionPlusLabel");
+    const optionComboLabel = document.getElementById("optionComboLabel");
+
+    const customTagInput = document.getElementById("customTagInput");
+    const addTagBtn = document.getElementById("addTagBtn");
+    const presetContainer = document.getElementById("presetContainer");
+    const activeTagsContainer = document.getElementById("activeTagsContainer");
+    const generateBtn = document.getElementById("generateBtn");
+
+    const statCountText = document.getElementById("statCountText");
+    const resultsBadge = document.getElementById("resultsBadge");
+    const resultsList = document.getElementById("resultsList");
+    const emptyState = document.getElementById("emptyState");
+    const resultsScrollBox = document.getElementById("resultsScrollBox");
+    const searchFilterInput = document.getElementById("searchFilterInput");
+    const perfWarning = document.getElementById("perfWarning");
+
+    const copyAllBtn = document.getElementById("copyAllBtn");
+    const downloadTxtBtn = document.getElementById("downloadTxtBtn");
+    const downloadCsvBtn = document.getElementById("downloadCsvBtn");
+
+    const toast = document.getElementById("toast");
+    const toastMessage = document.getElementById("toastMessage");
+
+    // Default Presets
+    const defaultPresets = ["newsletter", "belanja", "sosmed", "kerja", "uji", "keuangan", "pribadi", "premium"];
+    let customTags = ["newsletter", "belanja", "sosmed", "kerja", "uji"]; // active by default
+
+    // Generated variations state
+    let generatedVariations = [];
+
+    // --- Theme Handling ---
+    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        sunIcon.classList.remove('hidden');
+        moonIcon.classList.add('hidden');
+    } else {
+        document.documentElement.classList.remove('dark');
+        sunIcon.classList.add('hidden');
+        moonIcon.classList.remove('hidden');
+    }
+
+    themeToggleBtn.addEventListener("click", () => {
+        if (document.documentElement.classList.contains('dark')) {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+            sunIcon.classList.add('hidden');
+            moonIcon.classList.remove('hidden');
+        } else {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+            sunIcon.classList.remove('hidden');
+            moonIcon.classList.add('hidden');
+        }
+    });
+
+    // --- Clean Gmail input ---
+    baseEmailInput.addEventListener("input", function() {
+        // Strip out spaces, dots if they write them, and strip any gmail extensions
+        let val = this.value.toLowerCase().trim();
+        if (val.includes("@")) {
+            val = val.split("@")[0];
+        }
+        this.value = val;
+    });
+
+    // --- Radio Styling & UI Active States ---
+    function updateRadioStyles() {
+        const labels = [
+            { el: optionDotLabel, checked: modeDot.checked },
+            { el: optionPlusLabel, checked: modePlus.checked },
+            { el: optionComboLabel, checked: modeCombo.checked }
+        ];
+
+        labels.forEach(item => {
+            const ind = item.el.querySelector(".radio-indicator div");
+            if (item.checked) {
+                item.el.classList.add("border-red-500", "dark:border-orange-500", "bg-red-50/20", "dark:bg-orange-500/5");
+                item.el.classList.remove("border-slate-200", "dark:border-slate-800", "bg-slate-50/50", "dark:bg-slate-950/20");
+                ind.classList.remove("scale-0");
+                ind.classList.add("scale-100");
+            } else {
+                item.el.classList.add("border-slate-200", "dark:border-slate-800", "bg-slate-50/50", "dark:bg-slate-950/20");
+                item.el.classList.remove("border-red-500", "dark:border-orange-500", "bg-red-50/20", "dark:bg-orange-500/5");
+                ind.classList.remove("scale-100");
+                ind.classList.add("scale-0");
+            }
+        });
+
+        // Show/Hide Smart Aliases custom tag section
+        if (modePlus.checked || modeCombo.checked) {
+            plusTagPanel.classList.remove("hidden");
+        } else {
+            plusTagPanel.classList.add("hidden");
+        }
+    }
+
+    [modeDot, modePlus, modeCombo].forEach(radio => {
+        radio.addEventListener("change", updateRadioStyles);
+    });
+    // Init state
+    updateRadioStyles();
+
+    // --- Smart Tags UI Setup ---
+    function renderPresets() {
+        presetContainer.innerHTML = "";
+        defaultPresets.forEach(preset => {
+            const isSelected = customTags.includes(preset);
+            const badge = document.createElement("button");
+            badge.type = "button";
+            badge.className = `px-2.5 py-1 text-xs rounded-lg font-semibold border transition-all ${
+                isSelected 
+                ? "bg-orange-500/10 border-orange-300 text-orange-600 dark:text-orange-400" 
+                : "border-slate-200 dark:border-slate-800 bg-slate-50 hover:bg-slate-100 text-slate-600 dark:text-slate-400 dark:bg-slate-950"
+            }`;
+            badge.textContent = `+${preset}`;
+            badge.addEventListener("click", () => {
+                togglePreset(preset);
+            });
+            presetContainer.appendChild(badge);
+        });
+    }
+
+    function renderActiveTags() {
+        activeTagsContainer.innerHTML = "";
+        customTags.forEach(tag => {
+            const tagEl = document.createElement("span");
+            tagEl.className = "inline-flex items-center space-x-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-850 dark:text-slate-250 border border-slate-200/50 dark:border-slate-700/50";
+            tagEl.innerHTML = `
+                <span>+${tag}</span>
+                <button type="button" class="hover:text-red-500 transition-colors remove-tag-btn" data-tag="${tag}">
+                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                </button>
+            `;
+            activeTagsContainer.appendChild(tagEl);
+        });
+        
+        // Bind delete listeners
+        activeTagsContainer.querySelectorAll(".remove-tag-btn").forEach(btn => {
+            btn.addEventListener("click", function() {
+                const targetTag = this.getAttribute("data-tag");
+                customTags = customTags.filter(t => t !== targetTag);
+                renderActiveTags();
+                renderPresets();
+            });
+        });
+
+        lucide.createIcons();
+    }
+
+    function togglePreset(tag) {
+        if (customTags.includes(tag)) {
+            customTags = customTags.filter(t => t !== tag);
+        } else {
+            customTags.push(tag);
+        }
+        renderActiveTags();
+        renderPresets();
+    }
+
+    addTagBtn.addEventListener("click", () => {
+        let val = customTagInput.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (val && !customTags.includes(val)) {
+            customTags.push(val);
+            customTagInput.value = "";
+            renderActiveTags();
+            renderPresets();
+        }
+    });
+
+    customTagInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            addTagBtn.click();
+        }
+    });
+
+    // Initialize tags
+    renderPresets();
+    renderActiveTags();
+
+    // --- STREAMING_CHUNK:Adding variation generators and performance limits... ---
+    // Core Generation Algorithms
+    function generateDots(username) {
+        const results = [];
+        const len = username.length;
+        if (len <= 1) return [username];
+
+        const totalCombos = Math.pow(2, len - 1);
+        const limit = Math.min(totalCombos, 2048); // performance cap
+
+        if (totalCombos > 2048) {
+            perfWarning.classList.remove("hidden");
+        } else {
+            perfWarning.classList.add("hidden");
+        }
+
+        for (let i = 0; i < limit; i++) {
+            let current = username[0];
+            for (let j = 0; j < len - 1; j++) {
+                if ((i >> j) & 1) {
+                    current += '.';
+                }
+                current += username[j + 1];
+            }
+            results.push(current);
+        }
+        return results;
+    }
+
+    function generatePluses(username) {
+        perfWarning.classList.add("hidden");
+        const results = [];
+        results.push(username); // original
+        customTags.forEach(tag => {
+            results.push(`${username}+${tag}`);
+        });
+        return results;
+    }
+
+    function generateCombo(username) {
+        const dotVariations = generateDots(username);
+        const results = [];
+        
+        // Merge dot variations and plus options
+        dotVariations.forEach(dotVar => {
+            results.push(dotVar); // Dot variation alone
+            customTags.forEach(tag => {
+                results.push(`${dotVar}+${tag}`); // Combined dot + plus
+            });
+        });
+
+        // Limit results to 4096 to prevent browser crashing in render
+        if (results.length > 4096) {
+            perfWarning.classList.remove("hidden");
+            perfWarning.querySelector("span").innerHTML = `<strong>Catatan Performa:</strong> Kombinasi menghasilkan total ${results.length} variasi. Kami membatasi tampilan pada 4096 variasi pertama untuk menjaga responsivitas browser Anda.`;
+            return results.slice(0, 4096);
+        }
+
+        return results;
+    }
+
+    // --- STREAMING_CHUNK:Adding filter export, search capabilities, and styling initialization... ---
+    // Handle Generate Button Action
+    generateBtn.addEventListener("click", () => {
+        const username = baseEmailInput.value.trim();
+        const domain = domainSelect.value;
+        const mode = document.querySelector('input[name="genMode"]:checked').value;
+
+        if (!username) {
+            showToast("Harap masukkan username Gmail terlebih dahulu!", "alert-triangle");
+            return;
+        }
+
+        // Run generators
+        let baseVariations = [];
+        if (mode === "dot") {
+            baseVariations = generateDots(username);
+        } else if (mode === "plus") {
+            baseVariations = generatePluses(username);
+        } else if (mode === "combo") {
+            baseVariations = generateCombo(username);
+        }
+
+        // Map domains
+        generatedVariations = baseVariations.map(variant => `${variant}@${domain}`);
+        
+        // Update Stats UI
+        statCountText.textContent = generatedVariations.length.toLocaleString('id-ID');
+        resultsBadge.textContent = `${generatedVariations.length} Alamat`;
+
+        // Render variations lists
+        renderResults(generatedVariations);
+    });
+
+    // Render Function with Dynamic Template
+    function renderResults(list) {
+        if (!list || list.length === 0) {
+            emptyState.classList.remove("hidden");
+            resultsList.classList.add("hidden");
+            return;
+        }
+
+        emptyState.classList.add("hidden");
+        resultsList.classList.remove("hidden");
+        resultsList.innerHTML = "";
+
+        // Performance friendly progressive render
+        const fragment = document.createDocumentFragment();
+        
+        list.forEach((email, index) => {
+            const filterQuery = `to:(${email})`;
+            const card = document.createElement("div");
+            card.className = "flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-sm group";
+            
+            card.innerHTML = `
+                <div class="flex items-center space-x-3 cursor-pointer select-all flex-1 min-w-0 pr-2 email-text-container" data-email="${email}">
+                    <div class="w-7 h-7 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-lg flex items-center justify-center text-xs font-semibold group-hover:bg-orange-100 dark:group-hover:bg-orange-950/40 group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors">
+                        ${index + 1}
+                    </div>
+                    <span class="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate font-mono">${email}</span>
+                </div>
+                
+                <div class="flex items-center space-x-1.5 mt-3 sm:mt-0 justify-end">
+                    <button class="copy-email-btn p-2 text-slate-400 hover:text-orange-500 dark:hover:text-orange-400 bg-slate-50 dark:bg-slate-950 rounded-xl transition-colors" title="Salin Email" data-email="${email}">
+                        <i data-lucide="copy" class="w-4 h-4"></i>
+                    </button>
+                    <button class="copy-filter-btn px-2.5 py-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-950 rounded-xl transition-colors flex items-center space-x-1" title="Salin Kueri Filter Gmail" data-query="${filterQuery}">
+                        <i data-lucide="filter" class="w-3.5 h-3.5"></i>
+                        <span>Kueri Filter</span>
+                    </button>
+                </div>
+            `;
+            
+            // Add custom dynamic copying actions to list elements
+            card.querySelector(".email-text-container").addEventListener("click", () => {
+                copyText(email, "Email berhasil disalin!");
+            });
+            card.querySelector(".copy-email-btn").addEventListener("click", (e) => {
+                e.stopPropagation();
+                copyText(email, "Email berhasil disalin!");
+            });
+            card.querySelector(".copy-filter-btn").addEventListener("click", (e) => {
+                e.stopPropagation();
+                copyText(filterQuery, "Filter query disalin! Masukkan di kolom 'Kepada' di Gmail Filter.");
+            });
+
+            fragment.appendChild(card);
+        });
+
+        resultsList.appendChild(fragment);
+        lucide.createIcons();
+    }
+
+    // Interactive Realtime Search across outcomes
+    searchFilterInput.addEventListener("input", function() {
+        const query = this.value.toLowerCase().trim();
+        const cards = resultsList.children;
+        let visibleCount = 0;
+
+        for (let i = 0; i < cards.length; i++) {
+            const card = cards[i];
+            const emailSpan = card.querySelector(".email-text-container span");
+            if (emailSpan) {
+                const text = emailSpan.textContent.toLowerCase();
+                if (text.includes(query)) {
+                    card.classList.remove("hidden");
+                    card.classList.add("flex");
+                    visibleCount++;
+                } else {
+                    card.classList.add("hidden");
+                    card.classList.remove("flex");
+                }
+            }
+        }
+        resultsBadge.textContent = `${visibleCount} dari ${generatedVariations.length} Alamat`;
+    });
+
+    // Clipboard Copy Helper Function for reliable delivery
+    function copyText(text, message) {
+        // Fallback method for modern browsers and iframe containers
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.top = "0";
+        textArea.style.left = "0";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        let success = false;
+        try {
+            success = document.execCommand('copy');
+        } catch (err) {
+            console.error("Copy failed", err);
+        }
+        document.body.removeChild(textArea);
+
+        if (success) {
+            showToast(message, "check-circle-2");
+        } else {
+            showToast("Gagal menyalin text.", "alert-circle");
+        }
+    }
+
+    // Native custom interactive notifications Toast system
+    function showToast(message, iconName) {
+        toastMessage.textContent = message;
+        
+        // Update Icon inside toast
+        const iconContainer = toast.querySelector("i");
+        if (iconContainer) {
+            iconContainer.setAttribute("data-lucide", iconName);
+            lucide.createIcons();
+        }
+
+        toast.classList.remove("opacity-0", "translate-y-10", "pointer-events-none");
+        toast.classList.add("opacity-100", "translate-y-0");
+
+        setTimeout(() => {
+            toast.classList.add("opacity-0", "translate-y-10", "pointer-events-none");
+            toast.classList.remove("opacity-100", "translate-y-0");
+        }, 3000);
+    }
+
+    // --- Bulk Action Export Operations ---
+    copyAllBtn.addEventListener("click", () => {
+        if (generatedVariations.length === 0) {
+            showToast("Belum ada variasi untuk disalin!", "alert-triangle");
+            return;
+        }
+        const textToCopy = generatedVariations.join("\n");
+        copyText(textToCopy, `Semua ${generatedVariations.length} variasi disalin ke clipboard!`);
+    });
+
+    downloadTxtBtn.addEventListener("click", () => {
+        if (generatedVariations.length === 0) {
+            showToast("Belum ada variasi untuk diunduh!", "alert-triangle");
+            return;
+        }
+        const textToDownload = generatedVariations.join("\n");
+        const blob = new Blob([textToDownload], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `gmail_variations_${baseEmailInput.value}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast("File .txt berhasil diunduh!", "file-text");
+    });
+
+    downloadCsvBtn.addEventListener("click", () => {
+        if (generatedVariations.length === 0) {
+            showToast("Belum ada variasi untuk diunduh!", "alert-triangle");
+            return;
+        }
+        let csvContent = "no,email,filter_query\n";
+        generatedVariations.forEach((email, idx) => {
+            csvContent += `${idx + 1},"${email}","to:(${email})"\n`;
+        });
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `gmail_variations_${baseEmailInput.value}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast("File .csv berhasil diunduh!", "table");
+    });
+
+    // --- Accordion FAQ System Interactions ---
+    const faqItems = document.querySelectorAll(".faq-item");
+    faqItems.forEach(item => {
+        const trigger = item.querySelector(".faq-trigger");
+        const content = item.querySelector(".faq-content");
+        const icon = item.querySelector(".faq-icon");
+
+        trigger.addEventListener("click", () => {
+            const isOpen = content.style.maxHeight && content.style.maxHeight !== "0px";
+            
+            // Close other items
+            faqItems.forEach(otherItem => {
+                otherItem.querySelector(".faq-content").style.maxHeight = "0px";
+                otherItem.querySelector(".faq-icon").classList.remove("rotate-180");
+            });
+
+            if (!isOpen) {
+                content.style.maxHeight = content.scrollHeight + "px";
+                icon.classList.add("rotate-180");
+            } else {
+                content.style.maxHeight = "0px";
+                icon.classList.remove("rotate-180");
+            }
+        });
+    });
+
+    // Auto-generate on load first time
+    generateBtn.click();
+});
+</script>
+</body>
+</html>

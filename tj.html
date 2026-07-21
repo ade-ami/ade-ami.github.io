@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <link href="assets/img/logo.png" rel="icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetak Stiker T&J (All-in-One)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Konfigurasi Tailwind untuk mendeteksi class 'dark'
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+
+    <!-- QRCode.js untuk Generate QR 2D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- SheetJS untuk Export / Import Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- jsPDF untuk Export ke PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Area Canvas untuk Print - Selalu Putih walau Dark Mode */
+        .a4-canvas {
+            background: white !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            margin: 0 auto 20px auto;
+            display: block;
+        }
+
+        /* Pengaturan Khusus Layar (Preview Responsif untuk Smartphone & Zoom) */
+        @media screen {
+            .a4-canvas {
+                max-width: 100%; /* Agar tidak melebihi lebar layar HP saat zoom 100% */
+                height: auto !important; 
+                transition: width 0.2s ease, height 0.2s ease;
+            }
+            /* Class tambahan ketika user melakukan Zoom In agar bisa di-scroll horizontal */
+            .a4-canvas.zoomed-override {
+                max-width: none !important;
+            }
+        }
+
+        /* Pengaturan Cetak (Print) Absolut */
+        @media print {
+            body, html { 
+                background-color: white !important; 
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .no-print { 
+                display: none !important; 
+            }
+            #preview-container {
+                padding: 0 !important;
+                margin: 0 !important;
+                background: none !important;
+                overflow: visible !important;
+            }
+            .a4-canvas {
+                box-shadow: none !important;
+                margin: 0 !important;
+                page-break-after: always; 
+                max-width: none !important; /* Pastikan ukuran penuh saat diprint */
+                display: block;
+                /* Netralkan width inline yang mungkin diubah oleh Zoom saat print */
+                width: auto !important;
+                height: auto !important;
+            }
+            /* Mencegah halaman kosong tambahan di akhir pencetakan */
+            .a4-canvas:last-child {
+                page-break-after: auto !important; 
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+        
+        /* Dark Mode Scrollbar */
+        .dark ::-webkit-scrollbar-track { background: #374151; }
+        .dark ::-webkit-scrollbar-thumb { background: #4b5563; }
+        .dark ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+    </style>
+</head>
+<body class="bg-gray-200 dark:bg-gray-900 min-h-screen font-sans transition-colors duration-200 relative">
+
+    <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 md:p-6 shadow-sm z-10 no-print pb-8 transition-colors duration-200">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Stiker T&J</h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Render 300 DPI</p>
+                </div>
+                
+                <!-- Grup Tombol Kanan (Dark Mode & Print & PDF) -->
+                <div class="flex items-center gap-3">
+                    <!-- Tombol Dark/Light Mode -->
+                    <button type="button" id="themeToggleBtn" onclick="toggleTheme()" class="p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition shadow-sm" title="Ganti Tema">
+                        <!-- Icon Sun (Muncul saat Dark Mode) -->
+                        <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        <!-- Icon Moon (Muncul saat Light Mode) -->
+                        <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                    </button>
+
+                    <button type="button" onclick="downloadPDF()" class="bg-rose-600 hover:bg-rose-700 dark:bg-rose-500 dark:hover:bg-rose-600 text-white font-bold py-2 px-4 rounded-lg shadow flex items-center gap-2 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        <span class="hidden md:inline">PDF</span>
+                    </button>
+
+                    <button type="button" onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow flex items-center gap-2 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        Print
+                    </button>
+                </div>
+            </div>
+
+            <!-- Panel Template & Mode -->
+            <div class="flex flex-col md:flex-row gap-4 mb-4">
+                <div class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 p-3 rounded-lg flex-1 flex justify-between items-center gap-3 shadow-inner">
+                    <label class="font-bold text-emerald-800 dark:text-emerald-400 text-sm whitespace-nowrap">📜 Template T&J:</label>
+                    <select id="templateSelect" class="border border-emerald-300 dark:border-emerald-700 rounded px-3 py-1.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-medium focus:ring-emerald-500 w-full cursor-pointer">
+                        <option value="custom">🛠️ Custom (Atur Sendiri)</option>
+                        <option value="103">📄 No. 103 (32 x 64 mm) - 12 Pcs/Lembar</option>
+                        <option value="107">📄 No. 107 (18 x 50 mm) - 28 Pcs/Lembar</option>
+                        <option value="108">📄 No. 108 (18 x 38 mm) - 40 Pcs/Lembar</option>
+                        <option value="109">📄 No. 109 (13 x 38 mm) - 55 Pcs/Lembar</option>
+                        <option value="112">📄 No. 112 (36 x 80 mm) - 8 Pcs/Lembar</option>
+                        <option value="121">📄 No. 121 (38 x 75 mm) - 10 Pcs/Lembar</option>
+                        <option value="123">📄 No. 123 (11 x 30 mm) - 70 Pcs/Lembar</option>
+                        <option value="129">📄 No. 129 (17 x 58 mm) - 24 Pcs/Lembar</option>
+                    </select>
+                </div>
+                
+                <div class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 p-3 rounded-lg flex-1 flex justify-between items-center gap-3 shadow-inner">
+                    <label class="font-bold text-indigo-800 dark:text-indigo-400 text-sm whitespace-nowrap">⚙️ Mode Cetak:</label>
+                    <select id="modeSelect" class="border border-indigo-300 dark:border-indigo-700 rounded px-3 py-1.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-medium focus:ring-indigo-500 w-full cursor-pointer">
+                        <option value="qr">📷 Pakai QR Code & Teks</option>
+                        <option value="address">📝 Hanya Teks (Dengan Kotak)</option>
+                        <option value="address-noborder">📝 Hanya Teks (Tanpa Kotak/Border)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Panel Data Stiker -->
+            <div class="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/50 rounded-lg p-4 mb-4">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 gap-3">
+                    <h2 class="font-semibold text-blue-800 dark:text-blue-400 text-sm uppercase tracking-wider">Daftar Data Stiker</h2>
+                    <div class="flex gap-2 flex-wrap">
+                        <!-- Input File Tersembunyi untuk Import Data Excel -->
+                        <input type="file" id="excelInput" accept=".xlsx, .xls" class="hidden" onchange="handleExcelImport(event)">
+                        
+                        <button type="button" onclick="document.getElementById('excelInput').click()" class="text-sm bg-emerald-100 dark:bg-emerald-900/40 hover:bg-emerald-200 dark:hover:bg-emerald-800/60 text-emerald-700 dark:text-emerald-400 py-1.5 px-3 rounded border border-emerald-300 dark:border-emerald-700 transition font-bold flex items-center gap-1 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                            Import Excel
+                        </button>
+                        
+                        <button type="button" onclick="exportExcel()" class="text-sm bg-indigo-100 dark:bg-indigo-900/40 hover:bg-indigo-200 dark:hover:bg-indigo-800/60 text-indigo-700 dark:text-indigo-400 py-1.5 px-3 rounded border border-indigo-300 dark:border-indigo-700 transition font-bold flex items-center gap-1 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            Export Excel
+                        </button>
+                        
+                        <button type="button" onclick="clearAllData()" class="text-sm bg-red-100 dark:bg-red-900/40 hover:bg-red-200 dark:hover:bg-red-800/60 text-red-700 dark:text-red-400 py-1.5 px-3 rounded border border-red-300 dark:border-red-700 transition font-bold shadow-sm">
+                            Hapus Semua
+                        </button>
+
+                        <button type="button" onclick="addDataRow()" class="text-sm bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white py-1.5 px-3 rounded border border-blue-700 dark:border-blue-600 transition font-bold shadow-sm">
+                            + Tambah Data
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-12 gap-2 mb-2 text-xs font-semibold text-gray-700 dark:text-gray-300 text-center bg-blue-100 dark:bg-blue-900/30 p-2 rounded hidden md:grid">
+                    <div id="th-field1" class="col-span-3 text-left">Nama Perusahaan</div>
+                    <div id="th-field2" class="col-span-3 text-left">Detail Produk</div>
+                    <div id="th-field3" class="col-span-3 text-left">Data dalam QR</div>
+                    <div class="col-span-2">Jumlah Cetak (Pcs)</div>
+                    <div class="col-span-1">Aksi</div>
+                </div>
+
+                <div id="data-container" class="space-y-4 md:space-y-2 max-h-80 md:max-h-60 overflow-y-auto pr-1">
+                    <!-- Baris Form Injeksi JS -->
+                </div>
+            </div>
+
+            <!-- Panel Kalibrasi & Ukuran -->
+            <div class="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-inner mb-2">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 border-b border-gray-200 dark:border-gray-700 pb-3 gap-3">
+                    <h2 class="font-semibold text-gray-800 dark:text-gray-200 text-sm uppercase tracking-wider">🛠️ Pengaturan Kalibrasi Printer</h2>
+                    <div class="flex gap-2">
+                        <!-- Input File Tersembunyi untuk Import Setting Kalibrasi -->
+                        <input type="file" id="settingExcelInput" accept=".xlsx, .xls" class="hidden" onchange="handleSettingImport(event)">
+                        
+                        <button type="button" onclick="document.getElementById('settingExcelInput').click()" class="text-xs bg-amber-100 dark:bg-amber-900/30 hover:bg-amber-200 dark:hover:bg-amber-800/50 text-amber-700 dark:text-amber-500 py-1.5 px-3 rounded border border-amber-300 dark:border-amber-700 transition font-bold flex items-center shadow-sm">
+                            📥 Import Kalibrasi
+                        </button>
+                        <button type="button" onclick="exportSettingsExcel()" class="text-xs bg-amber-100 dark:bg-amber-900/30 hover:bg-amber-200 dark:hover:bg-amber-800/50 text-amber-700 dark:text-amber-500 py-1.5 px-3 rounded border border-amber-300 dark:border-amber-700 transition font-bold flex items-center shadow-sm">
+                            📤 Export Kalibrasi
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="calibration-panel" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Kolom 1: Kertas -->
+                    <div class="flex flex-col gap-1.5">
+                        <span class="font-semibold text-gray-700 dark:text-gray-300 text-xs uppercase border-b border-gray-300 dark:border-gray-600 pb-1 mb-1">1. Layout Kertas</span>
+                        <label class="text-[11px] text-gray-700 dark:text-gray-300 flex justify-between items-center hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded">Orientasi: 
+                            <select id="orientation" class="w-20 px-1 py-1 border dark:border-gray-600 rounded text-right focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white">
+                                <option value="portrait">Portrait</option>
+                                <option value="landscape">Landscape</option>
+                            </select>
+                        </label>
+                        <label class="text-[11px] text-gray-700 dark:text-gray-300 flex justify-between items-center hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded">Jml Kolom: <input type="number" id="cols" step="1" class="w-14 px-1 py-1 border dark:border-gray-600 rounded text-right focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"></label>
+                        <label class="text-[11px] text-gray-700 dark:text-gray-300 flex justify-between items-center hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded">Jml Baris: <input type="number" id="rowsPerPage" step="1" class="w-14 px-1 py-1 border dark:border-gray-600 rounded text-right focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"></label>
+                        <label class="text-[11px] text-gray-700 dark:text-gray-300 flex justify-between items-center hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded">Margin Atas (mm): <input type="number" id="marginTop" step="0.5" class="w-14 px-1 py-1 border dark:border-gray-600 rounded text-right focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"></label>
+                        <label class="text-[11px] text-gray-700 dark:text-gray-300 flex justify-between items-center hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded">Margin Kiri (mm): <input type="number" id="marginLeft" step="0.5" class="w-14 px-1 py-1 border dark:border-gray-600 rounded text-right focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"></label>
+                        <label class="text-[11px] text-gray-700 dark:text-gray-300 flex justify-between items-center hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded">Jarak X (mm): <input type="number" id="gapX" step="0.5" class="w-14 px-1 py-1 border dark:border-gray-600 rounded text-right focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"></label>
+                        <label class="text-[11px] text-gray-700 dark:text-gray-300 flex justify-between items-center hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded">Jarak Y (mm): <input type="number" id="gapY" step="0.5" class="w-14 px-1 py-1 border dark:border-gray-600 rounded text-right focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"></label>
+                    </div>
+                
+                    <!-- Kolom 2: Ukuran Elemen -->
+                    <div class="flex flex-col gap-1.5">
+                        <span class="font-semibold text-gray-700 dark:text-gray-300 text-xs uppercase border-b border-gray-300 dark:border-gray-600 pb-1 mb-1">2. Dimensi Stiker</span>
+                        <label class="text-[11px] text-gray-700 dark:text-gray-300 flex justify-between items-center hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded">Lebar Kotak (mm): <input type="number" id="labelWidth" step="0.5" class="w-14 px-1 py-1 border dark:border-gray-600 rounded text-right focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"></label>
+                        <label class="text-[11px] text-gray-700 dark:text-gray-300 flex justify-between items-center hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded">Tinggi Kotak (mm): <input type="number" id="labelHeight" step="0.5" class="w-14 px-1 py-1 border dark:border-gray-600 rounded text-right focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"></label>
+                        <label class="text-[11px] text-gray-700 dark:text-gray-300 flex justify-between items-center hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded">Ukuran QR (mm): <input type="number" id="qrSize" step="1" class="w-14 px-1 py-1 border dark:border-gray-600 rounded text-right focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"></label>
+                        <label class="text-[11px] text-gray-700 dark:text-gray-300 flex justify-between items-center hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded">Font Baris 1 (pt): <input type="number" id="fontCompany" step="0.5" class="w-14 px-1 py-1 border dark:border-gray-600 rounded text-right focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"></label>
+                        <label class="text-[11px] text-gray-700 dark:text-gray-300 flex justify-between items-center hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded">Font Baris 2/3 (pt): <input type="number" id="fontProduct" step="0.5" class="w-14 px-1 py-1 border dark:border-gray-600 rounded text-right focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"></label>
+                        <label class="text-[11px] text-gray-700 dark:text-gray-300 flex justify-between items-center hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded">Align Teks: 
+                            <select id="textAlign" class="w-20 px-1 py-1 border dark:border-gray-600 rounded text-right focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white">
+                                <option value="left">Kiri</option>
+                                <option value="center">Tengah</option>
+                                <option value="right">Kanan</option>
+                            </select>
+                        </label>
+                        <label class="text-[11px] text-gray-700 dark:text-gray-300 flex justify-between items-center hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded">Jarak Tepi Dalam (mm): <input type="number" id="stickerPadding" step="0.5" class="w-14 px-1 py-1 border dark:border-gray-600 rounded text-right focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"></label>
+                    </div>
+
+                    <!-- Kolom 3: Posisi/Offset -->
+                    <div class="flex flex-col gap-2">
+                        <div class="flex justify-between items-end border-b border-gray-300 dark:border-gray-600 pb-1 mb-1">
+                            <span class="font-semibold text-gray-700 dark:text-gray-300 text-xs uppercase">3. Geser Kalibrasi</span>
+                            <button type="button" onclick="handleResetSettings()" class="text-[10px] text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 underline bg-red-50 dark:bg-red-900/30 px-2 py-0.5 rounded border border-red-200 dark:border-red-800">Reset Kalibrasi</button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 mt-1">
+                            <label class="text-[11px] text-gray-600 dark:text-gray-400 flex flex-col font-medium">QR Geser X (↔) <input type="number" id="qrOffsetX" step="0.5" title="Minus ke kiri, Plus ke kanan" class="w-full px-1 py-1.5 border dark:border-gray-600 rounded text-center mt-1 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"></label>
+                            <label class="text-[11px] text-gray-600 dark:text-gray-400 flex flex-col font-medium">QR Geser Y (↕) <input type="number" id="qrOffsetY" step="0.5" title="Minus ke atas, Plus ke bawah" class="w-full px-1 py-1.5 border dark:border-gray-600 rounded text-center mt-1 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"></label>
+                            <label class="text-[11px] text-gray-600 dark:text-gray-400 flex flex-col font-medium">Teks Geser X (↔) <input type="number" id="textOffsetX" step="0.5" class="w-full px-1 py-1.5 border dark:border-gray-600 rounded text-center mt-1 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"></label>
+                            <label class="text-[11px] text-gray-600 dark:text-gray-400 flex flex-col font-medium">Teks Geser Y (↕) <input type="number" id="textOffsetY" step="0.5" class="w-full px-1 py-1.5 border dark:border-gray-600 rounded text-center mt-1 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toolbar Kontrol Zoom (Menempel di atas area Preview) -->
+    <div class="sticky top-0 z-20 w-full bg-gray-200/90 dark:bg-gray-900/90 backdrop-blur py-2 border-b border-gray-300 dark:border-gray-700 flex justify-center no-print shadow-sm transition-colors duration-200">
+        <div class="bg-white dark:bg-gray-800 rounded-full shadow-sm border border-gray-200 dark:border-gray-700 flex items-center p-1 gap-1">
+            <button type="button" onclick="changeZoom(-0.25)" class="p-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition" title="Zoom Out (-)">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" /></svg>
+            </button>
+            <span id="zoom-text" class="text-xs font-bold text-gray-700 dark:text-gray-200 w-12 text-center select-none">100%</span>
+            <button type="button" onclick="changeZoom(0.25)" class="p-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition" title="Zoom In (+)">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+            </button>
+            <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+            <button type="button" onclick="resetZoom()" class="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-full transition" title="Reset Zoom ke Layar Penuh">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Menghilangkan flex items-center agar kanvas bisa di-scroll horizontal saat zoom in -->
+    <main id="preview-container" class="w-full py-4 md:py-10 px-4 md:px-0 no-print-bg pb-20 overflow-x-auto">
+        <!-- Canvas Akan Digenerate Disini -->
+    </main>
+
+    <!-- Custom Toast Message -->
+    <div id="custom-toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-800 dark:bg-gray-100 text-white dark:text-gray-900 font-medium px-6 py-3 rounded-lg shadow-xl opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-2">
+        <span id="toast-icon">ℹ️</span>
+        <span id="toast-message">Pesan Notifikasi</span>
+    </div>
+
+    <!-- Custom Confirm Modal -->
+    <div id="custom-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 z-50 px-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-6 max-w-md w-full transform scale-95 transition-transform duration-300" id="custom-modal-content">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2" id="modal-title">Konfirmasi</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6 text-sm" id="modal-desc">Apakah anda yakin?</p>
+            <div class="flex justify-end gap-3" id="modal-buttons">
+                <!-- Buttons injected by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden div untuk generate temporary QR codes sebelum dipindah ke Canvas -->
+    <div id="qr-temp" class="hidden"></div>
+
+    <script>
+        // Logika Dark Mode
+        function setupTheme() {
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                updateThemeIcon('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                updateThemeIcon('light');
+            }
+        }
+
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                updateThemeIcon('light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                updateThemeIcon('dark');
+            }
+        }
+
+        function updateThemeIcon(theme) {
+            const iconSun = document.getElementById('icon-sun');
+            const iconMoon = document.getElementById('icon-moon');
+            if (theme === 'dark') {
+                iconSun.classList.remove('hidden');
+                iconMoon.classList.add('hidden');
+            } else {
+                iconSun.classList.add('hidden');
+                iconMoon.classList.remove('hidden');
+            }
+        }
+
+        // Initialize Theme
+        setupTheme();
+
+        // Pustaka Template Standar Tom & Jerry
+         const TEMPLATES = {
+            '103': { labelWidth: 64, labelHeight: 32, cols: 3, rowsPerPage: 4, marginTop: 7, marginLeft: 6, gapX: 2, gapY: 2, qrSize: 22, fontCompany: 10, fontProduct: 9, stickerPadding: 4, qrOffsetX: -3.5, qrOffsetY: 0, textOffsetX: -3, textOffsetY: -2.5, orientation: 'portrait' },
+            '107': { labelWidth: 50, labelHeight: 18, cols: 4, rowsPerPage: 7, marginTop: 7, marginLeft: 6, gapX: 2, gapY: 2, qrSize: 14, fontCompany: 8, fontProduct: 7, stickerPadding: 2, qrOffsetX: -3.5, qrOffsetY: 0, textOffsetX: -3, textOffsetY: -2.5, orientation: 'portrait' },
+            '108': { labelWidth: 38, labelHeight: 18, cols: 5, rowsPerPage: 8, marginTop: 7, marginLeft: 6, gapX: 2, gapY: 1, qrSize: 14, fontCompany: 7, fontProduct: 6, stickerPadding: 2, qrOffsetX: -3.5, qrOffsetY: 0, textOffsetX: -3, textOffsetY: -2.5, orientation: 'portrait' },
+            '109': { labelWidth: 38, labelHeight: 13, cols: 5, rowsPerPage: 11, marginTop: 7, marginLeft: 6, gapX: 2, gapY: 2, qrSize: 10, fontCompany: 6, fontProduct: 5, stickerPadding: 1.5, qrOffsetX: -3.5, qrOffsetY: 0, textOffsetX: -3, textOffsetY: -2.5, orientation: 'portrait' },
+			'112': { labelWidth: 80, labelHeight: 36, cols: 2, rowsPerPage: 4, marginTop: 7, marginLeft: 6, gapX: 5, gapY: 5, qrSize: 25, fontCompany: 11, fontProduct: 10, stickerPadding: 4, qrOffsetX: -3.5, qrOffsetY: 0, textOffsetX: -3, textOffsetY: -2.5, orientation: 'portrait' },
+            '121': { labelWidth: 72, labelHeight: 29, cols: 2, rowsPerPage: 5, marginTop: 7, marginLeft: 6, gapX: 8, gapY: 4, qrSize: 28, fontCompany: 10, fontProduct: 9, stickerPadding: 4, qrOffsetX: -3.5, qrOffsetY: 0, textOffsetX: -3, textOffsetY: -2.5, orientation: 'portrait' },
+            '123': { labelWidth: 30, labelHeight: 11, cols: 5, rowsPerPage: 14, marginTop: 7, marginLeft: 6, gapX: 2, gapY: 2, qrSize: 9, fontCompany: 4.5, fontProduct: 4, stickerPadding: 1, qrOffsetX: -0.5, qrOffsetY: 0, textOffsetX: -0.5, textOffsetY: -0.5, orientation: 'portrait' },
+            '129': { labelWidth: 58, labelHeight: 17, cols: 3, rowsPerPage: 8, marginTop: 7, marginLeft: 6, gapX: 2, gapY: 2, qrSize: 13, fontCompany: 8, fontProduct: 7, stickerPadding: 2, qrOffsetX: -1.5, qrOffsetY: 0, textOffsetX: -1, textOffsetY: -1.5, orientation: 'portrait' }
+        };
+		
+        const defaultData = [
+            { id: 1, field1: "Bpk. John Doe", field2: "Jl. Merdeka Raya No. 45, Komplek Perumahan Indah Asri Blok C, Jakarta Selatan, 12345", field3: "0812-3456-7890", qty: 1 },
+            { id: 2, field1: "PT. Eka Maju Mesinindo", field2: "T: LED Pojector Mini", field3: "LED Projector", qty: 1 }
+        ];
+
+        const defaultSettings = {
+            template: '121', mode: 'address', orientation: 'portrait', textAlign: 'left',
+            cols: 2, rowsPerPage: 5,
+            marginTop: 7, marginLeft: 6, gapX: 8, gapY: 4,
+            labelWidth: 72, labelHeight: 29,
+            qrSize: 28, fontCompany: 10, fontProduct: 9, stickerPadding: 4,
+            qrOffsetX: -3.5, qrOffsetY: 0, textOffsetX: 3, textOffsetY: -2.5
+        };
+
+        // Load Data Storage
+        let stickerData = JSON.parse(localStorage.getItem('tj_all_data_final'));
+        if (!stickerData || stickerData.length === 0) {
+            stickerData = JSON.parse(JSON.stringify(defaultData)); 
+        }
+
+        let settings = JSON.parse(localStorage.getItem('tj_all_settings_final')) || { ...defaultSettings };
+        settings = { ...defaultSettings, ...settings };
+
+        const elMap = {};
+        let pendingExcelData = null;
+
+        // FUNGSI ZOOM BARU
+        window.currentZoom = 1.0;
+        
+        window.changeZoom = function(delta) {
+            let newZoom = window.currentZoom + delta;
+            if (newZoom < 0.25) newZoom = 0.25; // Maksimal zoom out (kecil)
+            if (newZoom > 3.0) newZoom = 3.0; // Maksimal zoom in (besar)
+            window.currentZoom = newZoom;
+            updateZoomUI();
+        };
+
+        window.resetZoom = function() {
+            window.currentZoom = 1.0;
+            updateZoomUI();
+        };
+
+        window.updateZoomUI = function() {
+            document.getElementById('zoom-text').innerText = Math.round(window.currentZoom * 100) + '%';
+            
+            const canvases = document.querySelectorAll('.a4-canvas');
+            canvases.forEach(canvas => {
+                if (window.currentZoom !== 1.0) {
+                    canvas.classList.add('zoomed-override');
+                } else {
+                    canvas.classList.remove('zoomed-override');
+                }
+                
+                // Kalkulasi manual width/height canvas berdasarkan zoom
+                const baseW = canvas.getAttribute('data-w-mm');
+                const baseH = canvas.getAttribute('data-h-mm');
+                if (baseW && baseH) {
+                    canvas.style.width = `calc(${baseW}mm * ${window.currentZoom})`;
+                    canvas.style.height = `calc(${baseH}mm * ${window.currentZoom})`;
+                }
+            });
+        };
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('custom-toast');
+            document.getElementById('toast-message').textContent = message;
+            
+            toast.classList.remove('bg-gray-800', 'bg-red-600', 'bg-emerald-600', 'dark:bg-gray-100', 'text-gray-900');
+            
+            if(type === 'error') {
+                toast.classList.add('bg-red-600');
+            } else if(type === 'success') {
+                toast.classList.add('bg-emerald-600');
+            } else {
+                toast.classList.add('bg-gray-800', 'dark:bg-gray-100', 'dark:text-gray-900');
+            }
+            
+            document.getElementById('toast-icon').textContent = type === 'error' ? '⚠️' : type === 'success' ? '✅' : 'ℹ️';
+
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 3000);
+        }
+
+        function showModal(title, desc, buttons) {
+            const modal = document.getElementById('custom-modal');
+            const content = document.getElementById('custom-modal-content');
+            const titleEl = document.getElementById('modal-title');
+            const descEl = document.getElementById('modal-desc');
+            const btnContainer = document.getElementById('modal-buttons');
+
+            titleEl.textContent = title;
+            descEl.innerHTML = desc;
+            btnContainer.innerHTML = '';
+
+            buttons.forEach(btn => {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.textContent = btn.text;
+                b.className = `px-4 py-2 rounded font-medium transition ${btn.styleClass}`;
+                b.onclick = () => {
+                    if(btn.action) btn.action();
+                    closeModal();
+                };
+                btnContainer.appendChild(b);
+            });
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('custom-modal');
+            const content = document.getElementById('custom-modal-content');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+        }
+
+        // FUNGSI BARU: DOWNLOAD PDF MENGGUNAKAN jsPDF
+        window.downloadPDF = function() {
+            if (!window.jspdf) {
+                showToast("Library jsPDF belum dimuat.", "error");
+                return;
+            }
+            
+            const canvases = document.querySelectorAll('.a4-canvas');
+            if (canvases.length === 0) {
+                showToast("Tidak ada stiker untuk di-export ke PDF.", "error");
+                return;
+            }
+
+            showToast("Memproses PDF, mohon tunggu...", "info");
+            
+            // Menggunakan setTimeout agar UI sempat memunculkan pesan Toast sebelum proses render PDF yang berat
+            setTimeout(() => {
+                try {
+                    const { jsPDF } = window.jspdf;
+                    
+                    // Setup Orientasi
+                    const orientation = settings.orientation === 'landscape' ? 'l' : 'p';
+                    const pdf = new jsPDF({
+                        orientation: orientation,
+                        unit: 'mm',
+                        format: 'a4'
+                    });
+                    
+                    const pdfWidth = orientation === 'p' ? 210 : 297;
+                    const pdfHeight = orientation === 'p' ? 297 : 210;
+
+                    canvases.forEach((canvas, index) => {
+                        // Tambah halaman baru jika bukan halaman pertama
+                        if (index > 0) {
+                            pdf.addPage();
+                        }
+                        
+                        // Konversi canvas menjadi gambar. JPEG lebih optimal untuk ukuran file.
+                        // Angka 1.0 adalah kualitas tertinggi.
+                        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                        
+                        // Sisipkan ke PDF, penuhi dari pojok kiri atas hingga batas ukuran A4
+                        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+                    });
+
+                    // Simpan (Download) File PDF
+                    pdf.save('Stiker_Tom&Jerry.pdf');
+                    showToast("PDF berhasil di-download!", "success");
+                    
+                } catch (err) {
+                    console.error("Error generate PDF: ", err);
+                    showToast("Gagal membuat PDF.", "error");
+                }
+            }, 100);
+        };
+
+        // FUNGSI: Memecah teks menjadi beberapa baris berdasarkan lebar maksimum (Word Wrap)
+        function getWrappedLines(ctx, text, maxWidth) {
+            if (!text) return [];
+            const words = String(text).split(' ');
+            const lines = [];
+            let currentLine = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                const word = words[i];
+                const width = ctx.measureText(currentLine + " " + word).width;
+                if (width < maxWidth) {
+                    currentLine += " " + word;
+                } else {
+                    lines.push(currentLine);
+                    currentLine = word;
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const dataContainer = document.getElementById('data-container');
+            const elTemplate = document.getElementById('templateSelect');
+            const elMode = document.getElementById('modeSelect');
+            const elOrientation = document.getElementById('orientation');
+            const elTextAlign = document.getElementById('textAlign');
+            
+            if(elTemplate) elTemplate.value = settings.template;
+            if(elMode) elMode.value = settings.mode;
+            if(elOrientation) elOrientation.value = settings.orientation || 'portrait';
+            if(elTextAlign) elTextAlign.value = settings.textAlign || 'left';
+
+            // Bind Input Setting
+            const settingKeys = Object.keys(defaultSettings).filter(k => k !== 'template' && k !== 'mode' && k !== 'orientation' && k !== 'textAlign');
+            settingKeys.forEach(key => {
+                elMap[key] = document.getElementById(key);
+                if(elMap[key]) {
+                    elMap[key].value = settings[key];
+                    elMap[key].addEventListener('input', (e) => {
+                        settings[key] = parseFloat(e.target.value) || 0;
+                        elTemplate.value = 'custom';
+                        settings.template = 'custom';
+                        saveSettingsToLocal();
+                        renderCanvasPages(); 
+                    });
+                }
+            });
+
+            elTemplate.addEventListener('change', (e) => {
+                const tmpl = e.target.value;
+                settings.template = tmpl;
+                if(TEMPLATES[tmpl]) {
+                    const preset = TEMPLATES[tmpl];
+                    Object.keys(preset).forEach(k => {
+                        settings[k] = preset[k];
+                        if(elMap[k]) elMap[k].value = preset[k];
+                    });
+                    if(elOrientation) elOrientation.value = preset.orientation;
+                    if(elTextAlign) elTextAlign.value = preset.textAlign || 'left';
+                }
+                saveSettingsToLocal();
+                renderCanvasPages();
+                showToast(`Template diubah ke ${e.target.options[e.target.selectedIndex].text}`, 'success');
+            });
+
+            elMode.addEventListener('change', (e) => {
+                settings.mode = e.target.value;
+                saveSettingsToLocal();
+                updateFormUI();
+                renderFormRows();
+                renderCanvasPages();
+            });
+
+            if(elOrientation) {
+                elOrientation.addEventListener('change', (e) => {
+                    settings.orientation = e.target.value;
+                    saveSettingsToLocal();
+                    renderCanvasPages();
+                });
+            }
+
+            if(elTextAlign) {
+                elTextAlign.addEventListener('change', (e) => {
+                    settings.textAlign = e.target.value;
+                    saveSettingsToLocal();
+                    renderCanvasPages();
+                });
+            }
+
+            window.saveDataToLocal = () => localStorage.setItem('tj_all_data_final', JSON.stringify(stickerData));
+            window.saveSettingsToLocal = () => localStorage.setItem('tj_all_settings_final', JSON.stringify(settings));
+
+            window.handleResetSettings = function() {
+                showModal(
+                    "Reset Kalibrasi", 
+                    "Apakah Anda yakin ingin mengembalikan semua setelan margin, ukuran, dan pergeseran ke bawaan template?",
+                    [
+                        { text: "Batal", styleClass: "bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600" },
+                        { text: "Ya, Reset", styleClass: "bg-red-600 text-white hover:bg-red-700", action: () => {
+                            const tmpl = settings.template;
+                            let newAlign = 'left';
+                            
+                            // BUG FIX: Pengecekan preset sebelum mengambil nilainya
+                            if(TEMPLATES[tmpl]) {
+                                const preset = TEMPLATES[tmpl];
+                                Object.keys(preset).forEach(k => settings[k] = preset[k]);
+                                newAlign = preset.textAlign || 'left';
+                            } else {
+                                Object.keys(defaultSettings).forEach(k => settings[k] = defaultSettings[k]);
+                                newAlign = defaultSettings.textAlign || 'left';
+                            }
+                            
+                            settings.qrOffsetX = 0; settings.qrOffsetY = 0;
+                            settings.textOffsetX = 0; settings.textOffsetY = 0;
+                            settings.textAlign = newAlign;
+                            
+                            Object.keys(settings).forEach(key => {
+                                if(elMap[key]) elMap[key].value = settings[key];
+                            });
+                            
+                            if(document.getElementById('textAlign')) {
+                                document.getElementById('textAlign').value = settings.textAlign;
+                            }
+                            
+                            saveSettingsToLocal();
+                            renderCanvasPages();
+                            showToast("Kalibrasi berhasil direset.", "success");
+                        }}
+                    ]
+                );
+            };
+
+            window.updateFormUI = function() {
+                const isAddr = settings.mode.startsWith('address');
+                // Penyesuaian nama header (hanya Desktop)
+                const th1 = document.getElementById('th-field1');
+                const th2 = document.getElementById('th-field2');
+                const th3 = document.getElementById('th-field3');
+                if(th1) th1.textContent = isAddr ? "Nama Penerima/PT" : "Nama Perusahaan";
+                if(th2) th2.textContent = isAddr ? "Alamat Lengkap" : "Detail Produk";
+                if(th3) th3.textContent = isAddr ? "No Telp / Info" : "Data dalam QR";
+            };
+
+            window.renderFormRows = function() {
+                dataContainer.innerHTML = '';
+                const isAddr = settings.mode.startsWith('address');
+
+                if(stickerData.length === 0) {
+                    dataContainer.innerHTML = `<div class="text-center p-4 text-gray-500 dark:text-gray-400 text-sm">Tidak ada data. Silakan tambah data atau import dari Excel.</div>`;
+                }
+
+                stickerData.forEach((data, index) => {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = 'grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-2 items-center bg-white dark:bg-gray-800 p-3 md:p-2 rounded border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow transition-shadow relative';
+                    
+                    rowDiv.innerHTML = `
+                        <!-- Label for Mobile -->
+                        <div class="col-span-1 md:hidden flex justify-between items-center mb-1">
+                            <span class="text-xs font-bold text-gray-500 dark:text-gray-400">Data Stiker #${index + 1}</span>
+                            <button type="button" onclick="removeDataRow(${index})" class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-1 bg-red-50 dark:bg-red-900/30 rounded" title="Hapus Baris">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                            </button>
+                        </div>
+
+                        <div class="col-span-1 md:col-span-3">
+                            <label class="md:hidden text-[10px] font-semibold text-gray-500 dark:text-gray-400">${isAddr ? 'Penerima/PT' : 'Perusahaan'}</label>
+                            <input type="text" value="${data.field1}" oninput="updateData(${index}, 'field1', this.value)" class="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded text-sm font-semibold focus:ring-blue-500 focus:border-blue-500" placeholder="${isAddr ? 'Cth: Bpk Andi' : 'Perusahaan'}">
+                        </div>
+                        <div class="col-span-1 md:col-span-3">
+                            <label class="md:hidden text-[10px] font-semibold text-gray-500 dark:text-gray-400">${isAddr ? 'Alamat' : 'Detail Produk'}</label>
+                            <input type="text" value="${data.field2}" oninput="updateData(${index}, 'field2', this.value)" class="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="${isAddr ? 'Jl. Mawar No. 1' : 'Produk'}">
+                        </div>
+                        <div class="col-span-1 md:col-span-3">
+                            <label class="md:hidden text-[10px] font-semibold text-gray-500 dark:text-gray-400">${isAddr ? 'No Telp' : 'Data QR'}</label>
+                            <input type="text" value="${data.field3}" oninput="updateData(${index}, 'field3', this.value)" class="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="${isAddr ? '0812xxx' : 'Isi QR'}">
+                        </div>
+                        <div class="col-span-1 md:col-span-2">
+                            <label class="md:hidden text-[10px] font-semibold text-gray-500 dark:text-gray-400">Jumlah Cetak (Pcs)</label>
+                            <input type="number" value="${data.qty}" min="1" oninput="updateData(${index}, 'qty', this.value)" class="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded text-sm md:text-center focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div class="col-span-1 text-center hidden md:block">
+                            <button type="button" onclick="removeDataRow(${index})" class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-1 bg-red-50 dark:bg-red-900/30 rounded hover:bg-red-100 dark:hover:bg-red-800/50 transition" title="Hapus Baris">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mx-auto" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                            </button>
+                        </div>
+                    `;
+                    dataContainer.appendChild(rowDiv);
+                });
+                renderCanvasPages(); 
+            };
+
+            window.addDataRow = function() {
+                stickerData.push({ id: Date.now(), field1: "Baru", field2: "Detail", field3: "Info", qty: 1 });
+                saveDataToLocal();
+                renderFormRows();
+            };
+
+            window.removeDataRow = function(index) {
+                stickerData.splice(index, 1);
+                saveDataToLocal();
+                renderFormRows();
+            };
+
+            window.clearAllData = function() {
+                if(stickerData.length === 0) return;
+                showModal(
+                    "Hapus Semua Data",
+                    "Apakah Anda yakin ingin menghapus seluruh baris data stiker di layar?",
+                    [
+                        { text: "Batal", styleClass: "bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600" },
+                        { text: "Hapus Semua", styleClass: "bg-red-600 text-white hover:bg-red-700", action: () => {
+                            stickerData = [];
+                            saveDataToLocal();
+                            renderFormRows();
+                            showToast("Semua data berhasil dihapus.", "success");
+                        }}
+                    ]
+                );
+            };
+
+            window.updateData = function(index, field, value) {
+                if (field === 'qty') stickerData[index][field] = parseInt(value) || 1;
+                else stickerData[index][field] = value;
+                saveDataToLocal();
+                
+                clearTimeout(window.renderTimeout);
+                window.renderTimeout = setTimeout(() => renderCanvasPages(), 100);
+            };
+
+            // Excel Import/Export logika...
+            window.exportExcel = function() {
+                if (!window.XLSX) { showToast("Library Excel belum dimuat.", "error"); return; }
+                const isAddr = settings.mode.startsWith('address');
+                const h1 = isAddr ? "Nama Penerima" : "Nama Perusahaan";
+                const h2 = isAddr ? "Alamat Lengkap" : "Detail Produk";
+                const h3 = isAddr ? "No Telp" : "Data QR";
+                const wsData = [ [h1, h2, h3, "Jumlah Cetak"] ];
+                stickerData.forEach(d => wsData.push([d.field1, d.field2, d.field3, d.qty]));
+                const ws = XLSX.utils.aoa_to_sheet(wsData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "DataStiker");
+                XLSX.writeFile(wb, "Template_Data_Stiker.xlsx");
+                showToast("File Excel berhasil di-download!", "success");
+            };
+
+            window.handleExcelImport = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                if (!window.XLSX) { showToast("Library Excel belum dimuat.", "error"); return; }
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    try {
+                        const data = new Uint8Array(evt.target.result);
+                        const workbook = XLSX.read(data, {type: 'array'});
+                        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const json = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                        if (json.length <= 1) { showToast("File Excel kosong.", "error"); return; }
+                        const newData = [];
+                        for (let i = 1; i < json.length; i++) {
+                            const row = json[i];
+                            if (!row || row.length === 0 || (!row[0] && !row[1] && !row[2])) continue;
+                            newData.push({
+                                id: Date.now() + i,
+                                field1: row[0] != null ? String(row[0]) : "",
+                                field2: row[1] != null ? String(row[1]) : "",
+                                field3: row[2] != null ? String(row[2]) : "",
+                                qty: parseInt(row[3]) || 1
+                            });
+                        }
+                        if (newData.length > 0) {
+                            pendingExcelData = newData;
+                            showModal(
+                                "Import Data Excel",
+                                `Ditemukan <b class="text-blue-600 dark:text-blue-400">${newData.length}</b> baris data valid.<br><br>Ganti semua data atau Tambahkan ke bawah?`,
+                                [
+                                    { text: "Batal", styleClass: "bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200" },
+                                    { text: "Tambahkan", styleClass: "bg-blue-600 text-white hover:bg-blue-700", action: () => { stickerData = stickerData.concat(pendingExcelData); finalizeImport(); }},
+                                    { text: "Ganti Semua", styleClass: "bg-emerald-600 text-white hover:bg-emerald-700", action: () => { stickerData = pendingExcelData; finalizeImport(); }}
+                                ]
+                            );
+                        } else { showToast("Tidak ada data valid.", "error"); }
+                    } catch (err) { showToast("Gagal membaca Excel.", "error"); }
+                    document.getElementById('excelInput').value = "";
+                };
+                reader.readAsArrayBuffer(file);
+            };
+
+            function finalizeImport() {
+                saveDataToLocal(); renderFormRows(); showToast("Data berhasil di-import!", "success"); pendingExcelData = null;
+            }
+
+            window.exportSettingsExcel = function() {
+                if (!window.XLSX) { showToast("Library belum dimuat.", "error"); return; }
+                const wsData = [ ["Parameter", "Nilai"] ];
+                for (const key in settings) wsData.push([key, settings[key]]);
+                const ws = XLSX.utils.aoa_to_sheet(wsData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Kalibrasi_Stiker");
+                XLSX.writeFile(wb, "Backup_Kalibrasi_TJ.xlsx");
+                showToast("Kalibrasi diexport!", "success");
+            };
+
+            window.handleSettingImport = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                if (!window.XLSX) { showToast("Library belum dimuat.", "error"); return; }
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    try {
+                        const data = new Uint8Array(evt.target.result);
+                        const workbook = XLSX.read(data, {type: 'array'});
+                        const sheetName = workbook.SheetNames.includes("Kalibrasi_Stiker") ? "Kalibrasi_Stiker" : workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[sheetName];
+                        const json = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                        let importedSettings = {};
+                        for (let i = 1; i < json.length; i++) {
+                            const row = json[i];
+                            if (row && row.length >= 2) {
+                                const key = row[0]; const val = row[1];
+                                if (['template', 'mode', 'orientation', 'textAlign'].includes(key)) importedSettings[key] = String(val);
+                                else importedSettings[key] = parseFloat(val) || 0;
+                            }
+                        }
+                        settings = { ...settings, ...importedSettings };
+                        saveSettingsToLocal();
+                        const elTemplate = document.getElementById('templateSelect');
+                        const elMode = document.getElementById('modeSelect');
+                        const elOrientation = document.getElementById('orientation');
+                        const elTextAlign = document.getElementById('textAlign');
+                        if (elTemplate && settings.template) elTemplate.value = settings.template;
+                        if (elMode && settings.mode) elMode.value = settings.mode;
+                        if (elOrientation && settings.orientation) elOrientation.value = settings.orientation;
+                        if (elTextAlign && settings.textAlign) elTextAlign.value = settings.textAlign;
+                        Object.keys(settings).forEach(key => { if(elMap[key]) elMap[key].value = settings[key]; });
+                        updateFormUI(); renderFormRows();
+                        showToast("Setting di-import!", "success");
+                    } catch (err) { showToast("Gagal membaca Setting.", "error"); }
+                    document.getElementById('settingExcelInput').value = ""; 
+                };
+                reader.readAsArrayBuffer(file);
+            };
+
+            window.renderCanvasPages = function() {
+                const container = document.getElementById('preview-container');
+                const qrTemp = document.getElementById('qr-temp');
+                container.innerHTML = ''; 
+                qrTemp.innerHTML = '';
+
+                // CSS Kertas Dinamis
+                let printStyle = document.getElementById('dynamic-print-style');
+                if (!printStyle) {
+                    printStyle = document.createElement('style');
+                    printStyle.id = 'dynamic-print-style';
+                    document.head.appendChild(printStyle);
+                }
+                printStyle.innerHTML = `@media print { @page { size: A4 ${settings.orientation || 'portrait'}; margin: 0; } }`;
+
+                // 300 DPI Rendering
+                const DPI = 300;
+                const mm2px = DPI / 25.4; 
+                const pt2px = DPI / 72;   
+
+                const isLandscape = settings.orientation === 'landscape';
+                const a4Width_mm = isLandscape ? 297 : 210;
+                const a4Height_mm = isLandscape ? 210 : 297;
+
+                const a4WidthPx = a4Width_mm * mm2px;
+                const a4HeightPx = a4Height_mm * mm2px;
+
+                const labelWPx = settings.labelWidth * mm2px;
+                const labelHPx = settings.labelHeight * mm2px;
+
+                const marginTPx = settings.marginTop * mm2px;
+                const marginLPx = settings.marginLeft * mm2px;
+                const gapXPx = settings.gapX * mm2px;
+                const gapYPx = settings.gapY * mm2px;
+                const paddingPx = settings.stickerPadding * mm2px;
+
+                const qrSizePx = settings.qrSize * mm2px;
+                const fontCompanyPx = settings.fontCompany * pt2px;
+                const fontProductPx = settings.fontProduct * pt2px;
+
+                const qrOffXPx = settings.qrOffsetX * mm2px;
+                const qrOffYPx = settings.qrOffsetY * mm2px;
+                const txtOffXPx = settings.textOffsetX * mm2px;
+                const txtOffYPx = settings.textOffsetY * mm2px;
+
+                let flatLabels = [];
+                stickerData.forEach(item => {
+                    for(let i=0; i < item.qty; i++) { flatLabels.push(item); }
+                });
+
+                if(flatLabels.length === 0) return;
+
+                const cols = Math.max(1, settings.cols);
+                const rowsPerPage = Math.max(1, settings.rowsPerPage); 
+                const labelsPerPage = cols * rowsPerPage;
+
+                let ctx = null;
+
+                flatLabels.forEach((item, index) => {
+                    if (index % labelsPerPage === 0) {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = a4WidthPx;
+                        canvas.height = a4HeightPx;
+                        
+                        // Set atribut pembantu untuk proses zooming secara real-time
+                        canvas.setAttribute('data-w-mm', a4Width_mm);
+                        canvas.setAttribute('data-h-mm', a4Height_mm);
+                        
+                        if (window.currentZoom !== 1.0) canvas.classList.add('zoomed-override');
+                        
+                        canvas.style.width = `calc(${a4Width_mm}mm * ${window.currentZoom})`;
+                        canvas.style.height = `calc(${a4Height_mm}mm * ${window.currentZoom})`;
+                        
+                        canvas.className += ' a4-canvas';
+                        container.appendChild(canvas);
+
+                        ctx = canvas.getContext('2d');
+                        ctx.fillStyle = '#ffffff'; 
+                        ctx.fillRect(0, 0, a4WidthPx, a4HeightPx);
+                        ctx.textBaseline = 'top';
+                    }
+
+                    const pageIndex = index % labelsPerPage;
+                    const col = pageIndex % cols;
+                    const row = Math.floor(pageIndex / cols);
+
+                    const x = marginLPx + col * (labelWPx + gapXPx);
+                    const y = marginTPx + row * (labelHPx + gapYPx);
+
+                    // Border Kotak Stiker
+                    if (settings.mode !== 'address-noborder') {
+                        ctx.strokeStyle = '#000000';
+                        ctx.lineWidth = 1.5 * (DPI / 96);
+                        ctx.strokeRect(x, y, labelWPx, labelHPx);
+                    }
+
+                    // Area Clipping (Penting agar teks tidak melewati batas stiker)
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(x, y, labelWPx, labelHPx);
+                    ctx.clip();
+
+                    ctx.fillStyle = '#000000'; 
+
+                    const align = settings.textAlign || 'left';
+                    ctx.textAlign = align;
+
+                    if (settings.mode === 'qr') {
+                        // ==== MODE QR ====
+                        const qrActualX = x + paddingPx + qrOffXPx;
+                        const qrActualY = y + (labelHPx - qrSizePx) / 2 + qrOffYPx;
+                        
+                        const tempId = `qr-${index}`;
+                        const tempDiv = document.createElement('div');
+                        tempDiv.id = tempId;
+                        qrTemp.appendChild(tempDiv);
+
+                        try {
+                            new QRCode(tempDiv, {
+                                text: item.field3 || ' ',
+                                width: 256, height: 256,
+                                colorDark : "#000000", colorLight : "#ffffff",
+                                correctLevel : QRCode.CorrectLevel.M
+                            });
+                            
+                            const qrGeneratedCanvas = tempDiv.querySelector('canvas');
+                            if (qrGeneratedCanvas) {
+                                ctx.drawImage(qrGeneratedCanvas, qrActualX, qrActualY, qrSizePx, qrSizePx);
+                            }
+                        } catch (e) {}
+
+                        // ==== TEKS DENGAN WRAP (MODE QR) ====
+                        const textStartX = qrActualX + qrSizePx + paddingPx + txtOffXPx;
+                        // Sisa lebar maksimum untuk teks
+                        const maxTextWidth = labelWPx - (textStartX - x) - paddingPx; 
+                        
+                        let drawTextX = textStartX;
+                        if (align === 'center') drawTextX = textStartX + (maxTextWidth / 2);
+                        else if (align === 'right') drawTextX = textStartX + maxTextWidth;
+
+                        ctx.font = `bold ${fontCompanyPx}px Arial`;
+                        const companyLines = getWrappedLines(ctx, item.field1, maxTextWidth);
+                        
+                        ctx.font = `normal ${fontProductPx}px Arial`;
+                        const productLines = getWrappedLines(ctx, item.field2, maxTextWidth);
+
+                        const lineSpacing = 1.5 * mm2px;
+                        const lineHeightH1 = fontCompanyPx * 1.1;
+                        const lineHeightH2 = fontProductPx * 1.1;
+
+                        // Hitung total tinggi untuk memposisikan teks di tengah vertikal
+                        const totalTextHeight = (companyLines.length * lineHeightH1) + 
+                                                ((companyLines.length > 0 && productLines.length > 0) ? lineSpacing : 0) + 
+                                                (productLines.length * lineHeightH2);
+
+                        // Pisahkan posisi awal (center/top-padding) dan manual offset dari user
+                        let baseTextY = y + (labelHPx - totalTextHeight) / 2;
+                        if (baseTextY < y + paddingPx) baseTextY = y + paddingPx; 
+
+                        // Terapkan Offset Y dari user setelah posisi base ditentukan
+                        let currentY = baseTextY + txtOffYPx;
+
+                        // Gambar Baris 1 (Company/Nama)
+                        ctx.font = `bold ${fontCompanyPx}px Arial`;
+                        companyLines.forEach(line => {
+                            ctx.fillText(line, drawTextX, currentY);
+                            currentY += lineHeightH1;
+                        });
+
+                        currentY += lineSpacing * 0.5; // Jarak antar segmen
+
+                        // Gambar Baris 2 (Produk/Detail)
+                        ctx.font = `normal ${fontProductPx}px Arial`;
+                        productLines.forEach(line => {
+                            ctx.fillText(line, drawTextX, currentY);
+                            currentY += lineHeightH2;
+                        });
+
+                    } else {
+                        // ==== MODE ALAMAT DENGAN WRAP (Tanpa QR) ====
+                        const textStartX = x + paddingPx + txtOffXPx;
+                        // Sisa lebar maksimum adalah lebar kotak dikurangi padding kiri kanan
+                        const maxTextWidth = labelWPx - (paddingPx * 2);
+                        
+                        let drawTextX = textStartX;
+                        if (align === 'center') drawTextX = textStartX + (maxTextWidth / 2);
+                        else if (align === 'right') drawTextX = textStartX + maxTextWidth;
+
+                        // Kalkulasi pecah baris (Word Wrap)
+                        ctx.font = `bold ${fontCompanyPx}px Arial`;
+                        const f1Lines = getWrappedLines(ctx, item.field1, maxTextWidth);
+                        
+                        ctx.font = `normal ${fontProductPx}px Arial`;
+                        const f2Lines = getWrappedLines(ctx, item.field2, maxTextWidth);
+                        const f3Lines = getWrappedLines(ctx, item.field3, maxTextWidth);
+
+                        const lineSpacing = 1.2 * mm2px;
+                        const lineHeightH1 = fontCompanyPx * 1.1;
+                        const lineHeightH2 = fontProductPx * 1.1;
+                        
+                        // Hitung total tinggi seluruh baris teks
+                        let totalHeight = (f1Lines.length * lineHeightH1) + 
+                                          (f2Lines.length * lineHeightH2) + 
+                                          (f3Lines.length * lineHeightH2) + 
+                                          (f1Lines.length > 0 && (f2Lines.length > 0 || f3Lines.length > 0) ? lineSpacing : 0) +
+                                          (f2Lines.length > 0 && f3Lines.length > 0 ? lineSpacing : 0);
+
+                        // Pisahkan posisi awal (center/top-padding) dan manual offset dari user
+                        let baseTextY = y + (labelHPx - totalHeight) / 2;
+                        if (baseTextY < y + paddingPx) baseTextY = y + paddingPx;
+                        
+                        // Terapkan Offset Y dari user setelah posisi base ditentukan
+                        let currentY = baseTextY + txtOffYPx;
+
+                        // Gambar Field 1 (Nama)
+                        ctx.font = `bold ${fontCompanyPx}px Arial`;
+                        f1Lines.forEach(line => {
+                            ctx.fillText(line, drawTextX, currentY);
+                            currentY += lineHeightH1;
+                        });
+                        
+                        if(f1Lines.length > 0) currentY += lineSpacing;
+
+                        // Gambar Field 2 (Alamat)
+                        ctx.font = `normal ${fontProductPx}px Arial`;
+                        f2Lines.forEach(line => {
+                            ctx.fillText(line, drawTextX, currentY);
+                            currentY += lineHeightH2;
+                        });
+                        
+                        if(f2Lines.length > 0) currentY += lineSpacing;
+
+                        // Gambar Field 3 (Telepon)
+                        f3Lines.forEach(line => {
+                            ctx.fillText(line, drawTextX, currentY);
+                            currentY += lineHeightH2;
+                        });
+                    }
+
+                    ctx.restore();
+                });
+            };
+
+            // Init aplikasi
+            updateFormUI();
+            renderFormRows();
+        });
+    </script>
+</body>
+</html>

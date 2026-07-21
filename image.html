@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image to Image Converter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .drag-active {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #3b82f6;
+            width: 30px;
+            height: 30px;
+            -webkit-animation: spin 1s linear infinite;
+            animation: spin 1s linear infinite;
+        }
+        @-webkit-keyframes spin {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Skeleton loading animation */
+        .skeleton {
+            background: linear-gradient(90deg, #e2e8f0 25%, #cbd5e1 50%, #e2e8f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col">
+
+    <header class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-10">
+        <div class="max-w-6xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+                ✨ AI Image Editor
+            </h1>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-6xl mx-auto w-full px-4 py-8 sm:px-6 lg:px-8">
+        
+        <!-- Error Message Box -->
+        <div id="errorBox" class="hidden mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-md shadow-sm">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-red-700 font-medium" id="errorMessage">Terjadi kesalahan.</p>
+                </div>
+                <div class="ml-auto pl-3">
+                    <div class="-mx-1.5 -my-1.5">
+                        <button type="button" onclick="document.getElementById('errorBox').classList.add('hidden')" class="inline-flex rounded-md p-1.5 text-red-500 hover:bg-red-100 focus:outline-none">
+                            <span class="sr-only">Dismiss</span>
+                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Left Column: Input Settings -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-6">
+                
+                <!-- Image Upload Zone -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">1. Unggah Gambar Asli</label>
+                    <div id="dropZone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-xl hover:bg-slate-50 transition-colors cursor-pointer relative overflow-hidden group">
+                        
+                        <div id="uploadContent" class="space-y-1 text-center">
+                            <svg class="mx-auto h-12 w-12 text-slate-400 group-hover:text-blue-500 transition-colors" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <div class="flex text-sm text-slate-600 justify-center">
+                                <span class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                                    <span>Pilih File</span>
+                                    <input id="fileInput" type="file" class="sr-only" accept="image/png, image/jpeg, image/webp">
+                                </span>
+                                <p class="pl-1">atau drag and drop</p>
+                            </div>
+                            <p class="text-xs text-slate-500">PNG, JPG, WEBP hingga 10MB</p>
+                        </div>
+                        
+                        <!-- Image Preview -->
+                        <div id="imagePreviewContainer" class="hidden absolute inset-0 bg-black/5 flex items-center justify-center p-2 backdrop-blur-sm">
+                            <img id="imagePreview" class="max-h-full max-w-full rounded-lg object-contain shadow-md" src="" alt="Preview">
+                            <button id="removeImageBtn" class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 shadow-sm transition-transform hover:scale-105">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Style Selection -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">2. Pilih Gaya Konversi</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4" id="presetStyles">
+                        <!-- Presets will be generated here by JS -->
+                    </div>
+                    
+                    <label class="block text-sm font-semibold text-slate-700 mb-2 mt-4">Atau Tulis Prompt Kustom Anda</label>
+                    <textarea id="customPrompt" rows="3" class="w-full px-3 py-2 text-slate-700 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow resize-none" placeholder="Contoh: Ubah gambar ini menjadi karakter anime cyberpunk dengan pencahayaan neon..."></textarea>
+                </div>
+
+                <!-- Generate Button -->
+                <div class="pt-2">
+                    <button id="generateBtn" disabled class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                        <span>Generate Gambar ✨</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Column: Output / Result -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col h-full min-h-[500px]">
+                <h2 class="text-sm font-semibold text-slate-700 mb-4 flex items-center justify-between">
+                    <span>Hasil Konversi</span>
+                    <span id="statusBadge" class="hidden px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">Selesai</span>
+                </h2>
+                
+                <div class="flex-grow flex flex-col items-center justify-center bg-slate-50 rounded-xl border border-slate-200 relative overflow-hidden" id="resultContainer">
+                    
+                    <!-- Empty State -->
+                    <div id="emptyState" class="text-center p-6">
+                        <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-8 h-8 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <p class="text-slate-500 text-sm">Hasil gambar akan muncul di sini.</p>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="loadingState" class="hidden absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
+                        <div class="loader mb-4"></div>
+                        <p class="text-blue-600 font-medium animate-pulse text-sm">AI sedang berimajinasi...</p>
+                        <p class="text-slate-400 text-xs mt-2">Ini mungkin memakan waktu beberapa detik.</p>
+                    </div>
+
+                    <!-- Result Image -->
+                    <img id="resultImage" class="hidden max-h-full max-w-full object-contain w-full h-full p-2 transition-opacity duration-500" src="" alt="Generated Result">
+                </div>
+
+                <!-- Action Buttons for Result -->
+                <div id="resultActions" class="hidden mt-4 flex gap-3 justify-end">
+                    <button id="downloadBtn" class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg shadow-sm text-sm font-medium hover:bg-slate-50 focus:outline-none transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Unduh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- Constants & State ---
+        const PRESETS = [
+            { id: '3d', label: '3D Render', prompt: 'Turn this into a high quality 3D digital rendering using unreal engine style, soft lighting', icon: '🧊' },
+            { id: 'anime', label: 'Anime Style', prompt: 'Convert this into a high quality Japanese anime style illustration, studio ghibli style', icon: '🌸' },
+            { id: 'pixel', label: 'Pixel Art', prompt: 'Convert this to a 16-bit retro pixel art style, high detail', icon: '👾' },
+            { id: 'oil', label: 'Oil Painting', prompt: 'Make this look like an expressive oil painting on canvas by a master artist', icon: '🎨' },
+            { id: 'sketch', label: 'Pencil Sketch', prompt: 'Turn this into a detailed black and white pencil sketch, realistic shading', icon: '✏️' },
+            { id: 'cyberpunk', label: 'Cyberpunk', prompt: 'Transform this into a cyberpunk futuristic style, neon lights, dark and moody', icon: '🌃' },
+        ];
+
+        let currentBase64Image = null;
+        let currentMimeType = null;
+        let selectedPreset = null;
+
+        // --- DOM Elements ---
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const uploadContent = document.getElementById('uploadContent');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const removeImageBtn = document.getElementById('removeImageBtn');
+        const customPrompt = document.getElementById('customPrompt');
+        const presetStylesContainer = document.getElementById('presetStyles');
+        const generateBtn = document.getElementById('generateBtn');
+        
+        const resultContainer = document.getElementById('resultContainer');
+        const emptyState = document.getElementById('emptyState');
+        const loadingState = document.getElementById('loadingState');
+        const resultImage = document.getElementById('resultImage');
+        const resultActions = document.getElementById('resultActions');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const statusBadge = document.getElementById('statusBadge');
+        
+        const errorBox = document.getElementById('errorBox');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // --- Initialize UI ---
+        function initPresets() {
+            PRESETS.forEach(preset => {
+                const btn = document.createElement('button');
+                btn.className = 'preset-btn px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 hover:border-blue-300 transition-all text-left flex items-center gap-2';
+                btn.innerHTML = `<span>${preset.icon}</span> <span>${preset.label}</span>`;
+                btn.onclick = () => selectPreset(preset, btn);
+                presetStylesContainer.appendChild(btn);
+            });
+        }
+
+        function selectPreset(preset, buttonElement) {
+            // UI Update
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50', 'border-blue-500');
+            });
+            buttonElement.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50', 'border-blue-500');
+            
+            // Set prompt
+            customPrompt.value = preset.prompt;
+            selectedPreset = preset;
+            checkGenerateReadiness();
+        }
+
+        function checkGenerateReadiness() {
+            const hasImage = !!currentBase64Image;
+            const hasPrompt = customPrompt.value.trim().length > 0;
+            generateBtn.disabled = !(hasImage && hasPrompt);
+        }
+
+        // --- File Upload Logic ---
+        function handleFile(file) {
+            if (!file) return;
+            
+            if (!file.type.startsWith('image/')) {
+                showError("Mohon unggah file gambar yang valid (JPG, PNG, WEBP).");
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                showError("Ukuran file terlalu besar. Maksimal 10MB.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const dataUrl = e.target.result;
+                
+                // Extract base64 and mime type
+                const matches = dataUrl.match(/^data:(image\/[a-zA-Z]+);base64,(.+)$/);
+                if (matches && matches.length === 3) {
+                    currentMimeType = matches[1];
+                    currentBase64Image = matches[2];
+                    
+                    // Update UI
+                    imagePreview.src = dataUrl;
+                    imagePreviewContainer.classList.remove('hidden');
+                    uploadContent.classList.add('invisible'); // hide text but keep area
+                    hideError();
+                    checkGenerateReadiness();
+                } else {
+                    showError("Gagal membaca file gambar.");
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeImage(e) {
+            e.stopPropagation(); // prevent triggering upload again
+            currentBase64Image = null;
+            currentMimeType = null;
+            fileInput.value = '';
+            imagePreview.src = '';
+            imagePreviewContainer.classList.add('hidden');
+            uploadContent.classList.remove('invisible');
+            checkGenerateReadiness();
+        }
+
+        // Drag and drop events
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-active');
+        });
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-active');
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-active');
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+        dropZone.addEventListener('click', () => {
+            if(!currentBase64Image) fileInput.click();
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+        removeImageBtn.addEventListener('click', removeImage);
+        customPrompt.addEventListener('input', checkGenerateReadiness);
+
+        // --- API & Generation Logic ---
+        function showError(msg) {
+            errorMessage.textContent = msg;
+            errorBox.classList.remove('hidden');
+            // Scroll to error
+            errorBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        function hideError() {
+            errorBox.classList.add('hidden');
+        }
+
+        async function generateImage() {
+            if (!currentBase64Image || !customPrompt.value.trim()) return;
+
+            // UI Loading State
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div> Memproses...';
+            
+            emptyState.classList.add('hidden');
+            resultImage.classList.add('hidden');
+            resultActions.classList.add('hidden');
+            statusBadge.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+            hideError();
+
+            const promptText = customPrompt.value.trim();
+
+            try {
+                // Using gemini-3.1-flash-image-preview for Image to Image editing
+                const payload = {
+                    contents: [{
+                        role: "user",
+                        parts: [
+                            { text: promptText },
+                            {
+                                inlineData: {
+                                    mimeType: currentMimeType,
+                                    data: currentBase64Image
+                                }
+                            }
+                        ]
+                    }],
+                    generationConfig: {
+                        // The model supports returning TEXT and IMAGE. For this, we just want the IMAGE.
+                        responseModalities: ['IMAGE']
+                    }
+                };
+
+                const apiKey = ""; // API Key provided by Canvas runtime
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                // Parse response to find inlineData containing the generated image
+                const part = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+                
+                if (part && part.inlineData && part.inlineData.data) {
+                    const generatedBase64 = part.inlineData.data;
+                    const generatedMime = part.inlineData.mimeType || 'image/png';
+                    const imageUrl = `data:${generatedMime};base64,${generatedBase64}`;
+                    
+                    // Show Result
+                    resultImage.src = imageUrl;
+                    resultImage.classList.remove('hidden');
+                    
+                    // Setup download button
+                    downloadBtn.onclick = () => {
+                        const a = document.createElement('a');
+                        a.href = imageUrl;
+                        a.download = `ai-edited-${Date.now()}.${generatedMime.split('/')[1]}`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    };
+                    
+                    resultActions.classList.remove('hidden');
+                    statusBadge.classList.remove('hidden');
+                } else {
+                    throw new Error("Format respons API tidak sesuai atau gambar diblokir oleh filter keamanan.");
+                }
+
+            } catch (error) {
+                console.error("Generation Error:", error);
+                showError("Gagal menghasilkan gambar. " + (error.message || "Silakan coba lagi dengan prompt yang berbeda."));
+                emptyState.classList.remove('hidden'); // Re-show empty state on error
+            } finally {
+                // Reset UI Loading State
+                loadingState.classList.add('hidden');
+                generateBtn.innerHTML = '<span>Generate Gambar ✨</span>';
+                checkGenerateReadiness(); // Re-evaluate button state
+            }
+        }
+
+        generateBtn.addEventListener('click', generateImage);
+
+        // Run on load
+        initPresets();
+    </script>
+</body>
+</html>

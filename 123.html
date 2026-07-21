@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tombol Akses Cepat</title>
+    <!-- Memuat Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Menggunakan font Inter sebagai default */
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease;
+        }
+    </style>
+    <script>
+        // Fungsi untuk mengarahkan ke URL yang diberikan
+        function goToLogin() {
+            const url = "https://hris.ekamaju.co.id/login/token=eyJpdiI6IkFlWThHM3ptcjl5eXZQNzF2NjBIRXc9PSIsInZhbHVlIjoiVzh5RHJwNGxMMjhoM1NvaE9iOXJTQT09IiwibWFjIjoiYjJkZjZjNDY1ZGM4YTNkNmFlZmMyOTY1Y2UwNGY3MDc5ZWMzNjg3YTk5NGUxMmFiZTFmZWI3MGM2NDY0Yjg4OSIsInRhZyI6IiJ9";
+            window.location.href = url;
+        }
+    </script>
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Kontainer Pusat (Card) -->
+    <div class="w-full max-w-lg bg-white shadow-2xl rounded-xl p-8 md:p-10 text-center border border-gray-100">
+
+        <h1 class="text-3xl font-extrabold text-gray-800 mb-2">Akses Cepat HRIS</h1>
+        <p class="text-gray-500 mb-8">Tekan tombol di bawah untuk melanjutkan ke halaman login menggunakan token yang tersedia.</p>
+        
+        <!-- Tombol Utama -->
+        <button 
+            onclick="goToLogin()"
+            class="w-full md:w-auto px-8 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-lg 
+                   hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50
+                   transform transition duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98]
+                   flex items-center justify-center mx-auto"
+        >
+            <!-- Ikon menggunakan SVG (opsional, untuk estetika) -->
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+            </svg>
+            Buka Halaman Login HRIS
+        </button>
+
+        <div class="mt-8 pt-4 border-t border-gray-200">
+            <p class="text-sm text-gray-400">Tautan ini mengarahkan ke: <code class="text-xs break-all text-gray-500">hris.ekamaju.co.id/login/...</code></p>
+        </div>
+
+    </div>
+
+</body>
+</html>
