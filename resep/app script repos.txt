@@ -1,0 +1,291 @@
+// =====================================================================
+// SCRIPT BACKEND GOOGLE SHEETS UNTUK SISTEM RESEP & POS
+// =====================================================================
+
+// Konstanta Nama Sheet (Tabel)
+const TABLES = [
+  'ukurans', 'bahans', 'reseps', 'resep_bahans', 
+  'konversis', 'menus', 'penjualan'
+];
+
+/**
+ * FUNGSI SETUP (JALANKAN SEKALI SAJA)
+ * Berfungsi untuk membuat Sheet beserta Header secara otomatis.
+ */
+function setup() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  const schema = {
+    'ukurans': ['id', 'nama', 'simbol', 'created_at', 'updated_at'],
+    'bahans': ['id', 'nama', 'jumlah_dasar', 'ukuran_id', 'harga_beli', 'created_at', 'updated_at'],
+    'reseps': ['id', 'nama', 'porsi_dasar', 'cara_masak', 'created_at', 'updated_at'],
+    'resep_bahans': ['id', 'resep_id', 'bahan_id', 'jumlah_dibutuhkan', 'created_at', 'updated_at'],
+    'konversis': ['id', 'kategori', 'dari_ukuran_id', 'ke_ukuran_id', 'pengali', 'catatan', 'created_at', 'updated_at'],
+    'menus': ['id', 'resep_id', 'kategori', 'harga_jual', 'deskripsi', 'gambar', 'status_aktif', 'created_at', 'updated_at'],
+    'penjualan': ['id', 'kode_penjualan', 'menu_id', 'jumlah_porsi', 'total_modal', 'total_pendapatan', 'total_keuntungan', 'created_at']
+  };
+
+  // Buat Sheet jika belum ada dan set Header
+  for (const [tableName, headers] of Object.entries(schema)) {
+    let sheet = ss.getSheetByName(tableName);
+    if (!sheet) {
+      sheet = ss.insertSheet(tableName);
+    }
+    
+    // Set Header jika baris pertama kosong
+    const range = sheet.getRange(1, 1, 1, headers.length);
+    const existingHeaders = range.getValues()[0];
+    if (existingHeaders[0] === '') {
+      range.setValues([headers]);
+      range.setFontWeight("bold");
+      range.setBackground("#f3f3f3");
+      sheet.setFrozenRows(1);
+    }
+  }
+  
+  // Hapus "Sheet1" bawaan jika ada dan tidak dipakai
+  const sheet1 = ss.getSheetByName("Sheet1");
+  if (sheet1 && ss.getSheets().length > 1) {
+    ss.deleteSheet(sheet1);
+  }
+  
+  Logger.log("Setup Database Berhasil! Semua sheet sudah siap.");
+}
+
+
+/**
+ * FUNGSI UTAMA (ENTRY POINT)
+ * Menerima semua POST request dari Frontend HTML
+ */
+function doPost(e) {
+  try {
+    if (!e || !e.postData || !e.postData.contents) {
+      throw new Error("Tidak ada data payload yang dikirim.");
+    }
+    
+    // Parse JSON dari Frontend
+    const payload = JSON.parse(e.postData.contents);
+    const action = payload.action;
+    const table = payload.table;
+    const data = payload.data;
+    const id = payload.id;
+    
+    let result = {};
+
+    // Routing berdasarkan jenis Aksi (action)
+    switch(action) {
+      case 'readAll':
+        result = handleReadAll();
+        break;
+      case 'insert':
+        result = handleInsert(table, data);
+        break;
+      case 'insertMultiple':
+        result = handleInsertMultiple(table, data);
+        break;
+      case 'update':
+        result = handleUpdate(table, id, data);
+        break;
+      case 'delete':
+        result = handleDelete(table, id);
+        break;
+      default:
+        throw new Error("Aksi tidak dikenali: " + action);
+    }
+
+    // Return Success
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'success',
+      ...result
+    })).setMimeType(ContentService.MimeType.JSON);
+
+  } catch (error) {
+    // Return Error
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'error',
+      message: error.message
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// Untuk menangani Pre-flight request (Meski text/plain jarang butuh ini, tapi aman dipasang)
+function doGet(e) {
+  return ContentService.createTextOutput("Backend App Script Aktif!").setMimeType(ContentService.MimeType.TEXT);
+}
+
+
+// =====================================================================
+// CONTROLLER LOGIC
+// =====================================================================
+
+function handleReadAll() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let response = {};
+  
+  TABLES.forEach(tableName => {
+    response[tableName] = getSheetDataAsJSON(ss.getSheetByName(tableName));
+  });
+  
+  return response;
+}
+
+function handleInsert(tableName, dataObj) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(tableName);
+  if (!sheet) throw new Error("Tabel tidak ditemukan: " + tableName);
+
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  
+  // Buat ID baru (Auto Increment)
+  const newId = getNextId(sheet);
+  dataObj.id = newId;
+
+  // Susun array data sesuai urutan header
+  const newRow = headers.map(header => {
+    return dataObj.hasOwnProperty(header) ? dataObj[header] : '';
+  });
+
+  sheet.appendRow(newRow);
+  return { message: "Data berhasil ditambah", id: newId };
+}
+
+function handleInsertMultiple(tableName, dataArray) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(tableName);
+  if (!sheet) throw new Error("Tabel tidak ditemukan: " + tableName);
+
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  let currentId = getNextId(sheet);
+  
+  let rowsToAppend = [];
+  
+  dataArray.forEach(dataObj => {
+    dataObj.id = currentId;
+    currentId++;
+    
+    let row = headers.map(header => {
+      return dataObj.hasOwnProperty(header) ? dataObj[header] : '';
+    });
+    rowsToAppend.push(row);
+  });
+
+  // Bulk insert untuk performa yang lebih cepat
+  if (rowsToAppend.length > 0) {
+    sheet.getRange(sheet.getLastRow() + 1, 1, rowsToAppend.length, headers.length).setValues(rowsToAppend);
+  }
+  
+  return { message: `${rowsToAppend.length} baris berhasil ditambahkan` };
+}
+
+function handleUpdate(tableName, id, dataObj) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(tableName);
+  if (!sheet) throw new Error("Tabel tidak ditemukan: " + tableName);
+
+  const dataRange = sheet.getDataRange();
+  const values = dataRange.getValues();
+  const headers = values[0];
+  const idIndex = headers.indexOf('id');
+  
+  if (idIndex === -1) throw new Error("Kolom ID tidak ada di tabel ini.");
+
+  // Cari baris dengan ID yang cocok
+  let rowIndex = -1;
+  for (let i = 1; i < values.length; i++) {
+    if (values[i][idIndex] == id) {
+      rowIndex = i;
+      break;
+    }
+  }
+
+  if (rowIndex === -1) throw new Error(`Data dengan ID ${id} tidak ditemukan.`);
+
+  // Update kolom yang spesifik berdasarkan payload dataObj
+  for (const key in dataObj) {
+    if (key === 'id') continue; // Jangan update ID
+    const colIndex = headers.indexOf(key);
+    if (colIndex !== -1) {
+      sheet.getRange(rowIndex + 1, colIndex + 1).setValue(dataObj[key]);
+    }
+  }
+
+  return { message: "Data berhasil diupdate" };
+}
+
+function handleDelete(tableName, id) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(tableName);
+  if (!sheet) throw new Error("Tabel tidak ditemukan: " + tableName);
+
+  const dataRange = sheet.getDataRange();
+  const values = dataRange.getValues();
+  const idIndex = values[0].indexOf('id');
+  
+  if (idIndex === -1) throw new Error("Kolom ID tidak ada di tabel ini.");
+
+  let rowIndex = -1;
+  for (let i = 1; i < values.length; i++) {
+    if (values[i][idIndex] == id) {
+      rowIndex = i;
+      break;
+    }
+  }
+
+  if (rowIndex === -1) throw new Error(`Data dengan ID ${id} tidak ditemukan.`);
+
+  sheet.deleteRow(rowIndex + 1); // +1 karena getRange basis index 1
+  return { message: "Data berhasil dihapus" };
+}
+
+
+// =====================================================================
+// UTILITY FUNCTIONS
+// =====================================================================
+
+/**
+ * Mengubah data Sheet menjadi Array of Objects JSON
+ */
+function getSheetDataAsJSON(sheet) {
+  if (!sheet) return [];
+  const lastRow = sheet.getLastRow();
+  const lastCol = sheet.getLastColumn();
+  
+  if (lastRow <= 1) return []; // Kosong atau hanya ada header
+
+  const data = sheet.getRange(1, 1, lastRow, lastCol).getValues();
+  const headers = data[0];
+  let jsonArray = [];
+
+  for (let i = 1; i < data.length; i++) {
+    let rowObj = {};
+    for (let j = 0; j < headers.length; j++) {
+      rowObj[headers[j]] = data[i][j];
+    }
+    jsonArray.push(rowObj);
+  }
+
+  return jsonArray;
+}
+
+/**
+ * Mendapatkan ID tertinggi berikutnya (Auto Increment logic)
+ */
+function getNextId(sheet) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow <= 1) return 1;
+
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+  const idIndex = headers.indexOf('id');
+  
+  if(idIndex === -1) return 1;
+
+  let maxId = 0;
+  for (let i = 1; i < data.length; i++) {
+    let currentId = parseInt(data[i][idIndex]);
+    if (!isNaN(currentId) && currentId > maxId) {
+      maxId = currentId;
+    }
+  }
+  return maxId + 1;
+}
