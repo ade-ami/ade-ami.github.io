@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="img/logo.png" rel="icon">
     <title>Sistem Resep & Kasir POS</title>
     
@@ -129,7 +129,8 @@
         </div>
     </div>
 
-    <header class="h-16 shrink-0 bg-gray-900 border-b border-white/5 flex items-center justify-between px-4 z-40 shadow-md">
+    <!-- Header ditambahkan ID topHeader dan transisi -->
+    <header id="topHeader" class="h-16 shrink-0 bg-gray-900 border-b border-white/5 flex items-center justify-between px-4 z-40 shadow-md transition-all duration-300">
         <div class="flex items-center gap-3 group">
             <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
                 <i class="ph ph-list text-white text-xl hidden md:block cursor-pointer" onclick="toggleSidebar()" title="Toggle Menu"></i>
@@ -482,7 +483,7 @@
                     </div>
                 </section>
 
-                <section id="view-resep" class="page-view shrink-0">
+               <section id="view-resep" class="page-view shrink-0">
                     <h2 class="text-2xl font-bold text-white mb-6">Kalkulasi Kebutuhan Resep</h2>
                     
                     <div class="glass-panel p-6 rounded-xl mb-6 flex flex-col md:flex-row justify-between items-center gap-4 shadow-xl border border-white/5 relative z-[45]">
@@ -693,12 +694,32 @@
             });
         }
 
-        /* --- PULL TO REFRESH LOGIC --- */
+        /* --- PULL TO REFRESH & AUTO-HIDE HEADER LOGIC --- */
         let touchstartY = 0;
+        let lastScrollTop = 0;
         const mainScrollArea = document.getElementById('mainScrollArea');
         const ptrIndicator = document.getElementById('ptr-indicator');
         const ptrIcon = document.getElementById('ptr-icon');
+        const topHeader = document.getElementById('topHeader');
 
+        // Scroll Event for Auto-Hide Header
+        mainScrollArea.addEventListener('scroll', () => {
+            if (window.innerWidth >= 768) {
+                topHeader.style.marginTop = '0px';
+                return;
+            }
+            let st = mainScrollArea.scrollTop;
+            if (st > lastScrollTop && st > 60) {
+                // Scroll Down -> Hide Header
+                topHeader.style.marginTop = '-64px';
+            } else {
+                // Scroll Up -> Show Header
+                topHeader.style.marginTop = '0px';
+            }
+            lastScrollTop = st;
+        }, { passive: true });
+
+        // Touch Events for Pull to Refresh
         mainScrollArea.addEventListener('touchstart', e => { 
             if(mainScrollArea.scrollTop === 0) touchstartY = e.touches[0].clientY; 
         }, {passive: true});
@@ -1385,7 +1406,7 @@
             const originalClasses = element.className; element.className = 'p-6 bg-white'; element.style.backgroundColor = '#ffffff';
             const allElements = element.querySelectorAll('*');
             allElements.forEach(el => { el.dataset.originalColor = el.style.color || ''; el.dataset.originalBg = el.style.backgroundColor || ''; el.dataset.originalBorder = el.style.borderColor || ''; el.style.color = '#1f2937'; if (el.tagName === 'TR' || el.tagName === 'TH' || el.tagName === 'TD' || el.classList.contains('border-t') || el.classList.contains('border-b') || el.classList.contains('border-r')) { el.style.borderColor = '#d1d5db'; } if (el.classList.contains('bg-black/20') || el.classList.contains('bg-white/5') || el.classList.contains('bg-black/30') || el.classList.contains('bg-gray-800/50')) { el.style.backgroundColor = 'transparent'; } });
-            document.getElementById('calcTotModal').style.color = '#000000'; document.getElementById('calcTotJual').style.color = '#059669';
+            document.getElementById('calcTotModal').style.color = '#000000'; document.getElementById('calcTotJual').style.color = '#059669'; document.getElementById('calcTotJualPerPorsi').style.color = '#059669';
             showToast('Menyiapkan Laporan PDF...');
             html2pdf().set(opt).from(element).save().then(() => { element.className = originalClasses; element.style.backgroundColor = ''; allElements.forEach(el => { el.style.color = el.dataset.originalColor; el.style.backgroundColor = el.dataset.originalBg; el.style.borderColor = el.dataset.originalBorder; }); });
         }
