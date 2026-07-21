@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TV Player Indonesia</title>
+    <title>TV Player Indonesia Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.12/hls.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -30,6 +30,13 @@
             background-color: #334155 !important;
             border-left: 4px solid #3b82f6;
         }
+        .channel-item:hover .delete-btn {
+            opacity: 1;
+        }
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+        }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden">
@@ -38,13 +45,23 @@
     <header class="bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center shrink-0">
         <div class="flex items-center gap-3">
             <div class="bg-blue-600 p-2 rounded-lg">
-                <i class="fas fa-tv text-xl"></i>
+                <i class="fas fa-tv text-xl text-white"></i>
             </div>
             <h1 class="text-xl font-bold tracking-tight">Indo<span class="text-blue-500">Stream</span></h1>
         </div>
-        <div id="status-indicator" class="text-xs text-slate-400 flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
-            Memuat Saluran...
+        <div class="flex items-center gap-2">
+            <button onclick="exportM3U()" title="Ekspor Daftar Saluran Aktif" class="bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-lg transition-all flex items-center gap-2 px-3">
+                <i class="fas fa-file-export"></i>
+                <span class="text-xs font-medium hidden sm:inline">Ekspor M3U</span>
+            </button>
+            <button onclick="toggleModal('add-modal', true)" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-all">
+                <i class="fas fa-plus"></i>
+                <span class="hidden sm:inline">Tambah M3U</span>
+            </button>
+            <div id="status-indicator" class="hidden sm:flex text-xs text-slate-400 items-center gap-2 ml-2">
+                <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                Siap
+            </div>
         </div>
     </header>
 
@@ -65,11 +82,20 @@
             </div>
             
             <div id="channel-list" class="channel-list flex-1 overflow-y-auto p-2 space-y-1">
-                <!-- Skeleton Loading -->
-                <div class="animate-pulse space-y-2 p-2">
-                    <div class="h-12 bg-slate-800 rounded"></div>
-                    <div class="h-12 bg-slate-800 rounded"></div>
-                    <div class="h-12 bg-slate-800 rounded"></div>
+                <div class="text-center p-10 text-slate-500">
+                    <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                    <p>Memuat saluran...</p>
+                </div>
+            </div>
+
+            <!-- Footer Sidebar -->
+            <div class="p-3 bg-slate-950 border-t border-slate-800 text-[10px] text-slate-500 flex flex-col gap-2">
+                <div class="flex justify-between items-center px-1">
+                    <span id="channel-count">0 Saluran</span>
+                    <div class="flex gap-3">
+                        <button onclick="confirmAction('clear-all')" class="hover:text-red-400 transition-colors uppercase font-bold">Hapus Semua</button>
+                        <button onclick="confirmAction('reset')" class="hover:text-blue-400 transition-colors uppercase font-bold">Reset Default</button>
+                    </div>
                 </div>
             </div>
         </aside>
@@ -96,14 +122,6 @@
                         <h2 id="current-title" class="text-2xl font-bold">Pilih Saluran</h2>
                         <p id="current-group" class="text-slate-400 text-sm mt-1">Gunakan daftar di samping untuk mulai menonton</p>
                     </div>
-                    <div class="flex gap-2">
-                        <button class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors" title="Laporkan Masalah">
-                            <i class="fas fa-flag"></i>
-                        </button>
-                        <button class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors" title="Bagikan">
-                            <i class="fas fa-share-alt"></i>
-                        </button>
-                    </div>
                 </div>
                 
                 <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -124,8 +142,50 @@
         </section>
     </main>
 
+    <!-- Modal Tambah M3U -->
+    <div id="add-modal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+                <h3 class="text-xl font-bold">Tambah Daftar Putar</h3>
+                <button onclick="toggleModal('add-modal', false)" class="text-slate-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-400 mb-1">URL M3U / M3U8</label>
+                    <input 
+                        type="url" 
+                        id="m3u-input"
+                        placeholder="https://example.com/playlist.m3u" 
+                        class="w-full bg-slate-800 border border-slate-700 rounded-lg py-2 px-4 text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                    >
+                </div>
+                <p class="text-xs text-slate-500">Saluran akan ditambahkan ke daftar yang sudah ada.</p>
+            </div>
+            <div class="p-6 bg-slate-800/50 flex gap-3">
+                <button onclick="toggleModal('add-modal', false)" class="flex-1 px-4 py-2 border border-slate-700 rounded-lg hover:bg-slate-700 transition-colors">Batal</button>
+                <button onclick="handleAddM3U()" class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-bold transition-colors">Tambah</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Konfirmasi Kustom -->
+    <div id="confirm-modal" class="modal-overlay fixed inset-0 z-[60] flex items-center justify-center hidden p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
+            <div class="p-6">
+                <h3 id="confirm-title" class="text-lg font-bold mb-2 text-white">Konfirmasi</h3>
+                <p id="confirm-msg" class="text-slate-400 text-sm leading-relaxed"></p>
+            </div>
+            <div class="p-4 bg-slate-800/50 flex gap-3">
+                <button onclick="toggleModal('confirm-modal', false)" class="flex-1 px-4 py-2 border border-slate-700 rounded-lg hover:bg-slate-700 transition-colors text-sm">Batal</button>
+                <button id="confirm-btn-ok" class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-bold transition-colors text-sm text-white">Ya, Lanjutkan</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        const M3U_URL = "https://raw.githubusercontent.com/dheonz666/dheonz666.github.io/refs/heads/main/id.m3u";
+        const DEFAULT_M3U = "https://raw.githubusercontent.com/dheonz666/dheonz666.github.io/refs/heads/main/id.m3u";
         const video = document.getElementById('video-player');
         const channelListContainer = document.getElementById('channel-list');
         const searchInput = document.getElementById('search-input');
@@ -134,24 +194,47 @@
         const currentGroup = document.getElementById('current-group');
         const playerOverlay = document.getElementById('player-overlay');
         const overlayMessage = document.getElementById('overlay-message');
+        const channelCountDisplay = document.getElementById('channel-count');
 
         let allChannels = [];
         let hls = null;
         let lastUrl = '';
 
-        // Parsing M3U
-        async function fetchPlaylist() {
+        // Inisialisasi
+        async function initApp() {
+            const savedChannels = localStorage.getItem('tv_channels');
+            if (savedChannels) {
+                try {
+                    allChannels = JSON.parse(savedChannels);
+                    renderChannels(allChannels);
+                    updateStatus(`Memuat ${allChannels.length} saluran tersimpan`, 'green');
+                } catch(e) {
+                    fetchPlaylist(DEFAULT_M3U);
+                }
+            } else {
+                fetchPlaylist(DEFAULT_M3U);
+            }
+        }
+
+        // Ambil Playlist
+        async function fetchPlaylist(url) {
+            updateStatus("Menarik data...", "yellow");
             try {
-                const response = await fetch(M3U_URL);
+                const response = await fetch(url);
                 if (!response.ok) throw new Error("Gagal mengambil playlist.");
                 const data = await response.text();
-                allChannels = parseM3U(data);
+                const newChannels = parseM3U(data);
+                
+                const existingUrls = new Set(allChannels.map(c => c.url));
+                const filteredNew = newChannels.filter(c => !existingUrls.has(c.url));
+                
+                allChannels = [...allChannels, ...filteredNew];
+                saveToLocal();
                 renderChannels(allChannels);
-                updateStatus(`Berhasil memuat ${allChannels.length} saluran`, 'green');
+                updateStatus(`Berhasil menambah ${filteredNew.length} saluran baru`, 'green');
             } catch (error) {
                 console.error(error);
                 updateStatus("Gagal memuat playlist", 'red');
-                channelListContainer.innerHTML = `<div class="p-4 text-center text-red-400">Gagal memuat data. Silakan refresh halaman.</div>`;
             }
         }
 
@@ -162,14 +245,13 @@
 
             for (let i = 0; i < lines.length; i++) {
                 let line = lines[i].trim();
-                
                 if (line.startsWith('#EXTINF:')) {
-                    // Extract info using regex
                     const name = line.split(',')[1] || "Tanpa Nama";
                     const logoMatch = line.match(/tvg-logo="([^"]+)"/);
                     const groupMatch = line.match(/group-title="([^"]+)"/);
                     
                     currentChannel = {
+                        id: Math.random().toString(36).substr(2, 9),
                         name: name,
                         logo: logoMatch ? logoMatch[1] : null,
                         group: groupMatch ? groupMatch[1] : "Lainnya",
@@ -187,32 +269,45 @@
         }
 
         function renderChannels(channels) {
+            channelCountDisplay.innerText = `${channels.length} Saluran`;
             if (channels.length === 0) {
-                channelListContainer.innerHTML = `<div class="p-4 text-center text-slate-500 italic">Saluran tidak ditemukan</div>`;
+                channelListContainer.innerHTML = `
+                    <div class="p-8 text-center text-slate-500 italic">
+                        <i class="fas fa-folder-open text-3xl mb-3 block opacity-20"></i>
+                        Tidak ada saluran.<br>Tambahkan URL M3U untuk memulai.
+                    </div>`;
                 return;
             }
 
-            channelListContainer.innerHTML = channels.map((channel, index) => `
-                <button 
-                    onclick="playChannel('${channel.url}', '${channel.name.replace(/'/g, "\\'")}', '${channel.group.replace(/'/g, "\\'")}', this)"
-                    class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800 transition-colors text-left"
-                >
-                    <div class="w-10 h-10 bg-slate-800 rounded flex shrink-0 items-center justify-center overflow-hidden border border-slate-700">
-                        ${channel.logo ? 
-                            `<img src="${channel.logo}" alt="" class="w-full h-full object-contain" onerror="this.innerHTML='<i class=\'fas fa-tv text-slate-600\'></i>'; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23475569\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Crect x=\'2\' y=\'7\' width=\'20\' height=\'15\' rx=\'2\' ry=\'2\'%3E%3C/rect%3E%3Cpolyline points=\'17 2 12 7 7 2\'%3E%3C/polyline%3E%3C/svg%3E';">` : 
-                            `<i class="fas fa-tv text-slate-600"></i>`}
-                    </div>
-                    <div class="overflow-hidden">
-                        <div class="font-medium text-sm truncate">${channel.name}</div>
-                        <div class="text-[10px] text-slate-500 uppercase tracking-wider truncate">${channel.group}</div>
-                    </div>
-                </button>
+            channelListContainer.innerHTML = channels.map((channel) => `
+                <div class="channel-item relative group/item">
+                    <button 
+                        onclick="playChannel('${channel.url}', '${channel.name.replace(/'/g, "\\'")}', '${channel.group.replace(/'/g, "\\'")}', this)"
+                        class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800 transition-colors text-left pr-10"
+                    >
+                        <div class="w-10 h-10 bg-slate-800 rounded flex shrink-0 items-center justify-center overflow-hidden border border-slate-700">
+                            ${channel.logo ? 
+                                `<img src="${channel.logo}" alt="" class="w-full h-full object-contain" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23475569\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Crect x=\'2\' y=\'7\' width=\'20\' height=\'15\' rx=\'2\' ry=\'2\'%3E%3C/rect%3E%3Cpolyline points=\'17 2 12 7 7 2\'%3E%3C/polyline%3E%3C/svg%3E';">` : 
+                                `<i class="fas fa-tv text-slate-600"></i>`}
+                        </div>
+                        <div class="overflow-hidden">
+                            <div class="font-medium text-sm truncate">${channel.name}</div>
+                            <div class="text-[10px] text-slate-500 uppercase tracking-wider truncate">${channel.group}</div>
+                        </div>
+                    </button>
+                    <button 
+                        onclick="confirmAction('delete', '${channel.id}')"
+                        class="delete-btn opacity-0 absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-500 hover:text-red-500 transition-all z-10"
+                        title="Hapus Saluran"
+                    >
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
             `).join('');
         }
 
         function playChannel(url, name, group, element) {
-            // UI Updates
-            document.querySelectorAll('#channel-list button').forEach(btn => btn.classList.remove('active-channel'));
+            document.querySelectorAll('.channel-item button').forEach(btn => btn.classList.remove('active-channel'));
             if (element) element.classList.add('active-channel');
             
             currentTitle.innerText = name;
@@ -220,38 +315,119 @@
             playerOverlay.classList.add('hidden');
             lastUrl = url;
 
-            // Video logic
-            if (hls) {
-                hls.destroy();
-            }
+            if (hls) hls.destroy();
 
             if (Hls.isSupported()) {
-                hls = new Hls({
-                    enableWorker: true,
-                    lowLatencyMode: true,
-                });
+                hls = new Hls({ enableWorker: true });
                 hls.loadSource(url);
                 hls.attachMedia(video);
-                hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                    video.play().catch(() => {
-                        console.log("Autoplay dicegah oleh browser.");
-                    });
+                hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(e => console.log("Autoplay blocked")));
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                    if (data.fatal) showError("Gagal memuat streaming. Saluran mungkin luring atau format tidak cocok.");
                 });
-                hls.on(Hls.Events.ERROR, function (event, data) {
-                    if (data.fatal) {
-                        showError("Maaf, saluran ini sedang tidak tersedia atau format tidak didukung.");
-                    }
-                });
-            } 
-            else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                // Support for Safari
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                 video.src = url;
-                video.addEventListener('loadedmetadata', function() {
-                    video.play();
-                });
+                video.addEventListener('loadedmetadata', () => video.play());
             } else {
-                showError("Browser Anda tidak mendukung pemutaran HLS.");
+                showError("Browser Anda tidak mendukung HLS.");
             }
+        }
+
+        // Logic Modal Konfirmasi
+        function confirmAction(type, data) {
+            const modal = document.getElementById('confirm-modal');
+            const title = document.getElementById('confirm-title');
+            const msg = document.getElementById('confirm-msg');
+            const okBtn = document.getElementById('confirm-btn-ok');
+
+            modal.classList.remove('hidden');
+
+            if (type === 'delete') {
+                title.innerText = "Hapus Saluran";
+                msg.innerText = "Anda yakin ingin menghapus saluran ini dari daftar?";
+                okBtn.onclick = () => {
+                    allChannels = allChannels.filter(c => c.id !== data);
+                    saveAndRefresh();
+                    toggleModal('confirm-modal', false);
+                    updateStatus("Saluran dihapus", "red");
+                };
+            } else if (type === 'clear-all') {
+                title.innerText = "Bersihkan Semua";
+                msg.innerText = "Hapus semua saluran yang ada sekarang? Anda bisa mengimpor ulang nanti.";
+                okBtn.onclick = () => {
+                    allChannels = [];
+                    saveAndRefresh();
+                    video.pause();
+                    video.src = "";
+                    currentTitle.innerText = "Pilih Saluran";
+                    currentGroup.innerText = "Daftar kosong";
+                    toggleModal('confirm-modal', false);
+                    updateStatus("Daftar dibersihkan", "red");
+                };
+            } else if (type === 'reset') {
+                title.innerText = "Reset ke Bawaan";
+                msg.innerText = "Ini akan menghapus saluran Anda saat ini dan mengembalikan daftar default Indonesia.";
+                okBtn.onclick = () => {
+                    localStorage.removeItem('tv_channels');
+                    allChannels = [];
+                    fetchPlaylist(DEFAULT_M3U);
+                    toggleModal('confirm-modal', false);
+                };
+            }
+        }
+
+        // FITUR EKSPOR: Sekarang mengekspor allChannels yang telah ter-update (termasuk hasil delete)
+        function exportM3U() {
+            if (allChannels.length === 0) {
+                updateStatus("Daftar kosong, tidak ada yang diekspor", "yellow");
+                return;
+            }
+
+            let m3uContent = "#EXTM3U\n";
+            allChannels.forEach(c => {
+                const logo = c.logo ? ` tvg-logo="${c.logo}"` : "";
+                const group = c.group ? ` group-title="${c.group}"` : "";
+                m3uContent += `#EXTINF:-1${logo}${group},${c.name}\n${c.url}\n`;
+            });
+
+            const blob = new Blob([m3uContent], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const timestamp = new Date().toISOString().slice(0,10);
+            
+            a.href = url;
+            a.download = `IndoStream_Aktif_${timestamp}.m3u`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            updateStatus(`Berhasil ekspor ${allChannels.length} saluran`, "green");
+        }
+
+        function saveAndRefresh() {
+            saveToLocal();
+            renderChannels(allChannels);
+        }
+
+        function toggleModal(id, show) {
+            const el = document.getElementById(id);
+            el.classList.toggle('hidden', !show);
+            if (show && id === 'add-modal') document.getElementById('m3u-input').focus();
+        }
+
+        function handleAddM3U() {
+            const urlInput = document.getElementById('m3u-input');
+            const url = urlInput.value.trim();
+            if (url) {
+                fetchPlaylist(url);
+                urlInput.value = '';
+                toggleModal('add-modal', false);
+            }
+        }
+
+        function saveToLocal() {
+            localStorage.setItem('tv_channels', JSON.stringify(allChannels));
         }
 
         function showError(msg) {
@@ -264,18 +440,11 @@
         }
 
         function updateStatus(text, color) {
-            const colors = {
-                green: 'bg-green-500',
-                red: 'bg-red-500',
-                yellow: 'bg-yellow-500'
-            };
-            statusIndicator.innerHTML = `
-                <span class="w-2 h-2 rounded-full ${colors[color] || 'bg-slate-500'}"></span>
-                ${text}
-            `;
+            const colors = { green: 'bg-green-500', red: 'bg-red-500', yellow: 'bg-yellow-500' };
+            statusIndicator.classList.remove('hidden');
+            statusIndicator.innerHTML = `<span class="w-2 h-2 rounded-full ${colors[color] || 'bg-slate-500'}"></span>${text}`;
         }
 
-        // Search Filter
         searchInput.addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
             const filtered = allChannels.filter(c => 
@@ -285,8 +454,7 @@
             renderChannels(filtered);
         });
 
-        // Init
-        window.onload = fetchPlaylist;
+        window.onload = initApp;
     </script>
 </body>
 </html>
