@@ -116,7 +116,7 @@
                 <div><label class="block text-sm font-medium text-gray-300 mb-1">Email</label><input type="email" id="loginEmail" class="glass-input w-full rounded-lg px-4 py-3" placeholder="admin@resep.com" required value="admin@resep.com"></div>
                 <div><label class="block text-sm font-medium text-gray-300 mb-1">Password</label><input type="password" id="loginPassword" class="glass-input w-full rounded-lg px-4 py-3" placeholder="••••••••" required value="admin123"></div>
                 <button type="submit" id="btnLogin" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-lg transition-colors mt-4 shadow-[0_0_15px_rgba(37,99,235,0.5)]">Masuk <i class="ph ph-sign-in ml-1"></i></button>
-                <p class="text-xs text-center text-gray-500 mt-2">Bypass Akun: admin@resep.com / admin123</p>
+                <p class="text-xs text-center text-gray-500 mt-2">Akun Default Database: admin@resep.com / admin123</p>
             </form>
         </div>
     </div>
@@ -625,7 +625,7 @@
 
     <script>
         // MIGRATION: Google Apps Script URL replaced Supabase
-        const GAS_URL = 'https://script.google.com/macros/s/AKfycbzRiRtomuxGCWGb7IcQYZb_UNhb9qQlAKcS8PtMPH2uBewldIOqlkQtNZgnlUQyOV2k/exec';
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbz4vS2ibbeTqVfTseQ9gJyo0XkPHbP_fR0jQ3PzqwbKFH7Ugop1mcZ1vI_H8Lbiyo2cCQ/exec';
 
         let db = { ukurans: [], bahans: [], reseps: [], resep_bahans: [], konversis: [], menus: [], penjualan: [] };
         let groupedPenjualan = []; 
@@ -770,22 +770,27 @@
             
             btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> Memproses...`; btn.disabled = true;
             
-            // Local Dummy Auth (Replace with actual backend check if needed)
-            setTimeout(() => {
-                if(email === 'admin@resep.com' && password === 'admin123') {
-                    localStorage.setItem('isLoggedIn', 'true');
-                    showToast('Login Berhasil!');
-                    proceedToApp();
-                } else {
-                    showToast('Email / Password salah! Gunakan admin@resep.com / admin123', 'error');
-                    btn.innerHTML = `Masuk <i class="ph ph-sign-in ml-1"></i>`; btn.disabled = false;
-                }
-            }, 800);
+            try {
+                // Request verifikasi login ke backend Google Sheets
+                const response = await gasFetch({ action: 'login', data: { email, password } });
+                
+                // PENGAMAN: Gunakan opsional chaining (?.) agar tidak crash jika backend versi lama
+                const userName = response.user?.nama || 'Admin';
+                
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userName', userName);
+                showToast(`Selamat datang, ${userName}!`);
+                proceedToApp();
+            } catch(error) {
+                showToast(error.message, 'error');
+                btn.innerHTML = `Masuk <i class="ph ph-sign-in ml-1"></i>`; btn.disabled = false;
+            }
         }
 
         function doLogout() { 
             localStorage.removeItem('isLoggedIn'); 
-            window.location.reload(); 
+            localStorage.removeItem('userName');
+            window.location.reload();
         }
 
         async function proceedToApp() {
@@ -894,7 +899,8 @@
                 
                 if(isRefresh) showToast('Data tersinkronisasi dari Server!');
             } catch (err) { 
-                showToast('Gagal memuat data dari Spreadsheet. Pastikan URL Script benar!', 'error'); 
+                console.error("Fetch Data Error:", err);
+                showToast('Gagal memuat: ' + err.message, 'error'); 
             }
         }
 
