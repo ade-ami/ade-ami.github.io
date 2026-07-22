@@ -7,180 +7,61 @@ function doPost(e) {
     const request = JSON.parse(e.postData.contents);
     const action = request.action;
     const tableName = request.table;
-    const data = request.data;
-    const id = request.id;
     
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-
-    // 1. BLOK LOGIKA LOGIN
+    // Autentikasi / Login
     if (action === 'login') {
-      const email = data.email;
-      const password = data.password;
-      const sheet = ss.getSheetByName('users');
+      const { email, password } = request.data;
+      const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('users');
+      if (!sheet) throw new Error("Tabel users tidak ditemukan.");
       
-      if (!sheet) return createJsonResponse({status: 'error', message: 'Tabel users tidak ditemukan! Harap jalankan fungsi setup()'});
+      const data = sheet.getDataRange().getValues();
+      const headers = data[0];
       
-      const rows = sheet.getDataRange().getValues();
-      const headers = rows[0];
-      
-      for (let i = 1; i < rows.length; i++) {
+      for (let i = 1; i < data.length; i++) {
+        const row = data[i];
         const record = {};
-        headers.forEach((h, index) => { record[h] = rows[i][index]; });
+        headers.forEach((h, index) => record[h] = row[index]);
         
-        // Pencocokan Email & Password
-        if (String(record.email) === String(email) && String(record.password) === String(password)) {
-          delete record.password; // Hapus password dari respons demi keamanan
-          return createJsonResponse({status: 'success', message: 'Login berhasil', user: record});
+        if (record.email === email && record.password === password) {
+          // Jangan kembalikan password ke frontend untuk keamanan
+          delete record.password; 
+          return responseJSON({ status: 'success', user: record });
         }
       }
-      return createJsonResponse({status: 'error', message: 'Email atau Password salah!'});
+      throw new Error("Email atau password salah!");
     }
-    
-    // 2. BLOK MEMBACA SEMUA DATA (READ ALL)
+
     if (action === 'readAll') {
-      const response = {};
-      const tables = ['ukurans', 'bahans', 'reseps', 'resep_bahans', 'konversis', 'menus', 'penjualan'];
-      
-      tables.forEach(name => {
-        const sheet = ss.getSheetByName(name);
-        if (sheet) {
-          response[name] = getDataAsObjects(sheet);
-        } else {
-          response[name] = []; // Return array kosong jika tabel belum ada
-        }
-      });
-      return createJsonResponse({ status: 'success', ...response });
+      return responseJSON(readAllData());
     }
-    
-    // Pastikan tabel yang diminta selain login/readAll tersedia
-    const sheet = ss.getSheetByName(tableName);
-    if (!sheet) return createJsonResponse({ status: 'error', message: `Table ${tableName} not found!` });
-    
-    const headers = sheet.getDataRange().getValues()[0];
-    
-    // 3. BLOK INSERT (TAMBAH DATA 1 BARIS)
+
+    if (!tableName) throw new Error("Nama tabel (table) wajib disertakan!");
+
     if (action === 'insert') {
-      const newId = getNextId(sheet);
-      data.id = newId; // Assign ID otomatis
-      
-      const rowData = headers.map(h => data[h] !== undefined ? data[h] : '');
-      sheet.appendRow(rowData);
-      return createJsonResponse({ status: 'success', data: data });
+      return responseJSON(insertData(tableName, request.data));
+    } else if (action === 'update') {
+      return responseJSON(updateData(tableName, request.id, request.data));
+    } else if (action === 'delete') {
+      return responseJSON(deleteData(tableName, request.id));
+    } else if (action === 'insertMultiple') {
+      return responseJSON(insertMultipleData(tableName, request.data));
+    } else {
+      throw new Error("Aksi tidak dikenal.");
     }
-    
-    // 4. BLOK INSERT MULTIPLE (TAMBAH DATA BANYAK BARIS - UNTUK POS KASIR)
-    if (action === 'insertMultiple') {
-      let currentId = getNextId(sheet);
-      const rowsToInsert = data.map(item => {
-        item.id = currentId++;
-        return headers.map(h => item[h] !== undefined ? item[h] : '');
-      });
-      
-      if(rowsToInsert.length > 0) {
-        sheet.getRange(sheet.getLastRow() + 1, 1, rowsToInsert.length, headers.length).setValues(rowsToInsert);
-      }
-      return createJsonResponse({ status: 'success', message: 'Multiple rows inserted' });
-    }
-    
-    // 5. BLOK UPDATE (UBAH DATA)
-    if (action === 'update') {
-      const rows = sheet.getDataRange().getValues();
-      let rowIndex = -1;
-      
-      // Cari baris berdasarkan ID
-      for (let i = 1; i < rows.length; i++) {
-        if (String(rows[i][0]) === String(id)) { // Diasumsikan Kolom 1 adalah ID
-          rowIndex = i + 1; // Index di Apps Script mulai dari 1
-          break;
-        }
-      }
-      
-      if (rowIndex === -1) return createJsonResponse({ status: 'error', message: 'Record not found for update!' });
-      
-      headers.forEach((h, colIndex) => {
-        if (data[h] !== undefined) {
-          sheet.getRange(rowIndex, colIndex + 1).setValue(data[h]);
-        }
-      });
-      return createJsonResponse({ status: 'success', message: 'Updated successfully' });
-    }
-    
-    // 6. BLOK DELETE (HAPUS DATA)
-    if (action === 'delete') {
-      const rows = sheet.getDataRange().getValues();
-      let rowIndex = -1;
-      
-      for (let i = 1; i < rows.length; i++) {
-        if (String(rows[i][0]) === String(id)) {
-          rowIndex = i + 1;
-          break;
-        }
-      }
-      
-      if (rowIndex === -1) return createJsonResponse({ status: 'error', message: 'Record not found for deletion!' });
-      
-      sheet.deleteRow(rowIndex);
-      return createJsonResponse({ status: 'success', message: 'Deleted successfully' });
-    }
-    
-    return createJsonResponse({ status: 'error', message: 'Action not valid' });
-
-  } catch (err) {
-    return createJsonResponse({ status: 'error', message: err.toString(), stack: err.stack });
+  } catch (error) {
+    return responseJSON({ status: 'error', message: error.message });
   }
 }
 
-// Fungsi pembantu untuk mengembalikan balasan JSON
-function createJsonResponse(responseObject) {
-  return ContentService.createTextOutput(JSON.stringify(responseObject))
-    .setMimeType(ContentService.MimeType.JSON);
+function responseJSON(data) {
+  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
 }
 
-// Fungsi pembantu mengubah Array Spreadsheet ke Object JavaScript
-function getDataAsObjects(sheet) {
-  const range = sheet.getDataRange();
-  const values = range.getValues();
-  if (values.length < 2) return []; // Hanya header atau kosong
-  
-  const headers = values[0];
-  const data = [];
-  
-  for (let i = 1; i < values.length; i++) {
-    const row = values[i];
-    // Abaikan jika ID kosong (mencegah baris siluman Excel terbaca)
-    if (row[0] === '' || row[0] === null) continue;
-    
-    const obj = {};
-    headers.forEach((header, index) => {
-      obj[header] = row[index];
-    });
-    data.push(obj);
-  }
-  return data;
-}
-
-// Fungsi pembantu untuk membuat ID berurutan secara otomatis
-function getNextId(sheet) {
-  const lastRow = sheet.getLastRow();
-  if (lastRow <= 1) return 1;
-  const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues().flat();
-  const maxId = Math.max(...ids.filter(id => !isNaN(id) && id !== ''));
-  return (maxId === -Infinity || maxId < 0) ? 1 : Math.floor(maxId) + 1;
-}
-
-// ==============================================================================
-// FUNGSI PERAWATAN & SETUP (JALANKAN DARI EDITOR APPS SCRIPT)
-// ==============================================================================
-
-/**
- * JALANKAN INI PERTAMA KALI
- * Untuk membuat semua tabel otomatis beserta headernya.
- */
 function setup() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   
   const tables = {
-    'users': ['id', 'email', 'password', 'nama', 'role', 'created_at'],
+    'users': ['id', 'email', 'password', 'nama', 'role', 'avatar', 'created_at'],
     'ukurans': ['id', 'nama', 'simbol', 'created_at', 'updated_at'],
     'bahans': ['id', 'nama', 'jumlah_dasar', 'ukuran_id', 'harga_beli', 'created_at', 'updated_at'],
     'konversis': ['id', 'kategori', 'dari_ukuran_id', 'ke_ukuran_id', 'pengali', 'catatan', 'created_at', 'updated_at'],
@@ -194,9 +75,7 @@ function setup() {
     let sheet = ss.getSheetByName(tableName);
     if (!sheet) {
       sheet = ss.insertSheet(tableName);
-      // Set Header Kolom
       sheet.appendRow(tables[tableName]);
-      // Buat Header menjadi Tebal (Bold)
       sheet.getRange(1, 1, 1, tables[tableName].length).setFontWeight("bold");
     }
   }
@@ -204,19 +83,16 @@ function setup() {
   // Buat Akun Default jika tabel users kosong
   const usersSheet = ss.getSheetByName('users');
   if (usersSheet.getLastRow() <= 1) {
-    usersSheet.appendRow([1, 'admin@resep.com', 'admin123', 'Administrator', 'admin', new Date().toISOString()]);
+    usersSheet.appendRow([1, 'admin@resep.com', 'admin123', 'Administrator', 'admin', '', new Date().toISOString()]);
   }
   
   Logger.log("Setup Selesai! Semua tabel sudah siap.");
 }
 
-/**
- * JALANKAN JIKA ERROR "Cannot read properties" (DATA BERADA DI BARIS 1)
- */
 function forceFixHeaders() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const tables = {
-    'users': ['id', 'email', 'password', 'nama', 'role', 'created_at'],
+    'users': ['id', 'email', 'password', 'nama', 'role', 'avatar', 'created_at'],
     'ukurans': ['id', 'nama', 'simbol', 'created_at', 'updated_at'],
     'bahans': ['id', 'nama', 'jumlah_dasar', 'ukuran_id', 'harga_beli', 'created_at', 'updated_at'],
     'konversis': ['id', 'kategori', 'dari_ukuran_id', 'ke_ukuran_id', 'pengali', 'catatan', 'created_at', 'updated_at'],
@@ -226,26 +102,17 @@ function forceFixHeaders() {
     'penjualan': ['id', 'kode_penjualan', 'menu_id', 'jumlah_porsi', 'total_modal', 'total_pendapatan', 'total_keuntungan', 'created_at']
   };
 
-  for (let name in tables) {
-    let sheet = ss.getSheetByName(name);
-    if(sheet) {
-      let firstVal = String(sheet.getRange("A1").getValue()).toLowerCase();
-      // Cek apakah sel A1 BUKAN id (berarti data langsung tanpa header)
-      if (firstVal !== 'id') {
-        sheet.insertRowBefore(1);
-        sheet.getRange(1, 1, 1, tables[name].length).setValues([tables[name]]);
-        sheet.getRange(1, 1, 1, tables[name].length).setFontWeight("bold");
-        Logger.log(`Tabel ${name} diperbaiki: Header berhasil ditambahkan!`);
-      }
+  for (let tableName in tables) {
+    let sheet = ss.getSheetByName(tableName);
+    if (sheet) {
+      sheet.insertRowBefore(1);
+      sheet.getRange(1, 1, 1, tables[tableName].length).setValues([tables[tableName]]);
+      sheet.getRange(1, 1, 1, tables[tableName].length).setFontWeight("bold");
     }
   }
-  Logger.log("Pengecekan dan perbaikan Header selesai!");
+  Logger.log("Header berhasil disisipkan kembali di baris 1!");
 }
 
-/**
- * JALANKAN INI JIKA DATA IMPORT EXCEL MENINGGALKAN BARIS SILUMAN
- * Ini menghapus baris-baris kosong berlebih di bagian bawah tabel.
- */
 function forceCleanPhantomRows() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheets = ss.getSheets();
@@ -253,15 +120,120 @@ function forceCleanPhantomRows() {
   sheets.forEach(sheet => {
     const maxRows = sheet.getMaxRows();
     const lastRow = sheet.getLastRow();
-    
     if (maxRows > lastRow) {
-      try {
-        sheet.deleteRows(lastRow + 1, maxRows - lastRow);
-        Logger.log(`Tabel ${sheet.getName()}: Menghapus ${maxRows - lastRow} baris kosong siluman.`);
-      } catch (e) {
-        Logger.log(`Gagal menghapus baris di ${sheet.getName()}: ${e.message}`);
-      }
+      sheet.deleteRows(lastRow + 1, maxRows - lastRow);
     }
   });
-  Logger.log("Pembersihan Phantom Rows Selesai!");
+  Logger.log("Pembersihan baris kosong selesai!");
+}
+
+function generateId() {
+  return new Date().getTime() + Math.floor(Math.random() * 1000);
+}
+
+function readAllData() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheets = ss.getSheets();
+  const result = { status: 'success' };
+  
+  sheets.forEach(sheet => {
+    const name = sheet.getName();
+    const data = sheet.getDataRange().getValues();
+    if (data.length <= 1) {
+      result[name] = [];
+      return;
+    }
+    const headers = data[0];
+    const rows = [];
+    for (let i = 1; i < data.length; i++) {
+      let obj = {};
+      let isEmptyRow = true;
+      headers.forEach((header, index) => {
+        obj[header] = data[i][index];
+        if (String(data[i][index]).trim() !== '') isEmptyRow = false;
+      });
+      if (!isEmptyRow) rows.push(obj);
+    }
+    result[name] = rows;
+  });
+  
+  return result;
+}
+
+function insertData(tableName, dataObj) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(tableName);
+  if (!sheet) throw new Error("Tabel tidak ditemukan: " + tableName);
+  
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  dataObj.id = generateId();
+  if(!dataObj.created_at) dataObj.created_at = new Date().toISOString();
+  
+  const rowData = headers.map(header => dataObj[header] !== undefined ? dataObj[header] : "");
+  sheet.appendRow(rowData);
+  return { status: 'success', message: 'Data berhasil ditambahkan', id: dataObj.id };
+}
+
+function insertMultipleData(tableName, dataArray) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(tableName);
+  if (!sheet) throw new Error("Tabel tidak ditemukan: " + tableName);
+  
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const rowsData = [];
+  
+  dataArray.forEach(dataObj => {
+    dataObj.id = generateId();
+    if(!dataObj.created_at) dataObj.created_at = new Date().toISOString();
+    const rowData = headers.map(header => dataObj[header] !== undefined ? dataObj[header] : "");
+    rowsData.push(rowData);
+  });
+  
+  sheet.getRange(sheet.getLastRow() + 1, 1, rowsData.length, headers.length).setValues(rowsData);
+  return { status: 'success', message: rowsData.length + ' Data berhasil ditambahkan' };
+}
+
+function updateData(tableName, id, dataObj) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(tableName);
+  if (!sheet) throw new Error("Tabel tidak ditemukan: " + tableName);
+  
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+  let rowIndex = -1;
+  
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(id)) { 
+      rowIndex = i + 1;
+      break;
+    }
+  }
+  
+  if (rowIndex === -1) throw new Error("Data dengan ID " + id + " tidak ditemukan.");
+  if(!dataObj.updated_at) dataObj.updated_at = new Date().toISOString();
+  
+  headers.forEach((header, colIndex) => {
+    if (dataObj[header] !== undefined) {
+      sheet.getRange(rowIndex, colIndex + 1).setValue(dataObj[header]);
+    }
+  });
+  
+  return { status: 'success', message: 'Data berhasil diupdate' };
+}
+
+function deleteData(tableName, id) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(tableName);
+  if (!sheet) throw new Error("Tabel tidak ditemukan: " + tableName);
+  
+  const data = sheet.getDataRange().getValues();
+  let rowIndex = -1;
+  
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(id)) {
+      rowIndex = i + 1;
+      break;
+    }
+  }
+  
+  if (rowIndex === -1) throw new Error("Data tidak ditemukan.");
+  sheet.deleteRow(rowIndex);
+  
+  return { status: 'success', message: 'Data berhasil dihapus' };
 }
