@@ -126,10 +126,10 @@
     <header id="topHeader" class="h-16 shrink-0 bg-gray-900 border-b border-white/5 flex items-center justify-between px-4 z-40 shadow-md transition-all duration-300">
         <div class="flex items-center gap-3 group">
             <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg transition-transform">
-                <i class="ph ph-list text-white text-xl hidden md:block cursor-pointer hover:scale-110" onclick="toggleSidebar()" title="Toggle Menu"></i>
+                <i class="ph ph-list text-white text-xl hidden md:block cursor-pointer hover:scale-110" id="sidebarToggleIcon" onclick="toggleSidebar()" title="Toggle Menu"></i>
                 <i class="ph ph-storefront text-white text-xl block md:hidden"></i>
             </div>
-            <div><h1 class="text-white font-bold text-lg leading-tight">Rest Art</h1><p class="text-xs text-blue-400">Panel Admin & POS</p></div>
+            <div><h1 id="headerRestName" class="text-white font-bold text-lg leading-tight">Rest Art</h1><p class="text-xs text-blue-400">Panel Admin & POS</p></div>
         </div>
         <div class="flex items-center gap-2">
             <button onclick="toggleTheme()" id="themeToggleBtn" class="flex items-center justify-center w-9 h-9 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 rounded-lg transition-colors border border-purple-500/20"><i class="ph ph-sun text-lg"></i></button>
@@ -177,6 +177,8 @@
                 <div class="pt-4 pb-2 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap overflow-hidden">Master Data</div>
                 <button onclick="navigate('bahan')" id="nav-bahan" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"><i class="ph ph-carrot text-xl"></i> <span class="font-medium text-sm whitespace-nowrap">Bahan Baku</span></button>
                 <button onclick="navigate('unit')" id="nav-unit" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"><i class="ph ph-scales text-xl"></i> <span class="font-medium text-sm whitespace-nowrap">Satuan Ukur</span></button>
+                <div class="pt-4 pb-2 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap overflow-hidden">Sistem</div>
+                <button onclick="navigate('setting')" id="nav-setting" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"><i class="ph ph-gear text-xl"></i> <span class="font-medium text-sm whitespace-nowrap">Pengaturan</span></button>
             </nav>
         </aside>
 
@@ -562,6 +564,86 @@
                         <div id="pg-resep"></div>
                     </div>
                 </section>
+
+                <section id="view-setting" class="page-view shrink-0">
+                    <h2 class="text-2xl font-bold text-white mb-6">Pengaturan Sistem</h2>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+                        <!-- Tampilan Web -->
+                        <div class="glass-panel p-6 rounded-xl border border-white/5 shadow-xl">
+                            <h3 class="text-lg font-bold text-blue-400 mb-4 border-b border-white/10 pb-2"><i class="ph ph-monitor text-xl relative top-0.5 mr-1"></i> Tampilan Website</h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-1">Title Website (Browser)</label>
+                                    <input type="text" id="set_webTitle" class="glass-input w-full rounded-lg p-3 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-1">Nama Restoran (Header Kiri Atas)</label>
+                                    <input type="text" id="set_restName" class="glass-input w-full rounded-lg p-3 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-1">Icon Toggle Sidebar (Phosphor Icon Class)</label>
+                                    <input type="text" id="set_sidebarIcon" placeholder="Contoh: ph-list, ph-squares-four" class="glass-input w-full rounded-lg p-3 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-2">Icon Website (Favicon)</label>
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-gray-800 border border-gray-700 flex items-center justify-center relative p-1">
+                                            <img id="preview_webIcon" src="img/logo.png" class="w-full h-full object-contain">
+                                        </div>
+                                        <div>
+                                            <input type="file" id="f_webIcon" accept="image/*" class="hidden" onchange="handleSettingImageUpload(event, 'web')">
+                                            <button type="button" onclick="document.getElementById('f_webIcon').click()" class="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg text-xs font-medium transition border border-gray-600">Ubah Icon Web</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pengaturan Struk -->
+                        <div class="glass-panel p-6 rounded-xl border border-white/5 shadow-xl">
+                            <h3 class="text-lg font-bold text-yellow-400 mb-4 border-b border-white/10 pb-2"><i class="ph ph-receipt text-xl relative top-0.5 mr-1"></i> Info Struk Kasir</h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-1">Nama Restoran / Toko (Struk)</label>
+                                    <input type="text" id="set_strukName" class="glass-input w-full rounded-lg p-3 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-1">Alamat Outlet</label>
+                                    <input type="text" id="set_strukAddress" class="glass-input w-full rounded-lg p-3 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-1">No. Telepon / WA</label>
+                                    <input type="text" id="set_strukPhone" class="glass-input w-full rounded-lg p-3 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-1">Ucapan Terima Kasih (Footer)</label>
+                                    <textarea id="set_strukFooter" rows="2" class="glass-input w-full rounded-lg p-3 text-sm"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-2">Logo Struk (Opsional)</label>
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-white border border-gray-700 flex items-center justify-center relative p-1">
+                                            <img id="preview_strukIcon" src="" class="w-full h-full object-contain grayscale">
+                                        </div>
+                                        <div>
+                                            <input type="file" id="f_strukIcon" accept="image/*" class="hidden" onchange="handleSettingImageUpload(event, 'struk')">
+                                            <button type="button" onclick="document.getElementById('f_strukIcon').click()" class="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg text-xs font-medium transition border border-gray-600">Pilih Logo Struk</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end mb-8">
+                        <button onclick="saveSettingsForm(event)" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-[0_0_15px_rgba(37,99,235,0.4)] transition-all flex items-center gap-2">
+                            <i class="ph ph-floppy-disk text-lg"></i> Simpan Pengaturan
+                        </button>
+                    </div>
+                </section>
                 
             </div>
         </main>
@@ -590,6 +672,9 @@
             </button>
             <button onclick="navigate('unit')" id="mob-nav-unit" class="flex flex-col items-center justify-center py-2 px-4 min-w-[75px] rounded-xl text-gray-400 hover:text-yellow-400 transition-colors shrink-0">
                 <i class="ph ph-scales text-2xl mb-1"></i><span class="text-[10px] font-medium tracking-wide">Satuan</span>
+            </button>
+            <button onclick="navigate('setting')" id="mob-nav-setting" class="flex flex-col items-center justify-center py-2 px-4 min-w-[75px] rounded-xl text-gray-400 hover:text-yellow-400 transition-colors shrink-0">
+                <i class="ph ph-gear text-2xl mb-1"></i><span class="text-[10px] font-medium tracking-wide">Setting</span>
             </button>
         </nav>
     </div>
@@ -658,6 +743,115 @@
         let currentPosCategory = 'Semua';
         let tempMenuImage = '';
         let isMobileCartOpen = false;
+
+        let appSettings = {
+            webTitle: "Sistem Resep & Kasir POS",
+            restName: "Rest Art",
+            sidebarIcon: "ph-list",
+            webIcon: "",
+            strukName: "Rest Art",
+            strukAddress: "Jl. Contoh No. 123, Kota",
+            strukPhone: "0812 3456 7890",
+            strukFooter: "Terima Kasih\nSilakan datang kembali!",
+            strukIcon: ""
+        };
+
+        function loadSettings() {
+            const saved = localStorage.getItem('appSettings');
+            if(saved) {
+                appSettings = { ...appSettings, ...JSON.parse(saved) };
+            }
+            applySettings();
+        }
+
+        function applySettings() {
+            document.title = appSettings.webTitle;
+            const hrName = document.getElementById('headerRestName');
+            if(hrName) hrName.textContent = appSettings.restName;
+            
+            const sbIcon = document.getElementById('sidebarToggleIcon');
+            if(sbIcon) sbIcon.className = `ph ${appSettings.sidebarIcon} text-white text-xl hidden md:block cursor-pointer hover:scale-110`;
+            
+            if (appSettings.webIcon) {
+                let link = document.querySelector("link[rel~='icon']");
+                if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+                link.href = appSettings.webIcon;
+            }
+
+            // Populate form if available
+            if(document.getElementById('set_webTitle')) {
+                document.getElementById('set_webTitle').value = appSettings.webTitle || '';
+                document.getElementById('set_restName').value = appSettings.restName || '';
+                document.getElementById('set_sidebarIcon').value = appSettings.sidebarIcon || 'ph-list';
+                document.getElementById('set_strukName').value = appSettings.strukName || '';
+                document.getElementById('set_strukAddress').value = appSettings.strukAddress || '';
+                document.getElementById('set_strukPhone').value = appSettings.strukPhone || '';
+                document.getElementById('set_strukFooter').value = appSettings.strukFooter || '';
+                
+                if(appSettings.webIcon) document.getElementById('preview_webIcon').src = appSettings.webIcon;
+                if(appSettings.strukIcon) document.getElementById('preview_strukIcon').src = appSettings.strukIcon;
+            }
+        }
+
+        async function saveSettingsForm(event) {
+            appSettings.webTitle = document.getElementById('set_webTitle').value;
+            appSettings.restName = document.getElementById('set_restName').value;
+            appSettings.sidebarIcon = document.getElementById('set_sidebarIcon').value || 'ph-list';
+            appSettings.strukName = document.getElementById('set_strukName').value;
+            appSettings.strukAddress = document.getElementById('set_strukAddress').value;
+            appSettings.strukPhone = document.getElementById('set_strukPhone').value;
+            appSettings.strukFooter = document.getElementById('set_strukFooter').value;
+            
+            // Simpan lokal sebagai backup instant
+            localStorage.setItem('appSettings', JSON.stringify(appSettings));
+            applySettings();
+            
+            // UI Loading state
+            let btn = null;
+            let originalText = '';
+            if (event) {
+                btn = event.currentTarget;
+                originalText = btn.innerHTML;
+                btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> Menyimpan...`;
+                btn.disabled = true;
+            }
+
+            // Simpan ke Server Database (Google Sheets)
+            try {
+                await gasFetch({ action: 'saveSettings', data: appSettings });
+                showToast('Pengaturan berhasil disimpan ke Server!');
+            } catch (err) {
+                showToast('Pengaturan tersimpan di browser. Gagal simpan ke server: ' + err.message, 'error');
+            } finally {
+                if (btn) {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            }
+        }
+
+        function handleSettingImageUpload(event, type) {
+            const file = event.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+                    let maxW = 200, maxH = 200; let width = img.width; let height = img.height;
+                    if(width > height) { if(width > maxW) { height *= maxW / width; width = maxW; } }
+                    else { if(height > maxH) { width *= maxH / height; height = maxH; } }
+                    canvas.width = width; canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const b64 = canvas.toDataURL('image/png');
+                    
+                    if (type === 'web') { appSettings.webIcon = b64; document.getElementById('preview_webIcon').src = b64; }
+                    else { appSettings.strukIcon = b64; document.getElementById('preview_strukIcon').src = b64; }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
 
         let isLightMode = localStorage.getItem('theme') === 'light';
         function initTheme() {
@@ -800,7 +994,7 @@
 
         function navigate(view) {
             const role = localStorage.getItem('userRole') || 'admin';
-            if (role === 'kasir' && ['resep', 'konversi', 'bahan', 'unit', 'menu'].includes(view)) {
+            if (role === 'kasir' && ['resep', 'konversi', 'bahan', 'unit', 'menu', 'setting'].includes(view)) {
                 return showToast('Akses Ditolak! Akun Kasir tidak memiliki wewenang ke menu ini.', 'error');
             }
 
@@ -830,6 +1024,7 @@
             if(view === 'menu') { renderMenuTable(); updateDashboard(); }
             if(view === 'kasir') { renderKasirGrid(); renderPosCart(); }
             if(view === 'laporan') { updatePenjualanStats(); renderPenjualanTable(); }
+            if(view === 'setting') { applySettings(); }
         }
 
         /* --- STREAMING_CHUNK:Auth & Profile... --- */
@@ -915,12 +1110,12 @@
         function applyRolePermissions() {
             const role = localStorage.getItem('userRole') || 'admin';
             if (role === 'kasir') {
-                const restrictedDesktop = ['nav-resep', 'nav-konversi', 'nav-bahan', 'nav-unit', 'nav-menu'];
+                const restrictedDesktop = ['nav-resep', 'nav-konversi', 'nav-bahan', 'nav-unit', 'nav-menu', 'nav-setting'];
                 restrictedDesktop.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
                 document.querySelectorAll('#sidebar .uppercase').forEach(el => {
-                    if (el.textContent.includes('Kalkulasi') || el.textContent.includes('Master Data')) { el.style.display = 'none'; }
+                    if (el.textContent.includes('Kalkulasi') || el.textContent.includes('Master Data') || el.textContent.includes('Sistem')) { el.style.display = 'none'; }
                 });
-                const restrictedMobile = ['mob-nav-resep', 'mob-nav-konversi', 'mob-nav-bahan', 'mob-nav-unit', 'mob-nav-menu'];
+                const restrictedMobile = ['mob-nav-resep', 'mob-nav-konversi', 'mob-nav-bahan', 'mob-nav-unit', 'mob-nav-menu', 'mob-nav-setting'];
                 restrictedMobile.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
             }
         }
@@ -950,6 +1145,13 @@
                 db.menus = response.menus || []; 
                 db.penjualan = response.penjualan || [];
                 
+                // Teruskan Settings dari Server
+                if (response.settings && Object.keys(response.settings).length > 0) {
+                    appSettings = { ...appSettings, ...response.settings };
+                    localStorage.setItem('appSettings', JSON.stringify(appSettings));
+                    applySettings();
+                }
+
                 db.bahans.forEach(b => { b.ukurans = db.ukurans.find(u => u.id == b.ukuran_id) || null; });
                 db.resep_bahans.forEach(rb => { rb.bahans = db.bahans.find(b => b.id == rb.bahan_id) || null; });
                 db.menus.forEach(m => { m.reseps = db.reseps.find(r => r.id == m.resep_id) || null; });
@@ -1171,11 +1373,16 @@
             const subtotal = totalBayar / 1.11;
             const ppn = totalBayar - subtotal;
             
+            const strukIconHtml = appSettings.strukIcon ? `<img src="${appSettings.strukIcon}" class="w-12 h-12 mx-auto mb-2 object-contain grayscale">` : '';
+            const footerHtml = appSettings.strukFooter.split('\n').map(line => `<p>${line}</p>`).join('');
+
             let html = `
             <div id="strukPrintArea" class="bg-white text-black p-4 w-full max-w-sm mx-auto shadow-xl rounded-lg font-mono text-sm relative">
                 <div class="text-center border-b border-dashed border-gray-400 pb-3 mb-3">
-                    <h2 class="font-bold text-lg mb-1">Rest Art</h2>
-                    <p class="text-xs text-gray-600">Jl. Contoh No. 123, Kota</p>
+                    ${strukIconHtml}
+                    <h2 class="font-bold text-lg mb-1">${appSettings.strukName}</h2>
+                    <p class="text-xs text-gray-600">${appSettings.strukAddress}</p>
+                    <p class="text-xs text-gray-600">${appSettings.strukPhone}</p>
                     <p class="text-xs text-gray-600 mt-1">Kode: ${kode}</p>
                     <p class="text-xs text-gray-600">${date}</p>
                 </div>
@@ -1188,8 +1395,7 @@
                 ${cash > 0 ? `<div class="flex justify-between text-xs mb-1 text-gray-600"><span>Tunai:</span><span>${fRupiah(cash)}</span></div>
                 <div class="flex justify-between text-xs text-gray-600"><span>Kembali:</span><span>${fRupiah(cash - totalBayar)}</span></div>` : ''}
                 <div class="text-center mt-5 text-xs text-gray-500">
-                    <p>Terima Kasih</p>
-                    <p>Silakan datang kembali!</p>
+                    ${footerHtml}
                 </div>
             </div>
             `;
@@ -1764,7 +1970,7 @@
         function importUnitExcel(event) { processImport(event, 'ukurans'); } function importBahanExcel(event) { processImport(event, 'bahans'); } function importKonversiExcel(event) { processImport(event, 'konversis'); } function importResepExcel(event) { processImport(event, 'reseps'); }
         function processImport(event, table) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async function(e) { const data = new Uint8Array(e.target.result); const wb = XLSX.read(data, { type: 'array' }); const ws = wb.Sheets[wb.SheetNames[0]]; const jsonData = XLSX.utils.sheet_to_json(ws); if (jsonData.length === 0) return showToast("File Excel kosong!", "error"); showToast(`Mengimpor data ${table}...`); try { for(const r of jsonData) { let payload = {}; if(table === 'ukurans' && r['Nama Satuan']) { payload = { nama: r['Nama Satuan'], simbol: r['Simbol'] || '' }; } else if(table === 'bahans' && r['Nama Bahan']) { payload = { nama: r['Nama Bahan'], jumlah_dasar: r['Jumlah Dasar']||1, harga_beli: r['Harga Beli']||0, ukuran_id: r['ID Ukuran']||1 }; } else if(table === 'konversis' && r['ID Dari'] && r['ID Ke']) { payload = { kategori: r['Kategori']||'massa', dari_ukuran_id: r['ID Dari'], ke_ukuran_id: r['ID Ke'], pengali: r['Pengali']||1, catatan: r['Catatan']||'' }; } else if(table === 'reseps' && r['Nama Resep']) { payload = { nama: r['Nama Resep'], porsi_dasar: r['Porsi Dasar']||1, cara_masak: r['Cara Masak']||'' }; } if(Object.keys(payload).length > 0) { payload.created_at = new Date().toISOString(); payload.updated_at = new Date().toISOString(); await gasFetch({action: 'insert', table: table, data: payload}); } } showToast("Import selesai!"); fetchData(); } catch(err) { showToast("Terjadi kesalahan import: " + err.message, "error"); } }; reader.readAsArrayBuffer(file); event.target.value = ''; }
 
-        window.addEventListener('DOMContentLoaded', () => { initTheme(); checkAuthSession(); });
+        window.addEventListener('DOMContentLoaded', () => { initTheme(); loadSettings(); checkAuthSession(); });
     </script>
 </body>
 </html>
