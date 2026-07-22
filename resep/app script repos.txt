@@ -5,6 +5,27 @@
 // Ganti dengan ID Spreadsheet Anda (Ambil dari URL Spreadsheet)
 const SPREADSHEET_ID = SpreadsheetApp.getActiveSpreadsheet().getId(); 
 
+// SKEMA DATABASE (AUTO MAKER)
+const DB_SCHEMA = {
+  'users': ['id', 'email', 'password', 'nama', 'role', 'avatar', 'created_at', 'updated_at'],
+  'settings': ['key', 'value'],
+  'ukurans': ['id', 'nama', 'simbol', 'created_at', 'updated_at'],
+  'bahans': ['id', 'nama', 'jumlah_dasar', 'ukuran_id', 'harga_beli', 'created_at', 'updated_at'],
+  'reseps': ['id', 'nama', 'porsi_dasar', 'cara_masak', 'created_at', 'updated_at'],
+  'resep_bahans': ['id', 'resep_id', 'bahan_id', 'jumlah_dibutuhkan', 'created_at', 'updated_at'],
+  'konversis': ['id', 'kategori', 'dari_ukuran_id', 'ke_ukuran_id', 'pengali', 'catatan', 'created_at', 'updated_at'],
+  'menus': ['id', 'resep_id', 'kategori', 'harga_jual', 'deskripsi', 'gambar', 'status_aktif', 'created_at', 'updated_at'],
+  'penjualan': ['id', 'kode_penjualan', 'menu_id', 'jumlah_porsi', 'total_modal', 'total_pendapatan', 'total_keuntungan', 'created_at']
+};
+
+// Fungsi ini bisa dijalankan manual dari editor GAS untuk Generate Semua Sheet sekaligus
+function setupDatabase() {
+  for (let sheetName in DB_SCHEMA) {
+    getSheet(sheetName);
+  }
+  return "Database berhasil di-setup!";
+}
+
 function doPost(e) {
   let output = ContentService.createTextOutput();
   output.setMimeType(ContentService.MimeType.JSON);
@@ -61,9 +82,35 @@ function doOptions(e) {
 function getSheet(sheetName) {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   let sheet = ss.getSheetByName(sheetName);
+  
   // Jika sheet belum ada, buat otomatis
   if (!sheet) {
     sheet = ss.insertSheet(sheetName);
+    
+    // Auto-build Kolom Header berdasarkan Skema
+    if (DB_SCHEMA[sheetName]) {
+      // Masukkan header baris pertama
+      sheet.appendRow(DB_SCHEMA[sheetName]);
+      
+      // Mempercantik header (Bold & Warna Background Hijau Terang)
+      sheet.getRange(1, 1, 1, DB_SCHEMA[sheetName].length)
+           .setFontWeight("bold")
+           .setBackground("#d9ead3");
+           
+      // Auto-inject Akun Admin Default jika membuat tabel users
+      if (sheetName === 'users') {
+        sheet.appendRow([
+          new Date().getTime(), 
+          'admin@resep.com', 
+          'admin123', 
+          'Super Admin', 
+          'admin', 
+          '', 
+          new Date().toISOString(), 
+          new Date().toISOString()
+        ]);
+      }
+    }
   }
   return sheet;
 }
