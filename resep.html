@@ -1360,11 +1360,22 @@
             }
         }
 
-        function viewStruk(kode, cash = 0) {
+        async function viewStruk(kode, cash = 0) {
             const trxItems = db.penjualan.filter(p => p.kode_penjualan === kode);
             if(trxItems.length === 0) return showToast('Transaksi tidak ditemukan', 'error');
             
             const date = new Date(trxItems[0].created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+            
+            // Ambil nama kasir langsung dari database users Supabase
+            let kasirName = '-';
+            const currentUserId = localStorage.getItem('userId');
+            if (currentUserId) {
+                try {
+                    const { data: userDb } = await supabaseClient.from('users').select('nama').eq('id', currentUserId).maybeSingle();
+                    if (userDb) kasirName = userDb.nama;
+                } catch(e) { console.error(e); }
+            }
+            
             let totalBayar = 0;
             
             let itemsHtml = trxItems.map(item => {
@@ -1388,20 +1399,21 @@
                 <div class="text-center border-b border-dashed border-gray-400 pb-3 mb-3">
                     ${strukIconHtml}
                     <h2 class="font-bold text-lg mb-1">${appSettings.strukName}</h2>
-                    <p class="text-xs text-gray-600">${appSettings.strukAddress}</p>
-                    <p class="text-xs text-gray-600">${appSettings.strukPhone}</p>
-                    <p class="text-xs text-gray-600 mt-1">Kode: ${kode}</p>
-                    <p class="text-xs text-gray-600">${date}</p>
+                    <p class="text-xs text-black-600">${appSettings.strukAddress}</p>
+                    <p class="text-xs text-black-600">${appSettings.strukPhone}</p>
+					<p class="flex justify-between text-xs mb-1 text-black-600">Kasir  : ${kasirName}</p>
+                    <p class="flex justify-between text-xs mb-1 text-black-600">Kode   : ${kode}</p>
+                    <p class="flex justify-between text-xs mb-1 text-black-600">Tanggal :${date}</p>
                 </div>
-                <div class="mb-3 border-b border-dashed border-gray-400 pb-3">
+                <div class="mb-3 border-b border-dashed border-black-400 pb-3">
                     ${itemsHtml}
                 </div>
-                <div class="flex justify-between text-xs mb-1 text-gray-600"><span>Subtotal:</span><span>${fRupiah(subtotal)}</span></div>
-                <div class="flex justify-between text-xs mb-1 text-gray-600"><span>PPN 11%:</span><span>${fRupiah(ppn)}</span></div>
+                <div class="flex justify-between text-xs mb-1 text-black-600"><span>Subtotal:</span><span>${fRupiah(subtotal)}</span></div>
+                <div class="flex justify-between text-xs mb-1 text-black-600"><span>PPN 11%:</span><span>${fRupiah(ppn)}</span></div>
                 <div class="flex justify-between font-bold text-sm mb-3 mt-2"><span>Total:</span><span>${fRupiah(totalBayar)}</span></div>
-                ${cash > 0 ? `<div class="flex justify-between text-xs mb-1 text-gray-600"><span>Tunai:</span><span>${fRupiah(cash)}</span></div>
-                <div class="flex justify-between text-xs text-gray-600"><span>Kembali:</span><span>${fRupiah(cash - totalBayar)}</span></div>` : ''}
-                <div class="text-center mt-5 text-xs text-gray-500">
+                ${cash > 0 ? `<div class="flex justify-between text-xs mb-1 text-black-600"><span>Tunai:</span><span>${fRupiah(cash)}</span></div>
+                <div class="flex justify-between text-xs text-black-600"><span>Kembali:</span><span>${fRupiah(cash - totalBayar)}</span></div>` : ''}
+                <div class="text-center mt-5 text-xs text-black-500">
                     ${footerHtml}
                 </div>
             </div>
@@ -1594,7 +1606,9 @@
                 if (error) throw error;
                 hidePaymentModal(); showToast(`Pembayaran Berhasil!`); btn.innerHTML = `Bayar & Cetak Struk`; btn.disabled = false;
                 await fetchData(); 
-                viewStruk(kodePenjualan, document.getElementById('payUangDiterima').value);
+                
+                // Tambahkan 'await' agar menunggu fetch nama selesai sebelum nge-print
+                await viewStruk(kodePenjualan, document.getElementById('payUangDiterima').value);
                 setTimeout(() => printStruk(kodePenjualan), 500); 
                 clearPosCart();
             } catch(error) {
