@@ -5,7 +5,7 @@
 // Konstanta Nama Sheet (Tabel)
 const TABLES = [
   'ukurans', 'bahans', 'reseps', 'resep_bahans', 
-  'konversis', 'menus', 'penjualan'
+  'konversis', 'menus', 'penjualan', 'users'
 ];
 
 /**
@@ -22,7 +22,8 @@ function setup() {
     'resep_bahans': ['id', 'resep_id', 'bahan_id', 'jumlah_dibutuhkan', 'created_at', 'updated_at'],
     'konversis': ['id', 'kategori', 'dari_ukuran_id', 'ke_ukuran_id', 'pengali', 'catatan', 'created_at', 'updated_at'],
     'menus': ['id', 'resep_id', 'kategori', 'harga_jual', 'deskripsi', 'gambar', 'status_aktif', 'created_at', 'updated_at'],
-    'penjualan': ['id', 'kode_penjualan', 'menu_id', 'jumlah_porsi', 'total_modal', 'total_pendapatan', 'total_keuntungan', 'created_at']
+    'penjualan': ['id', 'kode_penjualan', 'menu_id', 'jumlah_porsi', 'total_modal', 'total_pendapatan', 'total_keuntungan', 'created_at'],
+    'users': ['id', 'email', 'password', 'nama', 'role', 'created_at']
   };
 
   // Buat Sheet jika belum ada dan set Header
@@ -43,6 +44,12 @@ function setup() {
     }
   }
   
+  // Buat akun admin default jika sheet 'users' masih kosong
+  const usersSheet = ss.getSheetByName('users');
+  if (usersSheet && usersSheet.getLastRow() <= 1) {
+    usersSheet.appendRow([1, 'admin@resep.com', 'admin123', 'Admin Resto', 'admin', new Date().toISOString()]);
+  }
+
   // Hapus "Sheet1" bawaan jika ada dan tidak dipakai
   const sheet1 = ss.getSheetByName("Sheet1");
   if (sheet1 && ss.getSheets().length > 1) {
@@ -74,6 +81,9 @@ function doPost(e) {
 
     // Routing berdasarkan jenis Aksi (action)
     switch(action) {
+      case 'login':
+        result = handleLogin(data.email, data.password);
+        break;
       case 'readAll':
         result = handleReadAll();
         break;
@@ -123,10 +133,46 @@ function handleReadAll() {
   let response = {};
   
   TABLES.forEach(tableName => {
-    response[tableName] = getSheetDataAsJSON(ss.getSheetByName(tableName));
+    // Jangan kirim tabel 'users' ke frontend secara massal demi keamanan
+    if (tableName !== 'users') {
+      response[tableName] = getSheetDataAsJSON(ss.getSheetByName(tableName));
+    }
   });
   
   return response;
+}
+
+function handleLogin(email, password) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName('users');
+  if (!sheet) throw new Error("Tabel users tidak ditemukan. Silakan jalankan Setup ulang.");
+
+  const dataRange = sheet.getDataRange();
+  const values = dataRange.getValues();
+  const headers = values[0];
+  
+  const emailIdx = headers.indexOf('email');
+  const passIdx = headers.indexOf('password');
+  const namaIdx = headers.indexOf('nama');
+  const roleIdx = headers.indexOf('role');
+
+  if (emailIdx === -1 || passIdx === -1) throw new Error("Struktur tabel users tidak valid.");
+
+  // Cari baris yang email dan passwordnya cocok
+  for (let i = 1; i < values.length; i++) {
+    if (values[i][emailIdx] == email && values[i][passIdx] == password) {
+      return { 
+        message: "Login Berhasil", 
+        user: { 
+          email: values[i][emailIdx], 
+          nama: values[i][namaIdx], 
+          role: values[i][roleIdx] 
+        } 
+      };
+    }
+  }
+
+  throw new Error("Email atau Password salah!");
 }
 
 function handleInsert(tableName, dataObj) {
