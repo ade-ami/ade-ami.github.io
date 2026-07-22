@@ -36,6 +36,9 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+        /* FIX SIDEBAR TOGGLE */
+        #sidebar.collapsed { display: none !important; }
+
         .cat-btn { background-color: transparent; border: 1px solid #4b5563; color: #9ca3af; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; }
         .cat-btn:hover { border-color: #6b7280; color: #d1d5db; }
         .cat-btn.active { border-color: #eab308; color: #eab308; background-color: rgba(234, 179, 8, 0.1); }
@@ -131,26 +134,46 @@
         <div class="flex items-center gap-2">
             <button onclick="toggleTheme()" id="themeToggleBtn" class="flex items-center justify-center w-9 h-9 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 rounded-lg transition-colors border border-purple-500/20"><i class="ph ph-sun text-lg"></i></button>
             <button onclick="fetchData(true)" class="flex items-center justify-center w-9 h-9 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-colors border border-blue-500/20"><i class="ph ph-arrows-clockwise text-lg"></i></button>
-            <button onclick="doLogout()" class="hidden md:flex items-center justify-center gap-2 px-4 h-9 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg text-sm font-medium transition-colors border border-red-500/20 ml-1"><i class="ph ph-sign-out text-base"></i> <span>Logout</span></button>
+            
+            <!-- DROPDOWN PROFIL -->
+            <div class="relative ml-1" id="userDropdownContainer">
+                <button onclick="toggleUserDropdown(event)" class="flex items-center gap-2 focus:outline-none hover:bg-white/5 p-1 pr-2 rounded-full transition-colors border border-transparent hover:border-white/10">
+                    <img id="hdrAvatar" src="" class="w-8 h-8 rounded-full border border-gray-600 object-cover bg-gray-800">
+                    <i class="ph ph-caret-down text-gray-400 text-sm hidden sm:block"></i>
+                </button>
+                
+                <!-- Isi Dropdown Menu -->
+                <div id="userDropdownMenu" class="hidden absolute right-0 mt-2 w-56 bg-gray-900 border border-white/10 rounded-xl shadow-2xl py-1 z-50 transform origin-top-right transition-all">
+                    <div class="px-4 py-3 border-b border-white/5 flex items-center gap-3">
+                        <img id="ddAvatar" src="" class="w-10 h-10 rounded-full object-cover bg-gray-800">
+                        <div class="overflow-hidden">
+                            <p id="ddName" class="text-sm font-bold text-white truncate">Nama User</p>
+                            <p id="ddRole" class="text-[10px] text-gray-400 uppercase tracking-wide">Role</p>
+                        </div>
+                    </div>
+                    <div class="p-1">
+                        <button onclick="openForm('profile')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white rounded-lg flex items-center gap-2 transition-colors"><i class="ph ph-user text-lg"></i> Profile</button>
+                    </div>
+                    <div class="p-1 border-t border-white/5">
+                        <button onclick="doLogout()" class="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-lg flex items-center gap-2 transition-colors"><i class="ph ph-sign-out text-lg"></i> Sign out</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
 
     <div id="mainApp" class="flex-1 overflow-hidden relative flex" style="display: none;">
         
-        <!-- Sidebar (Hidden entirely on Mobile, active on MD and up) -->
-        <aside id="sidebar" class="w-64 bg-gray-900 border-r border-white/5 flex-col shrink-0 z-[90] shadow-2xl relative h-full transition-all md:flex">
+        <aside id="sidebar" class="w-64 bg-gray-900 border-r border-white/5 flex-col shrink-0 z-[90] shadow-2xl relative h-full transition-all hidden md:flex">
             <nav class="flex-1 p-4 space-y-2 overflow-y-auto mt-2 pb-4">
                 <button onclick="navigate('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"><i class="ph ph-squares-four text-xl"></i> <span class="font-medium text-sm whitespace-nowrap">Dashboard</span></button>
-                
                 <div class="pt-4 pb-2 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap overflow-hidden">Bisnis & Transaksi</div>
                 <button onclick="navigate('kasir')" id="nav-kasir" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"><i class="ph ph-monitor-play text-xl"></i> <span class="font-medium text-sm whitespace-nowrap">Kasir (POS)</span></button>
                 <button onclick="navigate('laporan')" id="nav-laporan" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"><i class="ph ph-chart-line-up text-xl"></i> <span class="font-medium text-sm whitespace-nowrap">Laporan Sales</span></button>
                 <button onclick="navigate('menu')" id="nav-menu" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"><i class="ph ph-book-open-text text-xl"></i> <span class="font-medium text-sm whitespace-nowrap">Daftar Menu</span></button>
-                
                 <div class="pt-4 pb-2 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap overflow-hidden">Kalkulasi</div>
                 <button onclick="navigate('resep')" id="nav-resep" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"><i class="ph ph-notebook text-xl"></i> <span class="font-medium text-sm whitespace-nowrap">Resep & Modal</span></button>
                 <button onclick="navigate('konversi')" id="nav-konversi" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"><i class="ph ph-arrows-left-right text-xl"></i> <span class="font-medium text-sm whitespace-nowrap">Konversi Satuan</span></button>
-                
                 <div class="pt-4 pb-2 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap overflow-hidden">Master Data</div>
                 <button onclick="navigate('bahan')" id="nav-bahan" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"><i class="ph ph-carrot text-xl"></i> <span class="font-medium text-sm whitespace-nowrap">Bahan Baku</span></button>
                 <button onclick="navigate('unit')" id="nav-unit" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"><i class="ph ph-scales text-xl"></i> <span class="font-medium text-sm whitespace-nowrap">Satuan Ukur</span></button>
@@ -158,13 +181,11 @@
         </aside>
 
         <main class="flex-1 h-full overflow-y-auto relative w-full pb-20 md:pb-0" id="mainScrollArea">
-            
             <div id="ptr-indicator" class="w-full bg-blue-500/10 text-blue-400 text-sm font-bold border-b border-blue-500/20">
                 <i class="ph ph-arrow-down text-xl mr-2" id="ptr-icon"></i> Tarik untuk Muat Ulang
             </div>
             
             <div class="p-4 md:p-8 max-w-7xl mx-auto w-full h-full flex flex-col">
-                
                 <section id="view-dashboard" class="page-view active shrink-0">
                     <div class="mb-8"><h2 class="text-3xl font-bold text-white mb-2">SOP & Peraturan Karyawan</h2><p class="text-gray-400 text-sm">Ketentuan wajib yang harus dilaksanakan pada saat operasional.</p></div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
@@ -625,7 +646,6 @@
     </div>
 
     <script>
-        // MIGRATION: Google Apps Script URL
         const GAS_URL = 'https://script.google.com/macros/s/AKfycbwT1LvBl3lDCBGVb6o0API1gPdgnwMYjVui8NFNyMg--sScHAg2tPqdibBd91JThq6R-Q/exec';
 
         let db = { ukurans: [], bahans: [], reseps: [], resep_bahans: [], konversis: [], menus: [], penjualan: [] };
@@ -652,6 +672,7 @@
             }
         }
 
+        /* --- STREAMING_CHUNK:Utilities... --- */
         const fRupiah = (num) => { let n = parseFloat(num); if (isNaN(n)) n = 0; return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n); };
 
         function showToast(msg, type='success') {
@@ -675,6 +696,7 @@
             m.classList.add('opacity-0'); m.querySelector('.glass-panel').classList.add('scale-95');
             setTimeout(() => { m.classList.add('hidden'); confirmCallback = null; }, 300);
         }
+
         document.getElementById('confirmActionBtn').addEventListener('click', () => { if(confirmCallback) confirmCallback(); closeConfirm(); });
 
         function applySelectSearch(selector) {
@@ -687,7 +709,6 @@
             });
         }
 
-        /* --- GOOGLE APPS SCRIPT WRAPPER --- */
         async function gasFetch(payload) {
             try {
                 const response = await fetch(GAS_URL, {
@@ -704,7 +725,7 @@
             }
         }
 
-        /* --- PULL TO REFRESH & AUTO-HIDE HEADER LOGIC --- */
+        /* --- STREAMING_CHUNK:Layout & Theme... --- */
         let touchstartY = 0;
         let lastScrollTop = 0;
         const mainScrollArea = document.getElementById('mainScrollArea');
@@ -756,52 +777,6 @@
             }
         });
 
-        async function checkAuthSession() { 
-            if (localStorage.getItem('isLoggedIn')) proceedToApp(); 
-            else document.getElementById('loginScreen').classList.add('active'); 
-        }
-
-        async function doLogin() {
-            const email = document.getElementById('loginEmail').value.trim(); 
-            const password = document.getElementById('loginPassword').value.trim(); 
-            const btn = document.getElementById('btnLogin');
-            
-            if(!email || !password) return showToast('Harap isi Email dan Password!', 'error');
-            
-            btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> Memproses...`; btn.disabled = true;
-            
-            try {
-                const response = await gasFetch({ action: 'login', data: { email, password } });
-                
-                const userName = response.user?.nama || 'Admin';
-                const userRole = (response.user?.role || 'admin').toLowerCase(); // RBAC Role
-                
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('userName', userName);
-                localStorage.setItem('userRole', userRole);
-                
-                showToast(`Selamat datang, ${userName}!`);
-                proceedToApp();
-            } catch(error) {
-                showToast(error.message, 'error');
-                btn.innerHTML = `Masuk <i class="ph ph-sign-in ml-1"></i>`; btn.disabled = false;
-            }
-        }
-
-        function doLogout() { 
-            localStorage.removeItem('isLoggedIn'); 
-            localStorage.removeItem('userName');
-            localStorage.removeItem('userRole'); 
-            window.location.reload();
-        }
-
-        async function proceedToApp() {
-            document.getElementById('loginScreen').classList.remove('active');
-            setTimeout(() => { document.getElementById('loginScreen').style.display = 'none'; document.getElementById('mainApp').style.display = 'flex'; void document.getElementById('mainApp').offsetWidth; document.getElementById('mainApp').classList.add('active'); }, 300);
-            applyRolePermissions();
-            await fetchData(); navigate('dashboard');
-        }
-
         function centerMobileNav(view) {
             const nav = document.getElementById('mobileBottomNav');
             const activeBtn = document.getElementById('mob-nav-' + view);
@@ -817,33 +792,16 @@
             if(sidebar) sidebar.classList.toggle('collapsed');
         }
 
-        // ROLE BASED ACCESS CONTROL (RBAC) - Menyembunyikan UI Kasir
-        function applyRolePermissions() {
-            const role = localStorage.getItem('userRole') || 'admin';
-            
-            if (role === 'kasir') {
-                // 1. Sembunyikan Navigasi Desktop (Sidebar)
-                const restrictedDesktop = ['nav-resep', 'nav-konversi', 'nav-bahan', 'nav-unit', 'nav-menu'];
-                restrictedDesktop.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
-                
-                // 2. Sembunyikan Label Kategori di Sidebar
-                document.querySelectorAll('#sidebar div.uppercase').forEach(el => {
-                    if (el.textContent.includes('Kalkulasi') || el.textContent.includes('Master Data')) {
-                        el.style.display = 'none';
-                    }
-                });
-
-                // 3. Sembunyikan Navigasi Mobile (Bawah)
-                const restrictedMobile = ['mob-nav-resep', 'mob-nav-konversi', 'mob-nav-bahan', 'mob-nav-unit'];
-                restrictedMobile.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
-            }
+        function toggleMobileCart() {
+            const panel = document.getElementById('cartPanel'); const overlay = document.getElementById('cartOverlay');
+            isMobileCartOpen = !isMobileCartOpen;
+            if(isMobileCartOpen) { panel.classList.remove('translate-x-full'); overlay.classList.remove('hidden'); } else { panel.classList.add('translate-x-full'); overlay.classList.add('hidden'); }
         }
 
         function navigate(view) {
-            // PENGAMAN RBAC: Tolak akses URL view jika Role adalah Kasir
             const role = localStorage.getItem('userRole') || 'admin';
             if (role === 'kasir' && ['resep', 'konversi', 'bahan', 'unit', 'menu'].includes(view)) {
-                return showToast('Akses Ditolak! Akun Kasir tidak diizinkan masuk ke menu ini.', 'error');
+                return showToast('Akses Ditolak! Akun Kasir tidak memiliki wewenang ke menu ini.', 'error');
             }
 
             document.querySelectorAll('section.page-view').forEach(el => el.classList.remove('active'));
@@ -874,6 +832,100 @@
             if(view === 'laporan') { updatePenjualanStats(); renderPenjualanTable(); }
         }
 
+        /* --- STREAMING_CHUNK:Auth & Profile... --- */
+        async function doLogin() {
+            const email = document.getElementById('loginEmail').value.trim(); 
+            const password = document.getElementById('loginPassword').value.trim(); 
+            const btn = document.getElementById('btnLogin');
+            
+            if(!email || !password) return showToast('Harap isi Email dan Password!', 'error');
+            
+            btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> Memproses...`; btn.disabled = true;
+            
+            try {
+                const response = await gasFetch({ action: 'login', data: { email, password } });
+                
+                const userId = response.user?.id || '';
+                const userName = response.user?.nama || 'Admin';
+                const userRole = (response.user?.role || 'admin').toLowerCase();
+                const userAvatar = response.user?.avatar || ''; 
+                
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userId', userId);
+                localStorage.setItem('userName', userName);
+                localStorage.setItem('userRole', userRole);
+                localStorage.setItem('userAvatar', userAvatar); 
+                
+                showToast(`Selamat datang, ${userName}!`);
+                proceedToApp();
+            } catch(error) {
+                showToast(error.message, 'error');
+                btn.innerHTML = `Masuk <i class="ph ph-sign-in ml-1"></i>`; btn.disabled = false;
+            }
+        }
+
+        function doLogout() { 
+            localStorage.clear(); 
+            window.location.reload(); 
+        }
+
+        function updateProfileUI() {
+            const userName = localStorage.getItem('userName') || 'User';
+            const userRole = localStorage.getItem('userRole') || 'admin';
+            const userAvatar = localStorage.getItem('userAvatar');
+            
+            const fallbackImg = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=3b82f6&color=fff&bold=true`;
+            const imgSrc = userAvatar ? userAvatar : fallbackImg;
+
+            document.getElementById('hdrAvatar').src = imgSrc;
+            const ddMenu = document.getElementById('userDropdownMenu');
+            if(ddMenu) {
+                document.getElementById('ddAvatar').src = imgSrc;
+                document.getElementById('ddName').textContent = userName;
+                document.getElementById('ddRole').textContent = userRole;
+            }
+        }
+
+        function toggleUserDropdown(e) {
+            e.stopPropagation();
+            const dd = document.getElementById('userDropdownMenu');
+            dd.classList.toggle('hidden');
+        }
+
+        document.addEventListener('click', (e) => {
+            const dd = document.getElementById('userDropdownMenu');
+            if(dd && !dd.classList.contains('hidden') && !e.target.closest('#userDropdownContainer')) {
+                dd.classList.add('hidden');
+            }
+        });
+
+        async function checkAuthSession() { 
+            if (localStorage.getItem('isLoggedIn')) proceedToApp(); 
+            else document.getElementById('loginScreen').classList.add('active'); 
+        }
+
+        async function proceedToApp() {
+            document.getElementById('loginScreen').classList.remove('active');
+            setTimeout(() => { document.getElementById('loginScreen').style.display = 'none'; document.getElementById('mainApp').style.display = 'flex'; void document.getElementById('mainApp').offsetWidth; document.getElementById('mainApp').classList.add('active'); }, 300);
+            updateProfileUI();
+            applyRolePermissions();
+            await fetchData(); navigate('dashboard');
+        }
+
+        function applyRolePermissions() {
+            const role = localStorage.getItem('userRole') || 'admin';
+            if (role === 'kasir') {
+                const restrictedDesktop = ['nav-resep', 'nav-konversi', 'nav-bahan', 'nav-unit', 'nav-menu'];
+                restrictedDesktop.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+                document.querySelectorAll('#sidebar .uppercase').forEach(el => {
+                    if (el.textContent.includes('Kalkulasi') || el.textContent.includes('Master Data')) { el.style.display = 'none'; }
+                });
+                const restrictedMobile = ['mob-nav-resep', 'mob-nav-konversi', 'mob-nav-bahan', 'mob-nav-unit', 'mob-nav-menu'];
+                restrictedMobile.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+            }
+        }
+
+        /* --- STREAMING_CHUNK:Data Fetching... --- */
         function groupPenjualanData() {
             const trxGroups = {};
             db.penjualan.forEach(p => {
@@ -898,19 +950,10 @@
                 db.menus = response.menus || []; 
                 db.penjualan = response.penjualan || [];
                 
-                // MANUAL JOINS (Google Sheets Helper)
-                db.bahans.forEach(b => {
-                    b.ukurans = db.ukurans.find(u => u.id == b.ukuran_id) || null;
-                });
-                db.resep_bahans.forEach(rb => {
-                    rb.bahans = db.bahans.find(b => b.id == rb.bahan_id) || null;
-                });
-                db.menus.forEach(m => {
-                    m.reseps = db.reseps.find(r => r.id == m.resep_id) || null;
-                });
-                db.penjualan.forEach(p => {
-                    p.menus = db.menus.find(m => m.id == p.menu_id) || null;
-                });
+                db.bahans.forEach(b => { b.ukurans = db.ukurans.find(u => u.id == b.ukuran_id) || null; });
+                db.resep_bahans.forEach(rb => { rb.bahans = db.bahans.find(b => b.id == rb.bahan_id) || null; });
+                db.menus.forEach(m => { m.reseps = db.reseps.find(r => r.id == m.resep_id) || null; });
+                db.penjualan.forEach(p => { p.menus = db.menus.find(m => m.id == p.menu_id) || null; });
 
                 groupPenjualanData(); renderUnit(); renderBahan(); renderKonversi(); renderResepTable(); 
                 populateRecipeSelect(); populateKonversiSelect(); updateDashboard();
@@ -925,6 +968,272 @@
             }
         }
 
+        /* --- STREAMING_CHUNK:Helper Data Functions... --- */
+        function populateRecipeSelect() {
+            const select = document.getElementById('recipeSelect');
+            if(!select) return;
+            select.innerHTML = '<option value="">-- Pilih Resep --</option>' + 
+                db.reseps.map(r => `<option value="${r.id}">${r.nama}</option>`).join('');
+            if(select.tomselect) {
+                select.tomselect.sync();
+            } else {
+                applySelectSearch('#recipeSelect');
+            }
+        }
+
+        function populateKonversiSelect() {
+            const selectFrom = document.getElementById('calcUnitFrom');
+            const selectTo = document.getElementById('calcUnitTo');
+            if(!selectFrom || !selectTo) return;
+            
+            const options = db.ukurans.map(u => `<option value="${u.id}">${u.nama} (${u.simbol || '-'})</option>`).join('');
+            
+            selectFrom.innerHTML = options;
+            selectTo.innerHTML = options;
+        }
+
+        function calculateRecipeModal(resepId, porsi = 1) {
+            const resep = db.reseps.find(r => r.id == resepId);
+            if (!resep) return 0;
+            const porsiDasar = parseFloat(resep.porsi_dasar) || 1;
+            const ratio = porsi / porsiDasar;
+            
+            const bahans = db.resep_bahans.filter(rb => rb.resep_id == resepId);
+            let totalModal = 0;
+            
+            bahans.forEach(rb => {
+                const bahan = db.bahans.find(b => b.id == rb.bahan_id);
+                if (bahan) {
+                    const hrgPerUnit = parseFloat(bahan.harga_beli) / parseFloat(bahan.jumlah_dasar);
+                    const qtyNeeded = parseFloat(rb.jumlah_dibutuhkan) * ratio;
+                    totalModal += (hrgPerUnit * qtyNeeded);
+                }
+            });
+            
+            return totalModal;
+        }
+
+        function calcRecipe() {
+            const resepId = document.getElementById('recipeSelect').value;
+            const targetPorsi = parseFloat(document.getElementById('recipeTarget').value) || 1;
+            const body = document.getElementById('calcRecipeBody');
+            const foot = document.getElementById('calcRecipeFoot');
+            const headerInfo = document.getElementById('recipeHeaderInfo');
+            const instructionBox = document.getElementById('recipeInstructionBox');
+            const pdfBtnContainer = document.getElementById('pdfBtnContainer');
+            
+            if(!resepId) {
+                body.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">Pilih resep terlebih dahulu</td></tr>';
+                foot.classList.add('hidden');
+                headerInfo.classList.add('hidden');
+                instructionBox.classList.add('hidden');
+                pdfBtnContainer.style.display = 'none';
+                return;
+            }
+
+            const resep = db.reseps.find(r => r.id == resepId);
+            if(!resep) return;
+
+            const porsiDasar = parseFloat(resep.porsi_dasar) || 1;
+            const ratio = targetPorsi / porsiDasar;
+            const bahans = db.resep_bahans.filter(rb => rb.resep_id == resepId);
+            
+            document.getElementById('rH_nama').textContent = resep.nama;
+            document.getElementById('rH_info').textContent = `Kalkulasi untuk ${targetPorsi} Porsi (Resep Dasar: ${porsiDasar} Porsi)`;
+            headerInfo.classList.remove('hidden');
+
+            if (resep.cara_masak) {
+                document.getElementById('rH_cara').textContent = resep.cara_masak;
+                instructionBox.classList.remove('hidden');
+            } else {
+                instructionBox.classList.add('hidden');
+            }
+            
+            let totalModal = 0;
+            
+            if(bahans.length === 0) {
+                body.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">Belum ada komposisi bahan untuk resep ini.</td></tr>';
+            } else {
+                body.innerHTML = bahans.map(rb => {
+                    const bahan = db.bahans.find(b => b.id == rb.bahan_id);
+                    if(!bahan) return '';
+                    const unit = bahan.ukurans?.nama || '';
+                    const hrgPerUnit = parseFloat(bahan.harga_beli) / parseFloat(bahan.jumlah_dasar);
+                    const qtyDasar = parseFloat(rb.jumlah_dibutuhkan);
+                    const qtyTarget = qtyDasar * ratio;
+                    const estimasi = hrgPerUnit * qtyTarget;
+                    totalModal += estimasi;
+                    
+                    return `<tr class="hover:bg-white/5 transition-colors">
+                        <td class="px-6 py-3 border-r border-white/5 text-gray-200">${bahan.nama}</td>
+                        <td class="px-6 py-3 border-r border-white/5 text-gray-400">${qtyDasar} ${unit}</td>
+                        <td class="px-6 py-3 text-blue-400 font-bold border-r border-white/5 bg-blue-500/5">${qtyTarget.toFixed(2)} ${unit}</td>
+                        <td class="px-6 py-3 text-right text-gray-300">${fRupiah(estimasi)}</td>
+                    </tr>`;
+                }).join('');
+            }
+            
+            const marginPercent = parseFloat(document.getElementById('calcMargin').value) || 0;
+            const marginAmount = totalModal * (marginPercent / 100);
+            const totalJual = totalModal + marginAmount;
+            const jualPerPorsi = targetPorsi > 0 ? totalJual / targetPorsi : 0;
+            
+            document.getElementById('calcTotModal').textContent = fRupiah(totalModal);
+            document.getElementById('calcTotMargin').textContent = '+ ' + fRupiah(marginAmount);
+            document.getElementById('calcTotJual').textContent = fRupiah(totalJual);
+            document.getElementById('calcTotJualPerPorsi').textContent = fRupiah(jualPerPorsi);
+            
+            foot.classList.remove('hidden');
+            pdfBtnContainer.style.display = 'flex';
+        }
+
+        function calculateConversion() {
+            const val = parseFloat(document.getElementById('calcInput').value) || 0;
+            const dariId = document.getElementById('calcUnitFrom').value;
+            const keId = document.getElementById('calcUnitTo').value;
+            const output = document.getElementById('calcOutput');
+            const formula = document.getElementById('calcFormulaText');
+            
+            if(!dariId || !keId) {
+                output.value = 0;
+                formula.textContent = 'Pilih satuan';
+                return;
+            }
+            
+            if(dariId === keId) {
+                output.value = val;
+                formula.textContent = `1 = 1 (Satuan Sama)`;
+                return;
+            }
+
+            const rule = db.konversis.find(k => k.dari_ukuran_id == dariId && k.ke_ukuran_id == keId);
+            const reverseRule = db.konversis.find(k => k.dari_ukuran_id == keId && k.ke_ukuran_id == dariId);
+            
+            let result = 0;
+            let txt = '';
+            
+            if (rule) {
+                result = val * parseFloat(rule.pengali);
+                txt = `Dikali ${rule.pengali}`;
+            } else if (reverseRule) {
+                result = val / parseFloat(reverseRule.pengali);
+                txt = `Dibagi ${reverseRule.pengali}`;
+            } else {
+                output.value = 'N/A';
+                formula.innerHTML = `<span class="text-red-400">Tidak ada jalur konversi langsung.</span>`;
+                return;
+            }
+            
+            output.value = Number.isInteger(result) ? result : result.toFixed(4);
+            formula.textContent = txt;
+        }
+
+        function suggestMenuPrice() {
+            const resepId = document.getElementById('f_menu_resep')?.value;
+            if(!resepId) return;
+            const hpp = calculateRecipeModal(resepId, 1);
+            const saran = hpp + (hpp * 0.4);
+            
+            const hppEl = document.getElementById('f_menu_hpp');
+            const saranEl = document.getElementById('f_menu_saran');
+            
+            if(hppEl) hppEl.textContent = fRupiah(hpp);
+            if(saranEl) saranEl.textContent = fRupiah(saran);
+        }
+
+        async function toggleMenuStatus(id, status) {
+            try {
+                await gasFetch({ action: 'update', table: 'menus', id: id, data: { status_aktif: status ? 1 : 0, updated_at: new Date().toISOString() } });
+                showToast(status ? 'Menu diaktifkan!' : 'Menu dinonaktifkan!');
+                fetchData();
+            } catch(err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        function viewStruk(kode, cash = 0) {
+            const trxItems = db.penjualan.filter(p => p.kode_penjualan === kode);
+            if(trxItems.length === 0) return showToast('Transaksi tidak ditemukan', 'error');
+            
+            const date = new Date(trxItems[0].created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+            let totalBayar = 0;
+            
+            let itemsHtml = trxItems.map(item => {
+                const sub = parseFloat(item.total_pendapatan);
+                totalBayar += sub;
+                return `
+                <div class="flex justify-between text-xs mb-1">
+                    <span class="w-[60%] truncate pr-2">${item.menus?.reseps?.nama || 'Menu'} x${item.jumlah_porsi}</span>
+                    <span class="w-[40%] text-right">${fRupiah(sub)}</span>
+                </div>`;
+            }).join('');
+            
+            const subtotal = totalBayar / 1.11;
+            const ppn = totalBayar - subtotal;
+            
+            let html = `
+            <div id="strukPrintArea" class="bg-white text-black p-4 w-full max-w-sm mx-auto shadow-xl rounded-lg font-mono text-sm relative">
+                <div class="text-center border-b border-dashed border-gray-400 pb-3 mb-3">
+                    <h2 class="font-bold text-lg mb-1">Rest Art</h2>
+                    <p class="text-xs text-gray-600">Jl. Contoh No. 123, Kota</p>
+                    <p class="text-xs text-gray-600 mt-1">Kode: ${kode}</p>
+                    <p class="text-xs text-gray-600">${date}</p>
+                </div>
+                <div class="mb-3 border-b border-dashed border-gray-400 pb-3">
+                    ${itemsHtml}
+                </div>
+                <div class="flex justify-between text-xs mb-1 text-gray-600"><span>Subtotal:</span><span>${fRupiah(subtotal)}</span></div>
+                <div class="flex justify-between text-xs mb-1 text-gray-600"><span>PPN 11%:</span><span>${fRupiah(ppn)}</span></div>
+                <div class="flex justify-between font-bold text-sm mb-3 mt-2"><span>Total:</span><span>${fRupiah(totalBayar)}</span></div>
+                ${cash > 0 ? `<div class="flex justify-between text-xs mb-1 text-gray-600"><span>Tunai:</span><span>${fRupiah(cash)}</span></div>
+                <div class="flex justify-between text-xs text-gray-600"><span>Kembali:</span><span>${fRupiah(cash - totalBayar)}</span></div>` : ''}
+                <div class="text-center mt-5 text-xs text-gray-500">
+                    <p>Terima Kasih</p>
+                    <p>Silakan datang kembali!</p>
+                </div>
+            </div>
+            `;
+            
+            const m = document.getElementById('modalOverlay'); 
+            const mPanel = document.querySelector('#modalOverlay .glass-panel'); 
+            document.getElementById('modalTitle').innerHTML = `Detail Transaksi`;
+            mPanel.className = mPanel.className.replace(/border-t-[a-z]+-500/, `border-t-gray-500`);
+            document.getElementById('modalBody').innerHTML = html;
+            document.getElementById('modalForm').classList.remove('hidden'); 
+            document.getElementById('modalAlternativeContent').classList.add('hidden');
+            document.getElementById('modalFooter').innerHTML = `<button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg text-sm bg-gray-700 text-white hover:bg-gray-600 transition-colors">Tutup</button><button type="button" onclick="printStruk('${kode}')" class="px-5 py-2 rounded-lg text-sm font-semibold bg-gray-500 hover:bg-gray-400 text-white transition-colors"><i class="ph ph-printer"></i> Cetak</button>`;
+            
+            openModal();
+        }
+
+        function handleMenuImageUpload(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const maxW = 400; const maxH = 400;
+                    let width = img.width; let height = img.height;
+                    if(width > height) { if(width > maxW) { height *= maxW / width; width = maxW; } }
+                    else { if(height > maxH) { width *= maxH / height; height = maxH; } }
+                    canvas.width = width; canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    tempMenuImage = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    const preview = document.getElementById('menuImagePreview');
+                    const placeholder = document.getElementById('menuImagePlaceholder');
+                    if(preview) { preview.src = tempMenuImage; preview.classList.remove('hidden'); }
+                    if(placeholder) placeholder.classList.add('hidden');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        /* --- STREAMING_CHUNK:Dashboard logic... --- */
         function updateDashboard() {
             if (document.getElementById('dash-menu')) {
                 document.getElementById('dash-menu').textContent = db.menus.length; document.getElementById('dash-resep').textContent = db.reseps.length;
@@ -947,73 +1256,7 @@
             }
         }
 
-        function calculateRecipeModal(resepId, targetPorsi) {
-            const resep = db.reseps.find(r => r.id == resepId); if(!resep) return 0;
-            const myBahans = db.resep_bahans.filter(rb => rb.resep_id == resepId);
-            const porsiDasar = parseFloat(resep.porsi_dasar) || 1; const multiplier = targetPorsi / porsiDasar;
-            let totalCost = 0;
-            myBahans.forEach(rb => {
-                const b = rb.bahans; if(!b) return;
-                const jDasar = parseFloat(rb.jumlah_dibutuhkan) || 0; const jTarget = jDasar * multiplier; const qMaster = parseFloat(b.jumlah_dasar) || 1;
-                totalCost += (jTarget / qMaster) * (parseFloat(b.harga_beli) || 0);
-            });
-            return totalCost;
-        }
-
-        function populateRecipeSelect() { 
-            const sel = document.getElementById('recipeSelect'); 
-            if(sel) { sel.innerHTML = `<option value="">-- Pilih Resep --</option>` + db.reseps.map(r => `<option value="${r.id}">${r.nama}</option>`).join(''); applySelectSearch('#recipeSelect'); }
-        }
-
-        function calcRecipe() {
-            const id = parseInt(document.getElementById('recipeSelect').value); const target = parseFloat(document.getElementById('recipeTarget').value) || 0; const margin = parseFloat(document.getElementById('calcMargin').value) || 0;
-            const body = document.getElementById('calcRecipeBody'); const foot = document.getElementById('calcRecipeFoot'); const boxCara = document.getElementById('recipeInstructionBox'); const btnPdf = document.getElementById('pdfBtnContainer');
-
-            if(!id) { body.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">Pilih resep terlebih dahulu</td></tr>`; foot.classList.add('hidden'); if(boxCara) boxCara.classList.add('hidden'); btnPdf.style.display = 'none'; document.getElementById('recipeHeaderInfo').classList.add('hidden'); return; }
-
-            const resep = db.reseps.find(r => r.id == id); const myBahans = db.resep_bahans.filter(rb => rb.resep_id == id); const porsiDasar = parseFloat(resep.porsi_dasar) || 1; const multiplier = target / porsiDasar; let totalCost = 0;
-            document.getElementById('rH_nama').textContent = resep.nama; document.getElementById('rH_info').innerHTML = `Resep Dasar: ${porsiDasar} porsi &nbsp;|&nbsp; Target Kebutuhan: <b class="text-blue-500">${target} porsi</b>`; document.getElementById('recipeHeaderInfo').classList.remove('hidden');
-
-            if(myBahans.length > 0) {
-                body.innerHTML = myBahans.map(rb => {
-                    const b = rb.bahans; const jDasar = parseFloat(rb.jumlah_dibutuhkan); const jTarget = jDasar * multiplier; const qMaster = parseFloat(b.jumlah_dasar) || 1; const estHarga = (jTarget / qMaster) * parseFloat(b.harga_beli); totalCost += estHarga;
-                    return `<tr><td data-label="Bahan Baku" class="px-6 py-3 font-medium text-gray-500 border-r border-white/5">${b.nama}</td><td data-label="Qty Dasar" class="px-6 py-3 text-gray-400 border-r border-white/5">${jDasar.toFixed(2).replace(/\.00$/,'')} ${b.ukurans?.nama||''}</td><td data-label="Target" class="px-6 py-3 text-blue-500 font-bold border-r border-white/5">${jTarget.toFixed(2).replace(/\.00$/,'')} ${b.ukurans?.nama||''}</td><td data-label="Est. Harga" class="px-6 py-3 text-right text-gray-500">${fRupiah(estHarga)}</td></tr>`;
-                }).join('');
-            } else { body.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500 border border-dashed border-gray-600 rounded">Belum ada komposisi bahan ditambahkan.</td></tr>`; }
-
-            const untung = totalCost * (margin/100); const saranHargaJualTotal = totalCost + untung; const hargaJualPerPorsi = target > 0 ? saranHargaJualTotal / target : 0;
-            document.getElementById('calcTotModal').textContent = fRupiah(totalCost); document.getElementById('calcTotMargin').textContent = `+ ${fRupiah(untung)}`; document.getElementById('calcTotJual').textContent = fRupiah(saranHargaJualTotal); 
-            if(document.getElementById('calcTotJualPerPorsi')) document.getElementById('calcTotJualPerPorsi').textContent = fRupiah(hargaJualPerPorsi);
-            
-            if(boxCara) { if(resep.cara_masak) { document.getElementById('rH_cara').textContent = resep.cara_masak; boxCara.classList.remove('hidden'); } else { boxCara.classList.add('hidden'); } }
-            foot.classList.remove('hidden'); btnPdf.style.display = 'flex';
-        }
-
-        function populateKonversiSelect() {
-            const opts = db.ukurans.map(u => `<option value="${u.id}">${u.nama} ${u.simbol ? '('+u.simbol+')':''}</option>`).join('');
-            if(document.getElementById('calcUnitFrom')) { document.getElementById('calcUnitFrom').innerHTML = opts; applySelectSearch('#calcUnitFrom'); }
-            if(document.getElementById('calcUnitTo')) { document.getElementById('calcUnitTo').innerHTML = opts; applySelectSearch('#calcUnitTo'); }
-            if(document.getElementById('calcCategory')) applySelectSearch('#calcCategory');
-        }
-
-        function calculateConversion() {
-            if(db.konversis.length === 0) return;
-            const inputVal = parseFloat(document.getElementById('calcInput').value) || 0; const fromId = parseInt(document.getElementById('calcUnitFrom').value); const toId = parseInt(document.getElementById('calcUnitTo').value); const cat = document.getElementById('calcCategory').value;
-            const outputEl = document.getElementById('calcOutput'); const textEl = document.getElementById('calcFormulaText');
-
-            if (fromId === toId) { outputEl.value = inputVal; textEl.textContent = 'Satuan sama, tidak ada perubahan.'; return; }
-
-            let rule = db.konversis.find(k => k.dari_ukuran_id == fromId && k.ke_ukuran_id == toId && k.kategori === cat); let multiplier = 0;
-            if (rule) { multiplier = parseFloat(rule.pengali); textEl.textContent = `Kalikan nilai dengan ${multiplier}`;
-            } else {
-                rule = db.konversis.find(k => k.dari_ukuran_id == toId && k.ke_ukuran_id == fromId && k.kategori === cat);
-                if(rule) { multiplier = 1 / parseFloat(rule.pengali); textEl.textContent = `Bagi nilai dengan ${rule.pengali}`; }
-            }
-
-            if (multiplier > 0) { let result = inputVal * multiplier; outputEl.value = Number.isInteger(result) ? result : result.toPrecision(5).replace(/\.?0+$/, '');
-            } else { outputEl.value = "N/A"; textEl.textContent = "Belum ada aturan konversi untuk satuan ini."; }
-        }
-
+        /* --- STREAMING_CHUNK:POS (Kasir) & Payment... --- */
         function setPosCategory(cat) {
             currentPosCategory = cat;
             document.querySelectorAll('.cat-btn').forEach(btn => { if(btn.dataset.cat === cat) btn.classList.add('active'); else btn.classList.remove('active'); });
@@ -1145,6 +1388,7 @@
             }
         }
 
+        /* --- STREAMING_CHUNK:Tables & Pagination... --- */
         function handleSort(module, col) {
             if (sortState[module].col === col) sortState[module].dir = sortState[module].dir === 'asc' ? 'desc' : 'asc'; else { sortState[module].col = col; sortState[module].dir = 'asc'; }
             pageState[module].page = 1; updateSortIcons(module); callRender(module);
@@ -1331,70 +1575,43 @@
             document.getElementById('pg-penjualan').innerHTML = getPaginationHTML('penjualan', filtered.length);
         }
 
-        function viewStruk(kodeTrx, uangDiterimaModal = null) {
-            const trx = groupedPenjualan.find(g => g.kode_penjualan === kodeTrx); if(!trx) return;
-            const dateStr = new Date(trx.created_at).toLocaleString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute:'2-digit', second:'2-digit' }).replace(/\./g, ':');
-            document.getElementById('modalTitle').innerHTML = `Struk Kasir: <span class="text-blue-400">${kodeTrx}</span>`;
-            
-            let itemHtml = ''; let subtotalTrx = 0;
-            trx.items.forEach(item => {
-                const name = item.menus?.reseps?.nama || 'Produk'; const qty = item.jumlah_porsi; 
-                const totalWithPpn = parseFloat(item.total_pendapatan) || 0; const totalBase = totalWithPpn / 1.11; const priceBase = totalBase / qty;
-                subtotalTrx += totalBase;
-                itemHtml += `<div class="mb-2"><div>${name}</div><div class="flex justify-between"><span>${qty} x ${fRupiah(priceBase)}</span><span>${fRupiah(totalBase)}</span></div></div>`;
-            });
-            const ppnTrx = subtotalTrx * 0.11; const grandTotalTrx = subtotalTrx + ppnTrx; let uangBayar = (uangDiterimaModal !== null && uangDiterimaModal !== '') ? parseFloat(uangDiterimaModal) : grandTotalTrx; let kembalian = uangBayar - grandTotalTrx; if(kembalian < 0) kembalian = 0;
-
-            const html = `<div id="strukPrintArea" class="bg-white text-black p-5 rounded font-mono text-sm mx-auto shadow-inner w-full max-w-[320px]">
-                    <div class="text-center font-bold text-lg mb-1">REST ART</div><div class="text-center text-xs mb-3">Restoran & Caffe<br>Jl. Lurus Hanya Padamu No. 1<br>Telp. 08972444845</div>
-                    <div class="border-b border-dashed border-black mb-2 pb-2"></div>
-                    <div class="flex justify-between text-xs mb-1"><span>No. Struk:</span><span>${trx.kode_penjualan}</span></div><div class="flex justify-between text-xs mb-3"><span>Waktu:</span><span>${dateStr}</span></div>
-                    <div class="border-b border-dashed border-black mb-2 pb-2"></div>${itemHtml}<div class="border-b border-dashed border-black mb-2 mt-2 pb-2"></div>
-                    <div class="flex justify-between mb-1"><span>Subtotal</span><span>${fRupiah(subtotalTrx)}</span></div><div class="flex justify-between mb-1"><span>PPN (11%)</span><span>${fRupiah(ppnTrx)}</span></div>
-                    <div class="flex justify-between font-bold mb-1"><span>Total</span><span>${fRupiah(grandTotalTrx)}</span></div><div class="flex justify-between mt-1"><span>DIBAYAR</span><span>${fRupiah(uangBayar)}</span></div>
-                    <div class="flex justify-between mt-1 mb-2"><span>Kembalian</span><span>${fRupiah(kembalian)}</span></div>
-                    <div class="border-b border-dashed border-black mt-4 mb-2 pb-2"></div><div class="text-center text-xs mt-3 mb-2">TERIMA KASIH<br>ATAS KUNJUNGAN ANDA</div>
-                </div>`;
-            document.getElementById('modalFooter').classList.add('hidden'); 
-            const actionHtml = `<div class="flex justify-end gap-3 pt-4 border-t border-white/10 mt-4 shrink-0"><button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg text-sm bg-gray-700 text-white hover:bg-gray-600 transition-colors">Tutup</button><button type="button" onclick="printStruk('${trx.kode_penjualan}')" class="px-5 py-2 rounded-lg text-sm font-semibold bg-blue-500 hover:bg-blue-400 text-white shadow-[0_0_10px_rgba(59,130,246,0.4)] transition-colors flex items-center gap-2"><i class="ph ph-printer text-lg"></i> Cetak Struk</button></div>`;
-            const mPanel = document.querySelector('#modalOverlay .glass-panel'); mPanel.className = mPanel.className.replace(/border-t-[a-z]+-500/, `border-t-blue-500`);
-            document.getElementById('modalForm').classList.add('hidden'); const altContent = document.getElementById('modalAlternativeContent');
-            altContent.classList.remove('hidden'); altContent.innerHTML = html + actionHtml; openModal();
-        }
-
-        async function toggleMenuStatus(id, newStatus) { 
-            try { await gasFetch({ action: 'update', table: 'menus', id: id, data: { status_aktif: newStatus } }); fetchData(); }
-            catch(err) { showToast(err.message, 'error'); } 
-        }
-
-        function suggestMenuPrice() {
-            const resepId = parseInt(document.getElementById('f_menu_resep').value); if(!resepId) return;
-            const hpp = calculateRecipeModal(resepId, 1); const saran = hpp * 1.40;
-            document.getElementById('f_menu_hpp').textContent = fRupiah(hpp); document.getElementById('f_menu_saran').textContent = fRupiah(Math.ceil(saran));
-            const inputHarga = document.getElementById('f_menu_harga'); if(!inputHarga.value || currentModalContext.id === null) inputHarga.value = Math.ceil(saran);
-        }
-        function handleMenuImageUpload(event) {
-            const file = event.target.files[0]; if(!file) return; const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas'); const MAX_WIDTH = 400; const MAX_HEIGHT = 400; let width = img.width; let height = img.height;
-                    if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
-                    canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
-                    tempMenuImage = canvas.toDataURL('image/jpeg', 0.8);
-                    const preview = document.getElementById('menuImagePreview'); const placeholder = document.getElementById('menuImagePlaceholder');
-                    if (preview && placeholder) { preview.src = tempMenuImage; preview.classList.remove('hidden'); placeholder.classList.add('hidden'); }
-                }; img.src = e.target.result;
-            }; reader.readAsDataURL(file);
-        }
-
+        /* --- STREAMING_CHUNK:Modals, Forms, PDF... --- */
         function openModal() { const m = document.getElementById('modalOverlay'); m.classList.remove('hidden'); setTimeout(() => { m.classList.remove('opacity-0'); m.querySelector('.glass-panel').classList.remove('scale-95'); }, 10); }
         function closeModal() { const m = document.getElementById('modalOverlay'); m.classList.add('opacity-0'); m.querySelector('.glass-panel').classList.add('scale-95'); setTimeout(() => { m.classList.add('hidden'); document.getElementById('modalFooter').classList.remove('hidden'); }, 300); }
 
         function openForm(type, id = null) {
             currentModalContext = { type, id }; const body = document.getElementById('modalBody'); let html = ''; let item = null; let titleColor = 'blue';
             
-            if(type === 'unit') {
+            document.getElementById('modalFooter').innerHTML = `
+                <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg text-sm bg-gray-700 text-white hover:bg-gray-600 transition-colors">Batal</button>
+                <button type="submit" id="modalSubmitBtn" class="px-5 py-2 rounded-lg text-sm font-semibold bg-blue-500 hover:bg-blue-400 text-white shadow-[0_0_10px_rgba(59,130,246,0.4)] transition-colors">Simpan</button>
+            `;
+
+            const dd = document.getElementById('userDropdownMenu'); if(dd) dd.classList.add('hidden');
+
+            if(type === 'profile') {
+                titleColor = 'blue'; document.getElementById('modalTitle').innerHTML = `Edit Profile Pengguna`;
+                const userName = localStorage.getItem('userName') || '';
+                tempMenuImage = localStorage.getItem('userAvatar') || '';
+                const fallbackImg = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=3b82f6&color=fff&bold=true`;
+                const imgSrc = tempMenuImage ? tempMenuImage : fallbackImg;
+
+                html = `
+                    <div class="flex flex-col items-center mb-6">
+                        <div class="w-24 h-24 rounded-full overflow-hidden bg-gray-800 border-2 border-gray-600 flex items-center justify-center relative cursor-pointer group mb-2 shadow-lg" onclick="document.getElementById('f_menu_gambar').click()">
+                            <img id="menuImagePreview" src="${imgSrc}" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-black/60 hidden group-hover:flex items-center justify-center transition-all backdrop-blur-sm"><i class="ph ph-camera text-white text-2xl"></i></div>
+                        </div>
+                        <input type="file" id="f_menu_gambar" accept="image/*" class="hidden" onchange="handleMenuImageUpload(event)">
+                        <p class="text-xs text-gray-400 font-medium bg-gray-800 px-3 py-1 rounded-full">Klik foto untuk ubah</p>
+                    </div>
+                    <label class="block text-xs text-gray-400 mb-1">Nama Lengkap</label>
+                    <input type="text" id="f_profile_nama" value="${userName}" placeholder="Nama Anda" class="glass-input w-full rounded-lg p-3 text-sm mb-4" required>
+                    <label class="block text-xs text-gray-400 mb-1">Password Baru <span class="text-gray-500">(Opsional)</span></label>
+                    <input type="password" id="f_profile_pass" placeholder="Kosongkan jika tidak ingin ganti sandi" class="glass-input w-full rounded-lg p-3 text-sm">
+                    <p class="text-[10px] text-gray-500 mt-1"><i class="ph ph-info"></i> Jika password diisi, Anda akan diminta login ulang setelah disimpan.</p>
+                `;
+            } else if(type === 'unit') {
                 titleColor = 'purple'; if (id) item = db.ukurans.find(u => u.id == id); document.getElementById('modalTitle').innerHTML = id ? `Edit Satuan` : `Tambah Satuan Baru`;
                 html = `<input type="text" id="f_nama" placeholder="Nama Satuan (cth: Kilogram)" value="${item ? item.nama : ''}" class="glass-input w-full rounded-lg p-3 text-sm mb-3" required><input type="text" id="f_simbol" placeholder="Simbol (cth: kg)" value="${item?.simbol ? item.simbol : ''}" class="glass-input w-full rounded-lg p-3 text-sm">`;
             } else if(type === 'bahan') {
@@ -1415,7 +1632,7 @@
                 html = `<label class="block text-xs text-gray-400 mb-1">Pilih Master Resep</label><select id="f_menu_resep" class="glass-input w-full rounded-lg p-3 text-sm mb-3 bg-gray-800" onchange="suggestMenuPrice()"><option value="" disabled ${!item ? 'selected':''}>-- Pilih Resep --</option>${optResep}</select><label class="block text-xs text-gray-400 mb-1">Kategori Menu (POS)</label><select id="f_menu_kategori" class="glass-input w-full rounded-lg p-3 text-sm mb-3 bg-gray-800"><option value="Makanan" ${item?.kategori === 'Makanan' ? 'selected':''}>Makanan</option><option value="Minuman" ${item?.kategori === 'Minuman' ? 'selected':''}>Minuman</option><option value="Snack" ${item?.kategori === 'Snack' ? 'selected':''}>Snack</option></select><div class="bg-gray-800/50 p-3 rounded-lg border border-gray-700 mb-3 text-sm"><div class="flex justify-between text-gray-400 mb-1"><span>HPP / Modal (1 Porsi):</span> <span id="f_menu_hpp" class="text-white font-mono">Rp 0</span></div><div class="flex justify-between text-gray-400"><span>Saran Harga (Margin 40%):</span> <span id="f_menu_saran" class="text-emerald-400 font-mono">Rp 0</span></div></div><label class="block text-xs text-blue-400 font-bold mb-1">Harga Jual Tetap</label><input type="number" id="f_menu_harga" value="${item ? item.harga_jual : ''}" placeholder="Cth: 15000" class="glass-input w-full rounded-lg p-3 text-lg font-bold text-blue-400" required><label class="block text-xs text-gray-400 mb-1 mt-3">Deskripsi Singkat (Opsional)</label><textarea id="f_menu_deskripsi" placeholder="Deskripsi untuk kasir/pelanggan..." rows="2" class="glass-input w-full rounded-lg p-3 text-sm mb-3">${item && item.deskripsi ? item.deskripsi : ''}</textarea><label class="block text-xs text-gray-400 mb-1">Foto Menu (Opsional)</label><div class="flex items-center gap-4"><div class="w-16 h-16 shrink-0 rounded-lg overflow-hidden bg-gray-800 border border-gray-700 flex items-center justify-center relative cursor-pointer" onclick="document.getElementById('f_menu_gambar').click()"><img id="menuImagePreview" src="${tempMenuImage}" class="${tempMenuImage ? '' : 'hidden'} w-full h-full object-cover"><i id="menuImagePlaceholder" class="ph ph-camera text-2xl text-gray-500 ${tempMenuImage ? 'hidden' : ''}"></i></div><div class="flex-1"><input type="file" id="f_menu_gambar" accept="image/*" class="hidden" onchange="handleMenuImageUpload(event)"><button type="button" onclick="document.getElementById('f_menu_gambar').click()" class="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg text-xs font-medium transition border border-gray-600">Pilih Gambar Lokal</button><p class="text-[10px] text-gray-500 mt-1 leading-tight">Otomatis diresize & dikompres (Base64).</p></div></div>`;
             }
             const mPanel = document.querySelector('#modalOverlay .glass-panel'); mPanel.className = mPanel.className.replace(/border-t-[a-z]+-500/, `border-t-${titleColor}-500`);
-            const btn = document.getElementById('modalSubmitBtn'); btn.className = btn.className.replace(/bg-[a-z]+-500 hover:bg-[a-z]+-400/, `bg-${titleColor}-500 hover:bg-${titleColor}-400`); btn.innerHTML = `Simpan`;
+            const btn = document.getElementById('modalSubmitBtn'); if(btn) { btn.className = btn.className.replace(/bg-[a-z]+-500 hover:bg-[a-z]+-400/, `bg-${titleColor}-500 hover:bg-${titleColor}-400`); btn.innerHTML = `Simpan`; }
             document.getElementById('modalForm').classList.remove('hidden'); document.getElementById('modalAlternativeContent').classList.add('hidden'); body.innerHTML = html; 
             setTimeout(() => { 
                 if(item && type === 'konversi') { document.getElementById('f_dari').value = item.dari_ukuran_id; document.getElementById('f_ke').value = item.ke_ukuran_id; }
@@ -1424,9 +1641,37 @@
             }, 50); openModal();
         }
 
+        /* --- STREAMING_CHUNK:CRUD Actions via GAS... --- */
         async function handleModalSubmit(event) {
             event.preventDefault(); let { type, id } = currentModalContext; let table = ''; let payload = {}; let editId = id; 
-            if (type === 'unit') { table = 'ukurans'; payload = { nama: document.getElementById('f_nama').value, simbol: document.getElementById('f_simbol').value }; } 
+            
+            if (type === 'profile') {
+                const btn = document.getElementById('modalSubmitBtn'); btn.innerHTML = `<i class="ph ph-spinner animate-spin"></i> Menyimpan...`; btn.disabled = true;
+                const userId = localStorage.getItem('userId');
+                const newName = document.getElementById('f_profile_nama').value;
+                const newPass = document.getElementById('f_profile_pass').value;
+                
+                payload = { nama: newName, avatar: tempMenuImage, updated_at: new Date().toISOString() };
+                if (newPass) payload.password = newPass;
+
+                try {
+                    await gasFetch({ action: 'update', table: 'users', id: userId, data: payload });
+                    localStorage.setItem('userName', newName);
+                    localStorage.setItem('userAvatar', tempMenuImage);
+                    updateProfileUI(); 
+                    showToast('Profil berhasil diperbarui!');
+                    closeModal();
+                    
+                    if (newPass) {
+                        setTimeout(() => { showToast('Password diubah. Silakan login kembali.', 'blue'); doLogout(); }, 1500);
+                    }
+                } catch(err) {
+                    showToast(err.message, 'error');
+                }
+                btn.innerHTML = `Simpan`; btn.disabled = false;
+                return;
+            }
+            else if (type === 'unit') { table = 'ukurans'; payload = { nama: document.getElementById('f_nama').value, simbol: document.getElementById('f_simbol').value }; } 
             else if (type === 'bahan') { table = 'bahans'; payload = { nama: document.getElementById('f_nama').value, jumlah_dasar: document.getElementById('f_qty').value, ukuran_id: document.getElementById('f_unit').value, harga_beli: document.getElementById('f_harga').value }; }
             else if (type === 'konversi') { table = 'konversis'; payload = { kategori: document.getElementById('f_kat').value, dari_ukuran_id: document.getElementById('f_dari').value, ke_ukuran_id: document.getElementById('f_ke').value, pengali: document.getElementById('f_kali').value }; }
             else if (type === 'resep') { table = 'reseps'; payload = { nama: document.getElementById('f_nama').value, porsi_dasar: document.getElementById('f_qty').value, cara_masak: document.getElementById('f_cara').value }; }
@@ -1492,6 +1737,7 @@
             }); 
         }
 
+        /* --- STREAMING_CHUNK:Exports, Imports & Reports... --- */
         function downloadPDF() {
             const element = document.getElementById('pdfPrintArea'); const resepName = document.getElementById('rH_nama').textContent;
             const opt = { margin: 0.5, filename: `Kalkulasi_${resepName.replace(/\s/g, '_')}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, logging: false }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } };
