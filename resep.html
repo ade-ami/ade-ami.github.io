@@ -1360,14 +1360,7 @@
             }
         }
 
-        async function viewStruk(kode, cash = 0) {
-            const trxItems = db.penjualan.filter(p => p.kode_penjualan === kode);
-            if(trxItems.length === 0) return showToast('Transaksi tidak ditemukan', 'error');
-            
-            const date = new Date(trxItems[0].created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
-            
-            // Ambil nama kasir langsung dari database users Supabase
-            let kasirName = '-';
+         let kasirName = '-';
             const currentUserId = localStorage.getItem('userId');
             if (currentUserId) {
                 try {
@@ -1375,49 +1368,6 @@
                     if (userDb) kasirName = userDb.nama;
                 } catch(e) { console.error(e); }
             }
-            
-            let totalBayar = 0;
-            
-            let itemsHtml = trxItems.map(item => {
-                const sub = parseFloat(item.total_pendapatan);
-                totalBayar += sub;
-                return `
-                <div class="flex justify-between text-xs mb-1">
-                    <span class="w-[60%] truncate pr-2">${item.menus?.reseps?.nama || 'Menu'} x${item.jumlah_porsi}</span>
-                    <span class="w-[40%] text-right">${fRupiah(sub)}</span>
-                </div>`;
-            }).join('');
-            
-            const subtotal = totalBayar / 1.11;
-            const ppn = totalBayar - subtotal;
-            
-            const strukIconHtml = appSettings.strukIcon ? `<img src="${appSettings.strukIcon}" class="w-12 h-12 mx-auto mb-2 object-contain grayscale">` : '';
-            const footerHtml = appSettings.strukFooter.split('\n').map(line => `<p>${line}</p>`).join('');
-
-            let html = `
-            <div id="strukPrintArea" class="bg-white text-black p-4 w-full max-w-sm mx-auto shadow-xl rounded-lg font-mono text-sm relative">
-                <div class="text-center border-b border-dashed border-gray-400 pb-3 mb-3">
-                    ${strukIconHtml}
-                    <h2 class="font-bold text-lg mb-1">${appSettings.strukName}</h2>
-                    <p class="text-xs text-black-600">${appSettings.strukAddress}</p>
-                    <p class="text-xs text-black-600">${appSettings.strukPhone}</p>
-					<p class="flex justify-between text-xs mb-1 text-black-600">Kasir  : ${kasirName}</p>
-                    <p class="flex justify-between text-xs mb-1 text-black-600">Kode   : ${kode}</p>
-                    <p class="flex justify-between text-xs mb-1 text-black-600">Tanggal :${date}</p>
-                </div>
-                <div class="mb-3 border-b border-dashed border-black-400 pb-3">
-                    ${itemsHtml}
-                </div>
-                <div class="flex justify-between text-xs mb-1 text-black-600"><span>Subtotal:</span><span>${fRupiah(subtotal)}</span></div>
-                <div class="flex justify-between text-xs mb-1 text-black-600"><span>PPN 11%:</span><span>${fRupiah(ppn)}</span></div>
-                <div class="flex justify-between font-bold text-sm mb-3 mt-2"><span>Total:</span><span>${fRupiah(totalBayar)}</span></div>
-                ${cash > 0 ? `<div class="flex justify-between text-xs mb-1 text-black-600"><span>Tunai:</span><span>${fRupiah(cash)}</span></div>
-                <div class="flex justify-between text-xs text-black-600"><span>Kembali:</span><span>${fRupiah(cash - totalBayar)}</span></div>` : ''}
-                <div class="text-center mt-5 text-xs text-black-500">
-                    ${footerHtml}
-                </div>
-            </div>
-            `;
             
             const m = document.getElementById('modalOverlay'); 
             const mPanel = document.querySelector('#modalOverlay .glass-panel'); 
