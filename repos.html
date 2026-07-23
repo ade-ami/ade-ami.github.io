@@ -1360,14 +1360,7 @@
 				const date = new Date(trxItems[0].created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
 				
 				// Ambil nama kasir langsung dari database users Supabase
-				let kasirName = '-';
-				const currentUserId = localStorage.getItem('userId');
-				if (currentUserId) {
-					try {
-						const { data: userDb } = await supabaseClient.from('users').select('nama').eq('id', currentUserId).maybeSingle();
-						if (userDb) kasirName = userDb.nama;
-					} catch(e) { console.error(e); }
-				}
+				let kasirName = localStorage.getItem('userName') || '-';
 				
 				let totalBayar = 0;
 				
