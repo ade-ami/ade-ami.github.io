@@ -3,149 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="img/logo.png" rel="icon">
     <title>Generator Hash & Converter</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class', // Mengaktifkan dark mode berbasis class
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Menggunakan CryptoJS untuk algoritma hash -->
+    
+    <!-- CryptoJS untuk MD5, SHA -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <!-- BcryptJS untuk Bcrypt -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
+    
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        /* Custom scrollbar for better appearance */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
-        }
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        .dark ::-webkit-scrollbar-thumb:hover { background: #334155; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen p-4 md:p-8 flex justify-center items-center">
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen p-4 md:p-8 flex justify-center items-center transition-colors duration-300">
 
-    <div class="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden">
+    <div class="max-w-4xl w-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden transition-colors duration-300">
         
         <!-- Header -->
-        <div class="bg-indigo-600 p-6 text-white text-center">
+        <div class="bg-indigo-600 dark:bg-indigo-700 p-6 text-white text-center relative transition-colors duration-300">
             <h1 class="text-3xl font-bold mb-2">Generator & Konverter Hash</h1>
-            <p class="text-indigo-200">Hasilkan hash kriptografi secara instan dari teks Anda</p>
+            <p class="text-indigo-200 dark:text-indigo-100">Hasilkan & Verifikasi hash kriptografi secara instan</p>
+            
+            <!-- Theme Toggle Button -->
+            <button id="themeToggle" class="absolute top-4 right-4 p-2 bg-indigo-500/50 hover:bg-indigo-500 rounded-full transition-colors" title="Ganti Tema">
+                <!-- Sun Icon -->
+                <svg id="icon-sun" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <!-- Moon Icon -->
+                <svg id="icon-moon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            </button>
         </div>
 
-        <!-- Tab Navigasi -->
-        <div class="flex border-b border-slate-200 bg-slate-50">
-            <button id="tab-btn-gen" class="flex-1 py-4 text-sm font-semibold text-indigo-600 border-b-2 border-indigo-600 hover:bg-slate-100 transition-colors">Generator (Teks ke Hash)</button>
-            <button id="tab-btn-crack" class="flex-1 py-4 text-sm font-semibold text-slate-500 hover:text-indigo-600 hover:bg-slate-100 transition-colors">Pencari (Hash ke Teks)</button>
+        <div class="flex border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 transition-colors duration-300">
+            <button id="tab-btn-gen" class="flex-1 py-4 text-sm font-semibold text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">Generator (Teks ke Hash)</button>
+            <button id="tab-btn-crack" class="flex-1 py-4 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border-b-2 border-transparent">Pencari & Verifikasi</button>
         </div>
 
-        <!-- Wrapper Konten Generator -->
         <div id="content-gen" class="p-6 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
             
             <!-- Kolom Kiri: Input -->
             <div class="flex flex-col gap-6">
                 <div>
-                    <label for="inputText" class="block text-sm font-medium text-slate-700 mb-2">Masukkan Teks:</label>
+                    <label for="inputText" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Masukkan Teks:</label>
                     <textarea 
                         id="inputText" 
                         rows="6" 
-                        class="w-full p-4 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors resize-none"
+                        class="w-full p-4 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:text-white transition-colors resize-none"
                         placeholder="Ketik atau tempel teks Anda di sini..."
                     ></textarea>
                     
                     <div class="flex justify-between items-center mt-2">
-                        <span id="charCount" class="text-xs text-slate-500">0 karakter</span>
-                        <button id="clearBtn" class="text-sm text-red-500 hover:text-red-700 font-medium transition-colors">
+                        <span id="charCount" class="text-xs text-slate-500 dark:text-slate-400">0 karakter</span>
+                        <button id="clearBtn" class="text-sm text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium transition-colors">
                             Bersihkan
                         </button>
                     </div>
                 </div>
 
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <h3 class="text-sm font-semibold text-slate-700 mb-3">Algoritma yang Didukung:</h3>
+                <div class="bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Algoritma yang Didukung:</h3>
                     <div class="flex flex-wrap gap-2">
-                        <span class="px-3 py-1 bg-white border border-slate-300 rounded-full text-xs font-medium text-slate-600 shadow-sm">MD5</span>
-                        <span class="px-3 py-1 bg-white border border-slate-300 rounded-full text-xs font-medium text-slate-600 shadow-sm">SHA-1</span>
-                        <span class="px-3 py-1 bg-white border border-slate-300 rounded-full text-xs font-medium text-slate-600 shadow-sm">SHA-256</span>
-                        <span class="px-3 py-1 bg-white border border-slate-300 rounded-full text-xs font-medium text-slate-600 shadow-sm">SHA-512</span>
-                        <span class="px-3 py-1 bg-white border border-slate-300 rounded-full text-xs font-medium text-slate-600 shadow-sm">SHA-3</span>
+                        <span class="px-3 py-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 shadow-sm">MD5</span>
+                        <span class="px-3 py-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 shadow-sm">SHA-1</span>
+                        <span class="px-3 py-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 shadow-sm">SHA-256</span>
+                        <span class="px-3 py-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 shadow-sm">SHA-512</span>
+                        <span class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900 border border-indigo-300 dark:border-indigo-700 rounded-full text-xs font-bold text-indigo-700 dark:text-indigo-300 shadow-sm">Bcrypt</span>
                     </div>
-                    <p class="text-xs text-slate-500 mt-3 italic">Catatan: Konversi hash bersifat satu arah (one-way). Anda tidak dapat membalikkan hash kembali ke teks asli.</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-3 italic">Catatan: Setiap teks menghasilkan hash Bcrypt yang berbeda-beda karena mengandung "Salt" acak otomatis.</p>
                 </div>
             </div>
 
-            <!-- Kolom Kanan: Output Hash -->
             <div class="flex flex-col gap-4">
-                <h2 class="text-lg font-semibold border-b pb-2 text-slate-800">Hasil Hash</h2>
+                <h2 class="text-lg font-semibold border-b border-slate-200 dark:border-slate-700 pb-2 text-slate-800 dark:text-slate-200">Hasil Hash</h2>
                 
-                <!-- MD5 Output -->
-                <div class="relative">
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">MD5</label>
-                    <div class="flex">
-                        <input type="text" id="hash-md5" readonly class="w-full bg-slate-100 border border-slate-200 rounded-l-lg py-2 px-3 text-sm font-mono text-slate-600 focus:outline-none">
-                        <button onclick="copyToClipboard('hash-md5')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-4 rounded-r-lg border-y border-r border-slate-200 transition-colors group relative" title="Salin">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
+                <!-- Output Template Function -->
+                <script>
+                    function renderOutputField(id, label) {
+                        document.write(`
+                            <div class="relative">
+                                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">${label}</label>
+                                <div class="flex">
+                                    <input type="text" id="${id}" readonly class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-l-lg py-2 px-3 text-sm font-mono text-slate-600 dark:text-slate-300 focus:outline-none">
+                                    <button onclick="copyToClipboard('${id}')" class="bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 text-indigo-700 dark:text-indigo-300 px-4 rounded-r-lg border-y border-r border-slate-200 dark:border-slate-700 transition-colors" title="Salin">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                            <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        `);
+                    }
+                    renderOutputField('hash-md5', 'MD5');
+                    renderOutputField('hash-sha1', 'SHA-1');
+                    renderOutputField('hash-sha256', 'SHA-256');
+                    renderOutputField('hash-sha512', 'SHA-512');
+                </script>
 
-                <!-- SHA-1 Output -->
-                <div class="relative">
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">SHA-1</label>
+                <!-- Bcrypt Output (Special) -->
+                <div class="relative mt-2">
+                    <label class="block text-xs font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+                        <span>Bcrypt (Cost: 10)</span>
+                        <span id="bcrypt-status" class="text-xs font-normal text-slate-400 hidden animate-pulse">Menghitung...</span>
+                    </label>
                     <div class="flex">
-                        <input type="text" id="hash-sha1" readonly class="w-full bg-slate-100 border border-slate-200 rounded-l-lg py-2 px-3 text-sm font-mono text-slate-600 focus:outline-none">
-                        <button onclick="copyToClipboard('hash-sha1')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-4 rounded-r-lg border-y border-r border-slate-200 transition-colors" title="Salin">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- SHA-256 Output -->
-                <div class="relative">
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">SHA-256</label>
-                    <div class="flex">
-                        <input type="text" id="hash-sha256" readonly class="w-full bg-slate-100 border border-slate-200 rounded-l-lg py-2 px-3 text-sm font-mono text-slate-600 focus:outline-none">
-                        <button onclick="copyToClipboard('hash-sha256')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-4 rounded-r-lg border-y border-r border-slate-200 transition-colors" title="Salin">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- SHA-512 Output -->
-                <div class="relative">
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">SHA-512</label>
-                    <div class="flex">
-                        <input type="text" id="hash-sha512" readonly class="w-full bg-slate-100 border border-slate-200 rounded-l-lg py-2 px-3 text-sm font-mono text-slate-600 focus:outline-none">
-                        <button onclick="copyToClipboard('hash-sha512')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-4 rounded-r-lg border-y border-r border-slate-200 transition-colors" title="Salin">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-
-                 <!-- SHA-3 Output -->
-                 <div class="relative">
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">SHA-3</label>
-                    <div class="flex">
-                        <input type="text" id="hash-sha3" readonly class="w-full bg-slate-100 border border-slate-200 rounded-l-lg py-2 px-3 text-sm font-mono text-slate-600 focus:outline-none">
-                        <button onclick="copyToClipboard('hash-sha3')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-4 rounded-r-lg border-y border-r border-slate-200 transition-colors" title="Salin">
+                        <input type="text" id="hash-bcrypt" readonly class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-l-lg py-2 px-3 text-sm font-mono text-slate-600 dark:text-slate-300 focus:outline-none">
+                        <button onclick="copyToClipboard('hash-bcrypt')" class="bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 text-indigo-700 dark:text-indigo-300 px-4 rounded-r-lg border-y border-r border-slate-200 dark:border-slate-700 transition-colors" title="Salin">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
                                 <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
@@ -156,51 +138,102 @@
             </div>
         </div>
 
-        <!-- Konten Pencari / Cracker (Awalnya Sembunyi) -->
-        <div id="content-crack" class="p-6 md:p-8 hidden flex flex-col items-center">
-            <div class="max-w-2xl w-full flex flex-col gap-6">
-                <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg shadow-sm">
-                    <h3 class="text-amber-800 font-bold mb-1">Penting tentang "Dekripsi" Hash</h3>
-                    <p class="text-sm text-amber-700">Algoritma hash didesain satu arah dan tidak bisa dibalikkan. Alat ini mensimulasikan pencarian dengan menggunakan <strong>Dictionary Attack</strong> (mencocokkan kata sandi populer) dan <strong>Brute-Force</strong> (menebak angka 0 - 100.000). Jika teks aslinya rumit, alat ini tidak akan bisa menemukannya.</p>
+        <div id="content-crack" class="p-6 md:p-8 hidden flex flex-col md:flex-row gap-8">
+            
+            <!-- Kolom Kiri: Auto Cracker (Untuk MD5, SHA dll) -->
+            <div class="flex-1 flex flex-col gap-6">
+                <div class="border-b border-slate-200 dark:border-slate-700 pb-2">
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100">Pencari Teks (Auto)</h2>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Brute-force angka & Kamus untuk MD5/SHA.</p>
                 </div>
 
                 <div>
-                    <label for="inputHash" class="block text-sm font-medium text-slate-700 mb-2">Masukkan Hash (Otomatis deteksi MD5, SHA-1, SHA-256, SHA-512):</label>
+                    <label for="inputHash" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Masukkan Hash (MD5, SHA):</label>
                     <input 
-                        type="text" 
-                        id="inputHash" 
-                        class="w-full p-4 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors font-mono text-sm"
+                        type="text" id="inputHash" 
+                        class="w-full p-4 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:text-white transition-colors font-mono text-sm"
                         placeholder="Contoh: e10adc3949ba59abbe56e057f20f883e"
                     >
                 </div>
                 
                 <button id="btnCrack" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-colors flex justify-center items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
                     Cari Teks Asli
                 </button>
 
                 <!-- Hasil Crack -->
                 <div id="crackResultBox" class="hidden flex flex-col gap-2 mt-2">
-                    <label class="block text-sm font-medium text-slate-700">Hasil Pencarian:</label>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Hasil Pencarian:</label>
                     <div id="crackResultText" class="p-4 rounded-xl border text-center font-bold text-lg break-all"></div>
-                    <p id="crackResultMeta" class="text-xs text-center text-slate-500"></p>
+                    <p id="crackResultMeta" class="text-xs text-center text-slate-500 dark:text-slate-400"></p>
+                </div>
+            </div>
+
+            <!-- Kolom Kanan: Manual Verifier (Untuk Bcrypt & lainnya) -->
+            <div class="flex-1 flex flex-col gap-6 bg-slate-50 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
+                <div class="border-b border-slate-200 dark:border-slate-700 pb-2">
+                    <h2 class="text-xl font-bold text-indigo-700 dark:text-indigo-400">Verifikasi Manual (Bcrypt)</h2>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Hash seperti Bcrypt tidak bisa di-crack otomatis. Cocokkan manual di sini.</p>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <label for="verifyHash" class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Hash Target (Bcrypt / lainnya):</label>
+                        <input type="text" id="verifyHash" class="w-full p-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-mono dark:text-white" placeholder="$2y$12$...">
+                    </div>
+                    <div>
+                        <label for="verifyText" class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Tebak Teks Asli:</label>
+                        <input type="text" id="verifyText" class="w-full p-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm dark:text-white" placeholder="Masukkan teks dugaan Anda...">
+                    </div>
+                    <button id="btnVerify" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg shadow transition-colors">
+                        Cocokkan
+                    </button>
+
+                    <div id="verifyResult" class="hidden text-center p-3 rounded-lg font-bold text-sm mt-2 border"></div>
                 </div>
             </div>
         </div>
         
-        <!-- Toast Notification (Hidden by default) -->
-        <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50">
-            Disalin ke clipboard!
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed bottom-4 right-4 bg-slate-800 dark:bg-white text-white dark:text-slate-800 px-4 py-2 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50 font-medium text-sm">
+            Tersalin ke clipboard!
         </div>
     </div>
 
     <script>
+        // Memastikan library BcryptJS terpanggil dengan benar dari CDN
+        const bcrypt = window.dcodeIO ? window.dcodeIO.bcrypt : window.bcrypt;
+
         document.addEventListener('DOMContentLoaded', () => {
-            const inputTextArea = document.getElementById('inputText');
-            const clearBtn = document.getElementById('clearBtn');
-            const charCount = document.getElementById('charCount');
+            
+            // --- Fitur Dark / Light Theme ---
+            const htmlElement = document.documentElement;
+            const themeToggleBtn = document.getElementById('themeToggle');
+            const iconSun = document.getElementById('icon-sun');
+            const iconMoon = document.getElementById('icon-moon');
+
+            // Cek local storage atau system preference
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                htmlElement.classList.add('dark');
+                iconSun.classList.remove('hidden');
+                iconMoon.classList.add('hidden');
+            }
+
+            themeToggleBtn.addEventListener('click', () => {
+                htmlElement.classList.toggle('dark');
+                const isDark = htmlElement.classList.contains('dark');
+                
+                // Update icons
+                if(isDark) {
+                    iconSun.classList.remove('hidden');
+                    iconMoon.classList.add('hidden');
+                    localStorage.theme = 'dark';
+                } else {
+                    iconSun.classList.add('hidden');
+                    iconMoon.classList.remove('hidden');
+                    localStorage.theme = 'light';
+                }
+            });
 
             // --- Fitur Navigasi Tab ---
             const tabBtnGen = document.getElementById('tab-btn-gen');
@@ -212,17 +245,21 @@
                 if(tab === 'gen') {
                     contentGen.classList.remove('hidden');
                     contentCrack.classList.add('hidden');
-                    tabBtnGen.classList.add('text-indigo-600', 'border-b-2', 'border-indigo-600');
-                    tabBtnGen.classList.remove('text-slate-500');
-                    tabBtnCrack.classList.add('text-slate-500');
-                    tabBtnCrack.classList.remove('text-indigo-600', 'border-b-2', 'border-indigo-600');
+                    
+                    tabBtnGen.classList.add('text-indigo-600', 'dark:text-indigo-400', 'border-indigo-600', 'dark:border-indigo-400');
+                    tabBtnGen.classList.remove('text-slate-500', 'dark:text-slate-400', 'border-transparent');
+                    
+                    tabBtnCrack.classList.add('text-slate-500', 'dark:text-slate-400', 'border-transparent');
+                    tabBtnCrack.classList.remove('text-indigo-600', 'dark:text-indigo-400', 'border-indigo-600', 'dark:border-indigo-400');
                 } else {
                     contentCrack.classList.remove('hidden');
                     contentGen.classList.add('hidden');
-                    tabBtnCrack.classList.add('text-indigo-600', 'border-b-2', 'border-indigo-600');
-                    tabBtnCrack.classList.remove('text-slate-500');
-                    tabBtnGen.classList.add('text-slate-500');
-                    tabBtnGen.classList.remove('text-indigo-600', 'border-b-2', 'border-indigo-600');
+                    
+                    tabBtnCrack.classList.add('text-indigo-600', 'dark:text-indigo-400', 'border-indigo-600', 'dark:border-indigo-400');
+                    tabBtnCrack.classList.remove('text-slate-500', 'dark:text-slate-400', 'border-transparent');
+                    
+                    tabBtnGen.classList.add('text-slate-500', 'dark:text-slate-400', 'border-transparent');
+                    tabBtnGen.classList.remove('text-indigo-600', 'dark:text-indigo-400', 'border-indigo-600', 'dark:border-indigo-400');
                 }
             }
 
@@ -230,49 +267,58 @@
             tabBtnCrack.addEventListener('click', () => switchTab('crack'));
 
 
-            // Elemen output generator
+            // --- Logika Generator ---
+            const inputTextArea = document.getElementById('inputText');
+            const charCount = document.getElementById('charCount');
+            const clearBtn = document.getElementById('clearBtn');
+            
             const outMD5 = document.getElementById('hash-md5');
             const outSHA1 = document.getElementById('hash-sha1');
             const outSHA256 = document.getElementById('hash-sha256');
             const outSHA512 = document.getElementById('hash-sha512');
-            const outSHA3 = document.getElementById('hash-sha3');
+            const outBcrypt = document.getElementById('hash-bcrypt');
+            const bcryptStatus = document.getElementById('bcrypt-status');
+            
+            let bcryptTimeout;
 
-            // Fungsi utama untuk menghasilkan hash
-            function generateHashes(text) {
+            function clearOutputs() {
+                outMD5.value = ''; outSHA1.value = ''; outSHA256.value = ''; 
+                outSHA512.value = ''; outBcrypt.value = '';
+                bcryptStatus.classList.add('hidden');
+            }
+
+            inputTextArea.addEventListener('input', (e) => {
+                const text = e.target.value;
+                charCount.textContent = `${text.length} karakter`;
+                
                 if (!text) {
                     clearOutputs();
                     return;
                 }
 
-                try {
-                    // Menggunakan library CryptoJS
-                    outMD5.value = CryptoJS.MD5(text).toString();
-                    outSHA1.value = CryptoJS.SHA1(text).toString();
-                    outSHA256.value = CryptoJS.SHA256(text).toString();
-                    outSHA512.value = CryptoJS.SHA512(text).toString();
-                    outSHA3.value = CryptoJS.SHA3(text).toString();
-                } catch (error) {
-                    console.error("Gagal menghasilkan hash:", error);
-                }
-            }
+                // Generasi instan untuk MD5 dan SHA
+                outMD5.value = CryptoJS.MD5(text).toString();
+                outSHA1.value = CryptoJS.SHA1(text).toString();
+                outSHA256.value = CryptoJS.SHA256(text).toString();
+                outSHA512.value = CryptoJS.SHA512(text).toString();
 
-            // Fungsi untuk membersihkan semua output
-            function clearOutputs() {
-                outMD5.value = '';
-                outSHA1.value = '';
-                outSHA256.value = '';
-                outSHA512.value = '';
-                outSHA3.value = '';
-            }
-
-            // Event listener untuk input
-            inputTextArea.addEventListener('input', (e) => {
-                const text = e.target.value;
-                charCount.textContent = `${text.length} karakter`;
-                generateHashes(text);
+                // Bcrypt sangat berat, kita tunda kalkulasinya (debounce) 
+                // agar tidak freeze saat pengguna sedang mengetik cepat
+                clearTimeout(bcryptTimeout);
+                outBcrypt.value = '';
+                bcryptStatus.classList.remove('hidden');
+                
+                bcryptTimeout = setTimeout(() => {
+                    // Generate Bcrypt async dengan Cost factor 10
+                    bcrypt.genSalt(10, function(err, salt) {
+                        bcrypt.hash(text, salt, function(err, hash) {
+                            outBcrypt.value = hash;
+                            bcryptStatus.classList.add('hidden');
+                        });
+                    });
+                }, 600); // Tunggu 600ms setelah selesai ngetik
             });
 
-            // Event listener untuk tombol bersihkan
             clearBtn.addEventListener('click', () => {
                 inputTextArea.value = '';
                 charCount.textContent = '0 karakter';
@@ -280,27 +326,34 @@
                 inputTextArea.focus();
             });
 
-            // --- Logika Cracker (Pencari Hash) ---
+
+            // --- Logika Cracker (Pencari Auto) ---
             const btnCrack = document.getElementById('btnCrack');
             const inputHash = document.getElementById('inputHash');
             const crackResultBox = document.getElementById('crackResultBox');
             const crackResultText = document.getElementById('crackResultText');
             const crackResultMeta = document.getElementById('crackResultMeta');
 
-            // Kamus kata sandi umum
             const kamusUmum = ["123456", "password", "123456789", "12345", "12345678", "111111", "123123", "1234567890", "senhas", "1234567", "qwerty", "admin", "admin123", "iloveyou", "root", "rahasia", "bismillah", "sayang", "cinta", "indonesia"];
 
             btnCrack.addEventListener('click', () => {
                 const targetHash = inputHash.value.trim().toLowerCase();
                 if(!targetHash) return;
 
+                // Deteksi jika pengguna memasukkan hash Bcrypt di tempat yang salah
+                if(targetHash.startsWith("$2a$") || targetHash.startsWith("$2y$") || targetHash.startsWith("$2b$")) {
+                    crackResultBox.classList.remove('hidden');
+                    tampilkanHasilCrack(false, "Ini adalah Hash Bcrypt!", "Anda tidak bisa menggunakan auto-cracker untuk Bcrypt. Silakan gunakan fitur 'Verifikasi Manual' di sebelah kanan.");
+                    document.getElementById('verifyHash').value = inputHash.value.trim(); // Pindahkan ke kotak kanan
+                    return;
+                }
+
                 crackResultBox.classList.remove('hidden');
-                crackResultText.className = "p-4 rounded-xl border text-center font-bold text-lg bg-slate-100 text-slate-500 animate-pulse border-slate-300";
-                crackResultText.textContent = "Sedang mencari jutaan kemungkinan...";
+                crackResultText.className = "p-4 rounded-xl border text-center font-bold text-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 animate-pulse border-slate-300 dark:border-slate-700";
+                crackResultText.textContent = "Sedang mencari...";
                 crackResultMeta.textContent = "";
                 btnCrack.disabled = true;
 
-                // Gunakan setTimeout agar UI sempat render animasi sebelum CPU memproses loop berat
                 setTimeout(() => {
                     let algo = "";
                     if (targetHash.length === 32) algo = "MD5";
@@ -308,14 +361,14 @@
                     else if (targetHash.length === 64) algo = "SHA-256";
                     else if (targetHash.length === 128) algo = "SHA-512";
                     else {
-                        tampilkanHasilCrack(false, "Format hash tidak dikenal.", "Panjang hash tidak cocok dengan MD5, SHA-1, SHA-256, atau SHA-512.");
+                        tampilkanHasilCrack(false, "Format hash tidak dikenal", "Panjang hash tidak cocok dengan MD5, SHA-1, SHA-256, atau SHA-512.");
                         return;
                     }
 
-                    // 1. Cek Kamus Lokal
+                    // 1. Cek Kamus
                     for (const kata of kamusUmum) {
                         if (cekHash(kata, targetHash, algo)) {
-                            tampilkanHasilCrack(true, kata, `Algoritma: ${algo} (Ditemukan di kamus populer)`);
+                            tampilkanHasilCrack(true, kata, `Algoritma: ${algo} (Kamus)`);
                             return;
                         }
                     }
@@ -324,12 +377,12 @@
                     for (let i = 0; i <= 100000; i++) {
                         const angkaStr = i.toString();
                         if (cekHash(angkaStr, targetHash, algo)) {
-                            tampilkanHasilCrack(true, angkaStr, `Algoritma: ${algo} (Ditemukan via brute-force angka)`);
+                            tampilkanHasilCrack(true, angkaStr, `Algoritma: ${algo} (Brute-force angka)`);
                             return;
                         }
                     }
 
-                    tampilkanHasilCrack(false, "Teks asli tidak ditemukan.", `Teks terlalu rumit. Alat ini hanya menebak kamus dasar dan angka 0-100.000 untuk ${algo}.`);
+                    tampilkanHasilCrack(false, "Teks tidak ditemukan", "Hash terlalu kompleks. Alat ini hanya menebak kamus dan angka dasar.");
                 }, 100);
             });
 
@@ -346,45 +399,81 @@
                 crackResultText.classList.remove('animate-pulse');
                 
                 if (sukses) {
-                    crackResultText.className = "p-4 rounded-xl border-2 text-center font-bold text-2xl bg-green-50 text-green-700 border-green-500";
+                    crackResultText.className = "p-4 rounded-xl border-2 text-center font-bold text-2xl bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-500 dark:border-green-600";
                     crackResultText.textContent = teks;
                 } else {
-                    crackResultText.className = "p-4 rounded-xl border text-center font-medium text-red-600 bg-red-50 border-red-200";
+                    crackResultText.className = "p-4 rounded-xl border text-center font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800";
                     crackResultText.textContent = teks;
                 }
                 crackResultMeta.textContent = meta;
             }
+
+            // --- Logika Manual Verifier (Bcrypt) ---
+            const btnVerify = document.getElementById('btnVerify');
+            const verifyHash = document.getElementById('verifyHash');
+            const verifyText = document.getElementById('verifyText');
+            const verifyResult = document.getElementById('verifyResult');
+
+            btnVerify.addEventListener('click', () => {
+                const targetHash = verifyHash.value.trim();
+                const guessText = verifyText.value;
+
+                if(!targetHash || !guessText) return;
+
+                verifyResult.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'border-green-500', 'bg-red-100', 'text-red-700', 'border-red-500');
+                verifyResult.classList.add('bg-slate-100', 'text-slate-600', 'border-slate-300', 'dark:bg-slate-800', 'dark:text-slate-300', 'dark:border-slate-600');
+                verifyResult.textContent = "Mengecek...";
+
+                setTimeout(() => {
+                    let isMatch = false;
+
+                    // Jika Bcrypt
+                    if(targetHash.startsWith("$2a$") || targetHash.startsWith("$2y$") || targetHash.startsWith("$2b$")) {
+                        try {
+                            isMatch = bcrypt.compareSync(guessText, targetHash);
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    } else {
+                        // Jika bukan bcrypt, kita coba hash standar
+                        const hashL = targetHash.toLowerCase();
+                        isMatch = (
+                            CryptoJS.MD5(guessText).toString() === hashL ||
+                            CryptoJS.SHA1(guessText).toString() === hashL ||
+                            CryptoJS.SHA256(guessText).toString() === hashL ||
+                            CryptoJS.SHA512(guessText).toString() === hashL
+                        );
+                    }
+
+                    // Tampilkan Hasil
+                    verifyResult.classList.remove('bg-slate-100', 'text-slate-600', 'border-slate-300', 'dark:bg-slate-800', 'dark:text-slate-300', 'dark:border-slate-600');
+                    if(isMatch) {
+                        verifyResult.classList.add('bg-green-100', 'text-green-700', 'border-green-500', 'dark:bg-green-900/50', 'dark:text-green-400');
+                        verifyResult.textContent = `✅ COCOK! Teks aslinya adalah "${guessText}"`;
+                    } else {
+                        verifyResult.classList.add('bg-red-100', 'text-red-700', 'border-red-500', 'dark:bg-red-900/50', 'dark:text-red-400');
+                        verifyResult.textContent = "❌ TIDAK COCOK. Coba teks lain.";
+                    }
+                }, 50); // Jeda singkat agar UI merender
+            });
         });
 
+        // --- Utils ---
         function copyToClipboard(elementId) {
             const copyText = document.getElementById(elementId);
-            
             if (!copyText.value) return;
 
-            // Memilih teks
             copyText.select();
-            copyText.setSelectionRange(0, 99999); /* Untuk mobile */
-
+            copyText.setSelectionRange(0, 99999); 
             try {
-                // Menyalin ke clipboard
                 document.execCommand("copy");
-                showToast();
+                const toast = document.getElementById('toast');
+                toast.style.opacity = '1';
+                setTimeout(() => { toast.style.opacity = '0'; }, 2000);
             } catch (err) {
-                console.error('Gagal menyalin teks', err);
+                console.error('Gagal menyalin', err);
             }
-            
-            // Hapus seleksi
             window.getSelection().removeAllRanges();
-        }
-
-        // Fungsi untuk menampilkan notifikasi toast
-        function showToast() {
-            const toast = document.getElementById('toast');
-            toast.style.opacity = '1';
-            
-            setTimeout(() => {
-                toast.style.opacity = '0';
-            }, 2000);
         }
     </script>
 </body>
