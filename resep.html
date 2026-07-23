@@ -51,7 +51,8 @@
         .ts-control { background-color: #374151 !important; border: 1px solid #4b5563 !important; color: white !important; border-radius: 0.5rem !important; padding: 0.75rem 1rem !important; font-size: 0.875rem !important; min-height: auto !important; box-shadow: none !important; outline: none !important; transition: all 0.2s !important; }
         .ts-control.focus { border-color: #3b82f6 !important; box-shadow: 0 0 0 1px #3b82f6 !important; }
         .ts-control > input { color: white !important; font-size: 0.875rem !important; }
-        .ts-dropdown { background-color: #374151 !important; border: 1px solid #4b5563 !important; color: white !important; border-radius: 0.5rem !important; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important; z-index: 9999 !important; margin-top: 4px !important; }
+        /* Perbaikan z-index untuk Dropdown Tom Select agar muncul paling depan menutupi apapun di bawahnya */
+        .ts-dropdown { background-color: #374151 !important; border: 1px solid #4b5563 !important; color: white !important; border-radius: 0.5rem !important; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important; z-index: 99999 !important; margin-top: 4px !important; }
         .ts-dropdown .option { padding: 0.75rem 1rem !important; font-size: 0.875rem !important; cursor: pointer; }
         .ts-dropdown .option:hover, .ts-dropdown .option.active { background-color: #4b5563 !important; color: white !important; }
 
@@ -125,7 +126,8 @@
         </div>
     </div>
 
-    <header id="topHeader" class="h-16 shrink-0 bg-gray-900 border-b border-white/5 flex items-center justify-between px-4 z-40 shadow-md transition-all duration-300">
+    <!-- Perbaikan posisi header dengan class relative dan z-[95] -->
+    <header id="topHeader" class="h-16 shrink-0 bg-gray-900 border-b border-white/5 flex items-center justify-between px-4 relative z-[95] shadow-md transition-all duration-300">
         <div class="flex items-center gap-3 group">
             <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg transition-transform">
                 <i class="ph ph-list text-white text-xl hidden md:block cursor-pointer hover:scale-110" id="sidebarToggleIcon" onclick="toggleSidebar()" title="Toggle Menu"></i>
@@ -289,13 +291,13 @@
                             <!-- Left: Menu Area -->
                             <div class="flex-1 flex flex-col h-full w-full lg:w-[65%] pr-0 lg:pr-6 overflow-hidden">
                                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 shrink-0">
-                                    <div class="flex gap-2 overflow-x-auto pb-1 w-full md:w-auto hide-scrollbar" id="pos-category-filters">
+                                    <div class="flex gap-1 overflow-x-auto pb-1 w-full md:w-auto hide-scrollbar" id="pos-category-filters">
                                         <button onclick="setPosCategory('Semua')" class="cat-btn active shrink-0" data-cat="Semua">Semua</button>
                                         <button onclick="setPosCategory('Makanan')" class="cat-btn shrink-0" data-cat="Makanan"><i class="ph ph-fork-knife"></i> Makanan</button>
                                         <button onclick="setPosCategory('Minuman')" class="cat-btn shrink-0" data-cat="Minuman"><i class="ph ph-coffee"></i> Minuman</button>
                                         <button onclick="setPosCategory('Snack')" class="cat-btn shrink-0" data-cat="Snack"><i class="ph ph-cookie"></i> Snack</button>
                                     </div>
-                                    <div class="relative w-full md:w-60 shrink-0">
+                                    <div class="relative w-full md:w-40 shrink-0">
                                         <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                                         <input type="text" id="searchKasirMenu" oninput="renderKasirGrid()" placeholder="Cari menu..." class="glass-input pl-9 pr-4 py-2.5 rounded-full text-sm w-full bg-gray-900/80 focus:bg-gray-800 outline-none border-gray-700">
                                     </div>
@@ -760,6 +762,15 @@
             strukIcon: ""
         };
 
+        // --- HASHING FUNCTION (SHA-256) ---
+        async function hashPassword(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
+
         function loadSettings() {
             const saved = localStorage.getItem('appSettings');
             if(saved) {
@@ -1020,15 +1031,25 @@
         /* --- STREAMING_CHUNK:Auth & Profile... --- */
         async function doLogin() {
             const email = document.getElementById('loginEmail').value.trim(); 
-            const password = document.getElementById('loginPassword').value.trim(); 
+            const rawPassword = document.getElementById('loginPassword').value.trim(); 
             const btn = document.getElementById('btnLogin');
             
-            if(!email || !password) return showToast('Harap isi Email dan Password!', 'error');
+            if(!email || !rawPassword) return showToast('Harap isi Email dan Password!', 'error');
             
             btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> Memproses...`; btn.disabled = true;
             
             try {
-                const { data: user, error } = await supabaseClient.from('users').select('*').eq('email', email).eq('password', password).single();
+                // 1. Hash the password entered by the user
+                const hashedPassword = await hashPassword(rawPassword);
+
+                // 2. Query Supabase to find a matching user with the hashed password
+                const { data: user, error } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('email', email)
+                    .eq('password', hashedPassword)
+                    .single();
+                    
                 if (error || !user) throw new Error("Email atau Password salah!");
                 
                 const userId = user.id || '';
@@ -1366,15 +1387,8 @@
 				
 				const date = new Date(trxItems[0].created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
 				
-				// Ambil nama kasir langsung dari database users Supabase
-				let kasirName = '-';
-				const currentUserId = localStorage.getItem('userId');
-				if (currentUserId) {
-					try {
-						const { data: userDb } = await supabaseClient.from('users').select('nama').eq('id', currentUserId).maybeSingle();
-						if (userDb) kasirName = userDb.nama;
-					} catch(e) { console.error(e); }
-				}
+				// Mengambil nama kasir dari memori/localStorage (data supabase) tanpa perlu fetch ulang
+				let kasirName = localStorage.getItem('userName') || '-';
 				
 				let totalBayar = 0;
 				
@@ -1889,7 +1903,11 @@
                 const newPass = document.getElementById('f_profile_pass').value;
                 
                 payload = { nama: newName, avatar: tempMenuImage, updated_at: new Date().toISOString() };
-                if (newPass) payload.password = newPass;
+                
+                // HASH PASSWORD SAAT UPDATE PROFIL DI SUPABASE
+                if (newPass) {
+                    payload.password = await hashPassword(newPass);
+                }
 
                 try {
                     const { error } = await supabaseClient.from('users').update(payload).eq('id', userId);
