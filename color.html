@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Color Picker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Custom styles for specific elements not easily handled by Tailwind */
+        body {
+            background-color: #f8fafc; /* light slate background */
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* Color Board (Saturation/Lightness) */
+        #color-board {
+            width: 100%;
+            height: 250px;
+            border-radius: 12px;
+            cursor: crosshair;
+            position: relative;
+            background: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, transparent);
+            background-color: red; /* Initial Hue */
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+        }
+
+        #color-cursor {
+            width: 16px;
+            height: 16px;
+            border: 2px solid white;
+            border-radius: 50%;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 2px rgba(0,0,0,0.5);
+            pointer-events: none; /* Let clicks pass through to the board */
+            top: 20%;
+            left: 80%;
+        }
+
+        /* Hue Slider */
+        #hue-slider-container {
+            width: 100%;
+            height: 12px;
+            border-radius: 6px;
+            background: linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+            position: relative;
+            margin-top: 20px;
+            cursor: pointer;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+        }
+
+        #hue-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: white;
+            border: 2px solid #ccc;
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            pointer-events: none;
+            left: 0%; /* Initial pos */
+        }
+
+        /* Header Color Swatch */
+        .color-swatch-small {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Shades bar in header */
+        .shades-bar {
+            display: flex;
+            height: 24px;
+            border-radius: 12px;
+            overflow: hidden;
+            width: 300px;
+        }
+        .shade-segment {
+            flex: 1;
+        }
+
+        /* Hide number input spinners */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Top Header Bar -->
+    <header class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between text-sm shadow-sm z-10 relative">
+        
+        <!-- Left Side: Active Color & values -->
+        <div class="flex items-center space-x-6">
+            <div class="flex items-center space-x-2 border border-slate-200 rounded-full px-2 py-1">
+                <div id="header-swatch" class="color-swatch-small bg-[#DC1637]"></div>
+                <button class="text-slate-400 hover:text-slate-600 focus:outline-none" title="Eyedropper (Not implemented in basic web APIs usually)">
+                    <i class="fa-solid fa-eye-dropper text-xs"></i>
+                </button>
+            </div>
+
+            <div class="flex space-x-4 text-xs font-medium">
+                <div class="flex items-center"><span class="text-slate-400 mr-2 w-8">Hex</span> <span id="header-hex" class="font-semibold text-sm">#DC1637</span></div>
+                <div class="flex items-center"><span class="text-slate-400 mr-2 w-8">RGB</span> <span id="header-rgb" class="font-semibold text-sm">220, 22, 55</span></div>
+                <div class="flex items-center"><span class="text-slate-400 mr-2 w-8">HSL</span> <span id="header-hsl" class="font-semibold text-sm">350, 82%, 47%</span></div>
+                <div class="flex items-center"><span class="text-slate-400 mr-2 w-10">OKLCH</span> <span id="header-oklch" class="font-semibold text-sm">0.57, 0.22, 22</span></div>
+            </div>
+        </div>
+
+        <!-- Right Side: Shades & Actions -->
+        <div class="flex items-center space-x-4">
+            <div id="shades-container" class="shades-bar hidden md:flex">
+                <!-- Dynamically populated shades -->
+            </div>
+            
+            <div class="flex items-center space-x-3 text-slate-400 border-l pl-4 border-slate-200">
+                <button class="hover:text-slate-700 transition-colors"><i class="fa-solid fa-code-compare"></i></button>
+                <button class="hover:text-slate-700 transition-colors"><i class="fa-solid fa-arrow-up-from-bracket"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-6xl mx-auto mt-8 p-4 flex flex-col md:flex-row gap-6">
+        
+        <!-- Left Column: Controls (Picker) -->
+        <div class="w-full md:w-[400px] bg-white rounded-2xl shadow-sm border border-slate-100 p-5 flex flex-col gap-6">
+            
+            <!-- Saturation/Lightness Board -->
+            <div>
+                <div id="color-board">
+                    <div id="color-cursor"></div>
+                </div>
+                
+                <!-- Hue Slider -->
+                <div id="hue-slider-container">
+                    <div id="hue-thumb"></div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="border border-slate-200 rounded-xl p-2 flex items-center justify-between bg-slate-50">
+                <div class="flex items-center gap-3 pl-2 w-full">
+                    <div id="input-swatch" class="w-5 h-5 rounded-full bg-[#DC1637] shadow-inner"></div>
+                    <span class="text-slate-400 text-sm font-mono">#</span>
+                    <input type="text" id="hex-input" value="DC1637" class="bg-transparent border-none outline-none font-mono text-sm uppercase w-24 text-slate-700 font-semibold uppercase">
+                </div>
+                
+                <div class="flex items-center gap-2 pr-1">
+                    <button id="copy-btn" class="text-slate-400 hover:text-slate-700 p-1 rounded transition-colors" title="Copy Hex">
+                        <i class="fa-regular fa-copy text-sm"></i>
+                    </button>
+                    
+                    <div class="relative">
+                        <select class="appearance-none bg-white border border-slate-200 text-slate-600 text-xs py-1.5 pl-3 pr-8 rounded-lg focus:outline-none focus:ring-1 focus:ring-slate-300 cursor-pointer">
+                            <option>Hex</option>
+                            <option>RGB</option>
+                            <option>HSL</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+                            <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-3 mt-2">
+                <button id="random-btn" class="flex-1 py-2.5 px-4 bg-white border border-slate-200 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors text-slate-700">
+                    Random palette
+                </button>
+                <button class="flex-1 py-2.5 px-4 bg-[#1a1a1a] text-white rounded-xl text-sm font-medium hover:bg-black transition-colors flex justify-center items-center gap-2">
+                    Export colors
+                    <i class="fa-solid fa-arrow-up-right-from-square text-xs opacity-70"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Column: Harmony & Preview -->
+        <div class="flex-1 flex flex-col gap-4">
+            
+            <!-- Harmony Dropdown -->
+            <div class="relative w-64">
+                <select class="w-full appearance-none bg-white border border-slate-200 text-slate-700 text-sm font-medium py-2.5 pl-4 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-200 cursor-pointer">
+                    <option>Choose harmony...</option>
+                    <option>Complementary</option>
+                    <option>Analogous</option>
+                    <option>Triadic</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                </div>
+            </div>
+
+            <!-- Large Color Preview -->
+            <div id="large-preview" class="flex-1 bg-[#DC1637] rounded-2xl shadow-sm min-h-[400px] flex items-center justify-center transition-colors duration-200">
+                <span id="preview-text" class="text-white text-2xl font-bold tracking-wider font-mono">DC1637</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50">
+        Copied to clipboard!
+    </div>
+
+    <script>
+        // --- State Management ---
+        let currentColor = {
+            h: 350, // Hue (0-360)
+            s: 82,  // Saturation (0-100)
+            v: 86   // Value/Brightness (0-100) - Note: Picker board uses HSV internally for easier math
+        };
+
+        // --- DOM Elements ---
+        const colorBoard = document.getElementById('color-board');
+        const colorCursor = document.getElementById('color-cursor');
+        const hueSliderContainer = document.getElementById('hue-slider-container');
+        const hueThumb = document.getElementById('hue-thumb');
+        
+        const headerSwatch = document.getElementById('header-swatch');
+        const headerHex = document.getElementById('header-hex');
+        const headerRgb = document.getElementById('header-rgb');
+        const headerHsl = document.getElementById('header-hsl');
+        const headerOklch = document.getElementById('header-oklch'); // Mocked value
+        
+        const inputSwatch = document.getElementById('input-swatch');
+        const hexInput = document.getElementById('hex-input');
+        
+        const largePreview = document.getElementById('large-preview');
+        const previewText = document.getElementById('preview-text');
+        
+        const shadesContainer = document.getElementById('shades-container');
+        const copyBtn = document.getElementById('copy-btn');
+        const randomBtn = document.getElementById('random-btn');
+        const toast = document.getElementById('toast');
+
+        // --- Color Conversion Utilities ---
+        
+        // HSV to RGB (Internal format for picker board to RGB)
+        function hsvToRgb(h, s, v) {
+            let r, g, b;
+            let i = Math.floor(h * 6);
+            let f = h * 6 - i;
+            let p = v * (1 - s);
+            let q = v * (1 - f * s);
+            let t = v * (1 - (1 - f) * s);
+
+            switch (i % 6) {
+                case 0: r = v, g = t, b = p; break;
+                case 1: r = q, g = v, b = p; break;
+                case 2: r = p, g = v, b = t; break;
+                case 3: r = p, g = q, b = v; break;
+                case 4: r = t, g = p, b = v; break;
+                case 5: r = v, g = p, b = q; break;
+            }
+
+            return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+        }
+
+        // RGB to Hex
+        function rgbToHex(r, g, b) {
+            return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1).toUpperCase();
+        }
+
+        // Hex to RGB
+        function hexToRgb(hex) {
+            let shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+            hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+                return r + r + g + g + b + b;
+            });
+            let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? [
+                parseInt(result[1], 16),
+                parseInt(result[2], 16),
+                parseInt(result[3], 16)
+            ] : null;
+        }
+
+        // RGB to HSV (Needed if user types a Hex)
+        function rgbToHsv(r, g, b) {
+            r /= 255, g /= 255, b /= 255;
+            let max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, v = max;
+            let d = max - min;
+            s = max == 0 ? 0 : d / max;
+
+            if (max == min) {
+                h = 0; // achromatic
+            } else {
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            return [h, s, v];
+        }
+
+        // HSV to HSL (For display purposes)
+        function hsvToHsl(h, s, v) {
+            let l = v * (1 - s / 2);
+            let sl = (l === 0 || l === 1) ? 0 : (v - l) / Math.min(l, 1 - l);
+            return [h * 360, sl * 100, l * 100];
+        }
+
+        // --- Core UI Update Function ---
+        function updateUIFromState() {
+            // Calculate RGB from current HSV state
+            const rgb = hsvToRgb(currentColor.h / 360, currentColor.s / 100, currentColor.v / 100);
+            const hex = rgbToHex(rgb[0], rgb[1], rgb[2]);
+            const hsl = hsvToHsl(currentColor.h / 360, currentColor.s / 100, currentColor.v / 100);
+
+            // 1. Update Board Background (Pure Hue)
+            const hueRgb = hsvToRgb(currentColor.h / 360, 1, 1);
+            colorBoard.style.backgroundColor = `rgb(${hueRgb[0]}, ${hueRgb[1]}, ${hueRgb[2]})`;
+
+            // 2. Update Cursor Position
+            const cursorX = currentColor.s; // 0-100%
+            const cursorY = 100 - currentColor.v; // Invert V for top-to-bottom
+            colorCursor.style.left = `${cursorX}%`;
+            colorCursor.style.top = `${cursorY}%`;
+            // Change cursor color based on background brightness for contrast
+            colorCursor.style.borderColor = (currentColor.v > 50 && currentColor.s < 50) ? '#000' : '#fff';
+
+            // 3. Update Hue Thumb
+            const huePos = (currentColor.h / 360) * 100;
+            hueThumb.style.left = `${huePos}%`;
+
+            // 4. Update Header Values
+            headerSwatch.style.backgroundColor = hex;
+            headerHex.textContent = hex;
+            headerRgb.textContent = `${rgb[0]}, ${rgb[1]}, ${rgb[2]}`;
+            headerHsl.textContent = `${Math.round(hsl[0])}, ${Math.round(hsl[1])}%, ${Math.round(hsl[2])}%`;
+            
+            // Mock OKLCH based on HSL lightness roughly (Real OKLCH requires complex math)
+            const mockL = (hsl[2] / 100).toFixed(2);
+            const mockC = (hsl[1] / 100 * 0.4).toFixed(2);
+            headerOklch.textContent = `${mockL}, ${mockC}, ${Math.round(hsl[0])}`;
+
+            // 5. Update Input Area
+            inputSwatch.style.backgroundColor = hex;
+            if(document.activeElement !== hexInput) {
+                hexInput.value = hex.replace('#', '');
+            }
+
+            // 6. Update Large Preview
+            largePreview.style.backgroundColor = hex;
+            previewText.textContent = hex.replace('#', '');
+            // Adjust text color based on brightness
+            previewText.style.color = (hsl[2] > 60) ? '#1e293b' : '#ffffff';
+
+            // 7. Update Shades Bar
+            generateShades(currentColor.h, currentColor.s);
+        }
+
+        // Generate Monochromatic Shades for Header
+        function generateShades(h, s) {
+            shadesContainer.innerHTML = '';
+            const steps = 15;
+            
+            for (let i = 0; i < steps; i++) {
+                // Vary lightness from high to low
+                let l = 95 - (i * (90 / steps)); 
+                let segment = document.createElement('div');
+                segment.className = 'shade-segment';
+                segment.style.backgroundColor = `hsl(${h}, ${s}%, ${l}%)`;
+                
+                // Add a small dot to roughly indicate current color's position
+                if (Math.abs((100 - currentColor.v) - (i * (100 / steps))) < (100/steps/2)) {
+                   segment.innerHTML = `<div style="width:2px; height:2px; background:white; border-radius:50%; margin: 11px auto; mix-blend-mode: difference;"></div>`;
+                }
+
+                shadesContainer.appendChild(segment);
+            }
+        }
+
+        // --- Event Listeners: Interactive Board ---
+        let isDraggingBoard = false;
+
+        function handleBoardMove(e) {
+            if (!isDraggingBoard) return;
+            
+            const rect = colorBoard.getBoundingClientRect();
+            // Calculate relative position 0-1
+            let x = (e.clientX - rect.left) / rect.width;
+            let y = (e.clientY - rect.top) / rect.height;
+
+            // Clamp values
+            x = Math.max(0, Math.min(1, x));
+            y = Math.max(0, Math.min(1, y));
+
+            currentColor.s = x * 100;
+            currentColor.v = (1 - y) * 100; // Invert Y
+            updateUIFromState();
+        }
+
+        colorBoard.addEventListener('mousedown', (e) => {
+            isDraggingBoard = true;
+            handleBoardMove(e);
+        });
+        window.addEventListener('mousemove', handleBoardMove);
+        window.addEventListener('mouseup', () => isDraggingBoard = false);
+
+        // --- Event Listeners: Hue Slider ---
+        let isDraggingHue = false;
+
+        function handleHueMove(e) {
+            if (!isDraggingHue) return;
+
+            const rect = hueSliderContainer.getBoundingClientRect();
+            let x = (e.clientX - rect.left) / rect.width;
+            x = Math.max(0, Math.min(1, x));
+
+            currentColor.h = x * 360;
+            updateUIFromState();
+        }
+
+        hueSliderContainer.addEventListener('mousedown', (e) => {
+            isDraggingHue = true;
+            handleHueMove(e);
+        });
+        window.addEventListener('mousemove', handleHueMove);
+        window.addEventListener('mouseup', () => isDraggingHue = false);
+
+        // --- Event Listeners: Inputs & Buttons ---
+        
+        // Handle Hex Input
+        hexInput.addEventListener('input', (e) => {
+            let val = e.target.value.trim();
+            if (val.length === 6 || val.length === 3) {
+                const rgb = hexToRgb('#' + val);
+                if (rgb) {
+                    const hsv = rgbToHsv(rgb[0], rgb[1], rgb[2]);
+                    currentColor.h = hsv[0] * 360;
+                    currentColor.s = hsv[1] * 100;
+                    currentColor.v = hsv[2] * 100;
+                    updateUIFromState();
+                }
+            }
+        });
+
+        // Handle Copy
+        copyBtn.addEventListener('click', () => {
+            const hex = rgbToHex(...hsvToRgb(currentColor.h/360, currentColor.s/100, currentColor.v/100));
+            
+            // Modern Clipboard API fallback
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(hex);
+            } else {
+                // Fallback for older browsers or non-secure contexts (like some iframes)
+                let textArea = document.createElement("textarea");
+                textArea.value = hex;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    console.error('Failed to copy', err);
+                }
+                textArea.remove();
+            }
+
+            showToast();
+        });
+
+        // Handle Random Palette
+        randomBtn.addEventListener('click', () => {
+            currentColor.h = Math.random() * 360;
+            currentColor.s = 40 + (Math.random() * 60); // Keep it somewhat saturated
+            currentColor.v = 40 + (Math.random() * 60); // Keep it somewhat bright
+            updateUIFromState();
+        });
+
+        function showToast() {
+            toast.style.opacity = '1';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 2000);
+        }
+
+        // Initialize App
+        updateUIFromState();
+
+    </script>
+</body>
+</html>
