@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="img/logo.png" rel="icon">
-    <title>Generator Hash & Converter</title>
+    <title>Generator & Cracker Hash with SQLite DB</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            darkMode: 'class', // Mengaktifkan dark mode berbasis class
+            darkMode: 'class',
             theme: {
                 extend: {}
             }
@@ -23,10 +23,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <!-- BcryptJS untuk Bcrypt -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
+    <!-- SQL.js untuk SQLite Engine di Browser -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
     
     <style>
         body { font-family: 'Inter', sans-serif; }
-        /* Custom scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
@@ -35,31 +36,37 @@
         .dark ::-webkit-scrollbar-thumb:hover { background: #334155; }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen p-4 md:p-8 flex justify-center items-center transition-colors duration-300">
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen p-3 md:p-8 flex justify-center items-center transition-colors duration-300">
 
-    <div class="max-w-4xl w-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden transition-colors duration-300">
+    <div class="max-w-5xl w-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden transition-colors duration-300">
         
         <!-- Header -->
         <div class="bg-indigo-600 dark:bg-indigo-700 p-6 text-white text-center relative transition-colors duration-300">
-            <h1 class="text-3xl font-bold mb-2">Generator & Konverter Hash</h1>
-            <p class="text-indigo-200 dark:text-indigo-100">Hasilkan & Verifikasi hash kriptografi secara instan</p>
+            <div class="flex items-center justify-center gap-2 mb-1">
+                <span id="dbEngineStatus" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-500/60 text-white animate-pulse">
+                    ⚡ Memuat SQLite Engine...
+                </span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-bold mb-1">Generator & Konverter Hash</h1>
+            <p class="text-xs md:text-sm text-indigo-200 dark:text-indigo-100">Simpan & Kelola Kamus Hash dalam File Database SQLite (.db)</p>
             
             <!-- Theme Toggle Button -->
             <button id="themeToggle" class="absolute top-4 right-4 p-2 bg-indigo-500/50 hover:bg-indigo-500 rounded-full transition-colors" title="Ganti Tema">
-                <!-- Sun Icon -->
-                <svg id="icon-sun" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                <!-- Moon Icon -->
-                <svg id="icon-moon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                <svg id="icon-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <svg id="icon-moon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
             </button>
         </div>
 
         <div class="flex border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 transition-colors duration-300">
-            <button id="tab-btn-gen" class="flex-1 py-4 text-sm font-semibold text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">Generator (Teks ke Hash)</button>
-            <button id="tab-btn-crack" class="flex-1 py-4 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border-b-2 border-transparent">Pencari & Verifikasi</button>
+            <button id="tab-btn-gen" class="flex-1 py-3 text-xs md:text-sm font-semibold text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">Generator (Teks ke Hash)</button>
+            <button id="tab-btn-crack" class="flex-1 py-3 text-xs md:text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border-b-2 border-transparent">Pencari & Verifikasi</button>
+            <button id="tab-btn-db" class="flex-1 py-3 text-xs md:text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border-b-2 border-transparent flex items-center justify-center gap-1">
+                <span>📁 File DB (.db)</span>
+                <span id="badgeDbCount" class="bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full text-[10px] font-bold">0</span>
+            </button>
         </div>
 
         <div id="content-gen" class="p-6 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
             <!-- Kolom Kiri: Input -->
             <div class="flex flex-col gap-6">
                 <div>
@@ -67,7 +74,7 @@
                     <textarea 
                         id="inputText" 
                         rows="6" 
-                        class="w-full p-4 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:text-white transition-colors resize-none"
+                        class="w-full p-4 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:text-white transition-colors resize-none font-mono text-sm"
                         placeholder="Ketik atau tempel teks Anda di sini..."
                     ></textarea>
                     
@@ -79,32 +86,30 @@
                     </div>
                 </div>
 
-                <div class="bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                    <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Algoritma yang Didukung:</h3>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="px-3 py-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 shadow-sm">MD5</span>
-                        <span class="px-3 py-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 shadow-sm">SHA-1</span>
-                        <span class="px-3 py-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 shadow-sm">SHA-256</span>
-                        <span class="px-3 py-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 shadow-sm">SHA-512</span>
-                        <span class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900 border border-indigo-300 dark:border-indigo-700 rounded-full text-xs font-bold text-indigo-700 dark:text-indigo-300 shadow-sm">Bcrypt</span>
+                <div class="bg-indigo-50/50 dark:bg-indigo-950/30 p-4 rounded-xl border border-indigo-100 dark:border-indigo-900/50">
+                    <div class="flex items-center gap-2 mb-2">
+                        <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+                        <h3 class="text-xs font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wide">Penyimpanan Otomatis Ke File DB SQLite</h3>
                     </div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-3 italic">Catatan: Setiap teks menghasilkan hash Bcrypt yang berbeda-beda karena mengandung "Salt" acak otomatis.</p>
+                    <p class="text-xs text-indigo-700 dark:text-indigo-300/80 leading-relaxed">
+                        Teks yang Anda ketik secara otomatis di-hash dan disimpan dalam tabel <code class="bg-indigo-100 dark:bg-indigo-900 px-1 py-0.5 rounded font-mono">wordlist</code> di SQLite DB internal. Anda dapat mengunduh filenya kapan saja berbentuk <code class="font-bold">.db</code>.
+                    </p>
                 </div>
             </div>
 
+            <!-- Kolom Kanan: Hash Outputs -->
             <div class="flex flex-col gap-4">
                 <h2 class="text-lg font-semibold border-b border-slate-200 dark:border-slate-700 pb-2 text-slate-800 dark:text-slate-200">Hasil Hash</h2>
                 
-                <!-- Output Template Function -->
                 <script>
                     function renderOutputField(id, label) {
                         document.write(`
                             <div class="relative">
                                 <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">${label}</label>
                                 <div class="flex">
-                                    <input type="text" id="${id}" readonly class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-l-lg py-2 px-3 text-sm font-mono text-slate-600 dark:text-slate-300 focus:outline-none">
-                                    <button onclick="copyToClipboard('${id}')" class="bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 text-indigo-700 dark:text-indigo-300 px-4 rounded-r-lg border-y border-r border-slate-200 dark:border-slate-700 transition-colors" title="Salin">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <input type="text" id="${id}" readonly class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-l-lg py-2 px-3 text-xs md:text-sm font-mono text-slate-600 dark:text-slate-300 focus:outline-none">
+                                    <button onclick="copyToClipboard('${id}')" class="bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 text-indigo-700 dark:text-indigo-300 px-3.5 rounded-r-lg border-y border-r border-slate-200 dark:border-slate-700 transition-colors" title="Salin">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                             <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
                                             <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
                                         </svg>
@@ -119,16 +124,16 @@
                     renderOutputField('hash-sha512', 'SHA-512');
                 </script>
 
-                <!-- Bcrypt Output (Special) -->
-                <div class="relative mt-2">
+                <!-- Bcrypt Output -->
+                <div class="relative mt-1">
                     <label class="block text-xs font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider mb-1 flex items-center justify-between">
                         <span>Bcrypt (Cost: 10)</span>
                         <span id="bcrypt-status" class="text-xs font-normal text-slate-400 hidden animate-pulse">Menghitung...</span>
                     </label>
                     <div class="flex">
-                        <input type="text" id="hash-bcrypt" readonly class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-l-lg py-2 px-3 text-sm font-mono text-slate-600 dark:text-slate-300 focus:outline-none">
-                        <button onclick="copyToClipboard('hash-bcrypt')" class="bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 text-indigo-700 dark:text-indigo-300 px-4 rounded-r-lg border-y border-r border-slate-200 dark:border-slate-700 transition-colors" title="Salin">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <input type="text" id="hash-bcrypt" readonly class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-l-lg py-2 px-3 text-xs md:text-sm font-mono text-slate-600 dark:text-slate-300 focus:outline-none">
+                        <button onclick="copyToClipboard('hash-bcrypt')" class="bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 text-indigo-700 dark:text-indigo-300 px-3.5 rounded-r-lg border-y border-r border-slate-200 dark:border-slate-700 transition-colors" title="Salin">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
                                 <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
                             </svg>
@@ -139,19 +144,18 @@
         </div>
 
         <div id="content-crack" class="p-6 md:p-8 hidden flex flex-col md:flex-row gap-8">
-            
-            <!-- Kolom Kiri: Auto Cracker (Untuk MD5, SHA dll) -->
+            <!-- Kolom Kiri: Auto Cracker (Query dari SQLite DB) -->
             <div class="flex-1 flex flex-col gap-6">
                 <div class="border-b border-slate-200 dark:border-slate-700 pb-2">
-                    <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100">Pencari Teks (Auto)</h2>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">Brute-force angka & Kamus untuk MD5/SHA.</p>
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100">Pencari Teks Hash</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Mencari secara instan dari File Database SQLite, Kamus dasar, dan Brute-force.</p>
                 </div>
 
                 <div>
                     <label for="inputHash" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Masukkan Hash (MD5, SHA):</label>
                     <input 
                         type="text" id="inputHash" 
-                        class="w-full p-4 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:text-white transition-colors font-mono text-sm"
+                        class="w-full p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:text-white transition-colors font-mono text-sm"
                         placeholder="Contoh: e10adc3949ba59abbe56e057f20f883e"
                     >
                 </div>
@@ -163,56 +167,307 @@
 
                 <!-- Hasil Crack -->
                 <div id="crackResultBox" class="hidden flex flex-col gap-2 mt-2">
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Hasil Pencarian:</label>
-                    <div id="crackResultText" class="p-4 rounded-xl border text-center font-bold text-lg break-all"></div>
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Hasil Pencarian:</label>
+                    <div id="crackResultText" class="p-4 rounded-xl border text-center font-bold text-xl break-all"></div>
                     <p id="crackResultMeta" class="text-xs text-center text-slate-500 dark:text-slate-400"></p>
                 </div>
             </div>
 
-            <!-- Kolom Kanan: Manual Verifier (Untuk Bcrypt & lainnya) -->
-            <div class="flex-1 flex flex-col gap-6 bg-slate-50 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
+            <!-- Kolom Kanan: Manual Verifier (Bcrypt) -->
+            <div class="flex-1 flex flex-col gap-6 bg-slate-50 dark:bg-slate-900/60 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
                 <div class="border-b border-slate-200 dark:border-slate-700 pb-2">
-                    <h2 class="text-xl font-bold text-indigo-700 dark:text-indigo-400">Verifikasi Manual (Bcrypt)</h2>
-                    <p class="text-sm text-slate-600 dark:text-slate-400">Hash seperti Bcrypt tidak bisa di-crack otomatis. Cocokkan manual di sini.</p>
+                    <h2 class="text-xl font-bold text-indigo-700 dark:text-indigo-400">Verifikasi Bcrypt</h2>
+                    <p class="text-xs text-slate-600 dark:text-slate-400">Cocokkan teks tebakan secara manual dengan Hash Bcrypt.</p>
                 </div>
 
                 <div class="flex flex-col gap-4">
                     <div>
-                        <label for="verifyHash" class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Hash Target (Bcrypt / lainnya):</label>
-                        <input type="text" id="verifyHash" class="w-full p-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-mono dark:text-white" placeholder="$2y$12$...">
+                        <label for="verifyHash" class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Hash Target (Bcrypt):</label>
+                        <input type="text" id="verifyHash" class="w-full p-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-mono dark:text-white" placeholder="$2a$10$...">
                     </div>
                     <div>
                         <label for="verifyText" class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Tebak Teks Asli:</label>
                         <input type="text" id="verifyText" class="w-full p-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm dark:text-white" placeholder="Masukkan teks dugaan Anda...">
                     </div>
-                    <button id="btnVerify" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg shadow transition-colors">
+                    <button id="btnVerify" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg shadow transition-colors">
                         Cocokkan
                     </button>
 
-                    <div id="verifyResult" class="hidden text-center p-3 rounded-lg font-bold text-sm mt-2 border"></div>
+                    <div id="verifyResult" class="hidden text-center p-3 rounded-lg font-bold text-xs md:text-sm mt-2 border"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="content-db" class="p-6 md:p-8 hidden flex flex-col gap-6">
+            
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-slate-700 pb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                        🗄️ Manajemen File Database SQLite (.db)
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Kelola, impor, dan ekspor database kamus hash Anda dalam format file binary SQLite.
+                    </p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button id="btnExportDb" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow transition-colors flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Ekspor File .db
+                    </button>
+                    <label class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow cursor-pointer transition-colors flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        Impor File .db
+                        <input type="file" id="fileDbInput" accept=".db,.sqlite,.sqlite3" class="hidden">
+                    </label>
+                    <label class="px-4 py-2 bg-slate-700 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 text-white text-xs font-bold rounded-xl shadow cursor-pointer transition-colors flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Impor Wordlist (.txt)
+                        <input type="file" id="fileTxtInput" accept=".txt" class="hidden">
+                    </label>
+                    <button id="btnClearDb" class="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-bold rounded-xl hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors">
+                        Reset DB
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Ringkasan DB -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                    <span class="text-xs text-slate-500 dark:text-slate-400">Total Entry Hash</span>
+                    <h3 id="statTotalRows" class="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-1">0</h3>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                    <span class="text-xs text-slate-500 dark:text-slate-400">Ukuran Estimasi DB</span>
+                    <h3 id="statDbSize" class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">0 KB</h3>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                    <span class="text-xs text-slate-500 dark:text-slate-400">Tabel SQLite Active</span>
+                    <h3 class="text-lg font-bold text-slate-700 dark:text-slate-300 mt-1 font-mono">wordlist</h3>
+                </div>
+            </div>
+
+            <!-- Table Preview Data SQLite -->
+            <div class="flex flex-col gap-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300">Pratinjau Isi Database (50 Terbaru)</h3>
+                    <input type="text" id="searchDbInput" placeholder="Filter teks / hash di tabel..." class="px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 w-64 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                </div>
+
+                <div class="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl">
+                    <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300">
+                        <thead class="bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-400 uppercase font-semibold border-b border-slate-200 dark:border-slate-700">
+                            <tr>
+                                <th class="p-3">Algoritma</th>
+                                <th class="p-3">Teks Asli</th>
+                                <th class="p-3">Hash Value</th>
+                                <th class="p-3">Waktu</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dbTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
+                            <tr>
+                                <td colspan="4" class="p-4 text-center text-slate-400 italic">Memuat database...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
         
         <!-- Toast Notification -->
-        <div id="toast" class="fixed bottom-4 right-4 bg-slate-800 dark:bg-white text-white dark:text-slate-800 px-4 py-2 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50 font-medium text-sm">
-            Tersalin ke clipboard!
+        <div id="toast" class="fixed bottom-4 right-4 bg-slate-800 dark:bg-white text-white dark:text-slate-800 px-4 py-2.5 rounded-xl shadow-2xl opacity-0 transition-all duration-300 pointer-events-none z-50 font-medium text-xs md:text-sm flex items-center gap-2">
+            <span id="toastMsg">Tersalin ke clipboard!</span>
         </div>
     </div>
 
     <script>
-        // Memastikan library BcryptJS terpanggil dengan benar dari CDN
         const bcrypt = window.dcodeIO ? window.dcodeIO.bcrypt : window.bcrypt;
 
-        document.addEventListener('DOMContentLoaded', () => {
+        // --- SQLite WASM & IndexedDB Global Engine ---
+        let db = null;
+        let SQL = null;
+        const IDB_NAME = 'HashSQLiteDatabase';
+        const IDB_STORE = 'files';
+
+        // IndexedDB Helper untuk Menyimpan binary SQLite ArrayBuffer secara permanen
+        function saveDbToIndexedDB(uint8Array) {
+            const request = indexedDB.open(IDB_NAME, 1);
+            request.onupgradeneeded = (e) => {
+                const idb = e.target.result;
+                if (!idb.objectStoreNames.contains(IDB_STORE)) idb.createObjectStore(IDB_STORE);
+            };
+            request.onsuccess = (e) => {
+                const idb = e.target.result;
+                const tx = idb.transaction(IDB_STORE, 'readwrite');
+                tx.objectStore(IDB_STORE).put(uint8Array, 'current_db');
+            };
+        }
+
+        function loadDbFromIndexedDB(callback) {
+            const request = indexedDB.open(IDB_NAME, 1);
+            request.onupgradeneeded = (e) => {
+                const idb = e.target.result;
+                if (!idb.objectStoreNames.contains(IDB_STORE)) idb.createObjectStore(IDB_STORE);
+            };
+            request.onsuccess = (e) => {
+                const idb = e.target.result;
+                const tx = idb.transaction(IDB_STORE, 'readonly');
+                const req = tx.objectStore(IDB_STORE).get('current_db');
+                req.onsuccess = () => callback(req.result || null);
+                req.onerror = () => callback(null);
+            };
+            request.onerror = () => callback(null);
+        }
+
+        async function initSQLiteEngine() {
+            const statusEl = document.getElementById('dbEngineStatus');
+            try {
+                SQL = await initSqlJs({
+                    locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+                });
+
+                loadDbFromIndexedDB((savedBytes) => {
+                    if (savedBytes) {
+                        try {
+                            db = new SQL.Database(savedBytes);
+                        } catch(err) {
+                            db = new SQL.Database();
+                            createDefaultTables();
+                        }
+                    } else {
+                        db = new SQL.Database();
+                        createDefaultTables();
+                    }
+
+                    statusEl.textContent = '🟢 SQLite .db Ready';
+                    statusEl.classList.remove('animate-pulse', 'bg-indigo-500/60');
+                    statusEl.classList.add('bg-emerald-500/80');
+
+                    updateDbUI();
+                });
+            } catch (err) {
+                console.error("SQLite failed:", err);
+                statusEl.textContent = '⚠️ Memory Mode (Fallback)';
+                statusEl.classList.remove('animate-pulse');
+                statusEl.classList.add('bg-amber-500/80');
+            }
+        }
+
+        function createDefaultTables() {
+            if (!db) return;
+            db.run(`
+                CREATE TABLE IF NOT EXISTS wordlist (
+                    hash TEXT PRIMARY KEY,
+                    plain_text TEXT NOT NULL,
+                    algo TEXT NOT NULL,
+                    created_at TEXT
+                );
+            `);
+            saveDatabaseState();
+        }
+
+        function saveDatabaseState() {
+            if (!db) return;
+            try {
+                const binaryData = db.export();
+                saveDbToIndexedDB(binaryData);
+                updateDbUI();
+            } catch(e) {
+                console.error("Gagal menyimpan SQLite DB ke storage:", e);
+            }
+        }
+
+        function saveTextToSQLite(text, md5, sha1, sha256, sha512) {
+            if (!db || !text || text.trim() === '') return;
+
+            const timeStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
             
-            // --- Fitur Dark / Light Theme ---
+            db.run("BEGIN TRANSACTION;");
+            const stmt = db.prepare("INSERT OR REPLACE INTO wordlist (hash, plain_text, algo, created_at) VALUES (?, ?, ?, ?)");
+            
+            stmt.run([md5, text, 'MD5', timeStr]);
+            stmt.run([sha1, text, 'SHA-1', timeStr]);
+            stmt.run([sha256, text, 'SHA-256', timeStr]);
+            stmt.run([sha512, text, 'SHA-512', timeStr]);
+            
+            stmt.free();
+            db.run("COMMIT;");
+
+            saveDatabaseState();
+        }
+
+        function exportSQLiteFile() {
+            if (!db) return;
+            const binaryArray = db.export();
+            const blob = new Blob([binaryArray], { type: 'application/x-sqlite3' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `hash_database_${new Date().toISOString().slice(0,10)}.db`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast("File .db SQLite berhasil diunduh!");
+        }
+
+        function importSQLiteFile(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function() {
+                try {
+                    const uInts = new Uint8Array(reader.result);
+                    const importedDb = new SQL.Database(uInts);
+                    // Pastikan tabel wordlist ada
+                    importedDb.run(`CREATE TABLE IF NOT EXISTS wordlist (hash TEXT PRIMARY KEY, plain_text TEXT, algo TEXT, created_at TEXT);`);
+                    db = importedDb;
+                    saveDatabaseState();
+                    showToast("Database SQLite (.db) berhasil diimpor!");
+                } catch (e) {
+                    console.error(e);
+                    showToast("Format file .db tidak valid!");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function importTxtWordlist(file) {
+            if (!file || !db) return;
+            const reader = new FileReader();
+            reader.onload = function() {
+                const textContent = reader.result;
+                const lines = textContent.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+                if (lines.length === 0) return;
+
+                const timeStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                db.run("BEGIN TRANSACTION;");
+                const stmt = db.prepare("INSERT OR REPLACE INTO wordlist (hash, plain_text, algo, created_at) VALUES (?, ?, ?, ?)");
+                
+                let count = 0;
+                lines.forEach(word => {
+                    stmt.run([CryptoJS.MD5(word).toString(), word, 'MD5', timeStr]);
+                    stmt.run([CryptoJS.SHA1(word).toString(), word, 'SHA-1', timeStr]);
+                    stmt.run([CryptoJS.SHA256(word).toString(), word, 'SHA-256', timeStr]);
+                    stmt.run([CryptoJS.SHA512(word).toString(), word, 'SHA-512', timeStr]);
+                    count++;
+                });
+                stmt.free();
+                db.run("COMMIT;");
+
+                saveDatabaseState();
+                showToast(`Berhasil menambah ${count} kata ke SQLite DB!`);
+            };
+            reader.readAsText(file);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initSQLiteEngine();
+
+            // Dark / Light Theme
             const htmlElement = document.documentElement;
             const themeToggleBtn = document.getElementById('themeToggle');
             const iconSun = document.getElementById('icon-sun');
             const iconMoon = document.getElementById('icon-moon');
 
-            // Cek local storage atau system preference
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 htmlElement.classList.add('dark');
                 iconSun.classList.remove('hidden');
@@ -222,52 +477,65 @@
             themeToggleBtn.addEventListener('click', () => {
                 htmlElement.classList.toggle('dark');
                 const isDark = htmlElement.classList.contains('dark');
-                
-                // Update icons
                 if(isDark) {
-                    iconSun.classList.remove('hidden');
-                    iconMoon.classList.add('hidden');
+                    iconSun.classList.remove('hidden'); iconMoon.classList.add('hidden');
                     localStorage.theme = 'dark';
                 } else {
-                    iconSun.classList.add('hidden');
-                    iconMoon.classList.remove('hidden');
+                    iconSun.classList.add('hidden'); iconMoon.classList.remove('hidden');
                     localStorage.theme = 'light';
                 }
             });
 
-            // --- Fitur Navigasi Tab ---
+            // Navigasi Tab
             const tabBtnGen = document.getElementById('tab-btn-gen');
             const tabBtnCrack = document.getElementById('tab-btn-crack');
+            const tabBtnDb = document.getElementById('tab-btn-db');
+
             const contentGen = document.getElementById('content-gen');
             const contentCrack = document.getElementById('content-crack');
+            const contentDb = document.getElementById('content-db');
 
             function switchTab(tab) {
-                if(tab === 'gen') {
+                [contentGen, contentCrack, contentDb].forEach(el => el.classList.add('hidden'));
+                [tabBtnGen, tabBtnCrack, tabBtnDb].forEach(btn => {
+                    btn.classList.add('text-slate-500', 'dark:text-slate-400', 'border-transparent');
+                    btn.classList.remove('text-indigo-600', 'dark:text-indigo-400', 'border-indigo-600', 'dark:border-indigo-400');
+                });
+
+                if (tab === 'gen') {
                     contentGen.classList.remove('hidden');
-                    contentCrack.classList.add('hidden');
-                    
                     tabBtnGen.classList.add('text-indigo-600', 'dark:text-indigo-400', 'border-indigo-600', 'dark:border-indigo-400');
-                    tabBtnGen.classList.remove('text-slate-500', 'dark:text-slate-400', 'border-transparent');
-                    
-                    tabBtnCrack.classList.add('text-slate-500', 'dark:text-slate-400', 'border-transparent');
-                    tabBtnCrack.classList.remove('text-indigo-600', 'dark:text-indigo-400', 'border-indigo-600', 'dark:border-indigo-400');
-                } else {
+                } else if (tab === 'crack') {
                     contentCrack.classList.remove('hidden');
-                    contentGen.classList.add('hidden');
-                    
                     tabBtnCrack.classList.add('text-indigo-600', 'dark:text-indigo-400', 'border-indigo-600', 'dark:border-indigo-400');
-                    tabBtnCrack.classList.remove('text-slate-500', 'dark:text-slate-400', 'border-transparent');
-                    
-                    tabBtnGen.classList.add('text-slate-500', 'dark:text-slate-400', 'border-transparent');
-                    tabBtnGen.classList.remove('text-indigo-600', 'dark:text-indigo-400', 'border-indigo-600', 'dark:border-indigo-400');
+                } else {
+                    contentDb.classList.remove('hidden');
+                    tabBtnDb.classList.add('text-indigo-600', 'dark:text-indigo-400', 'border-indigo-600', 'dark:border-indigo-400');
+                    updateDbUI();
                 }
             }
 
             tabBtnGen.addEventListener('click', () => switchTab('gen'));
             tabBtnCrack.addEventListener('click', () => switchTab('crack'));
+            tabBtnDb.addEventListener('click', () => switchTab('db'));
 
+            // File DB Buttons
+            document.getElementById('btnExportDb').addEventListener('click', exportSQLiteFile);
+            document.getElementById('fileDbInput').addEventListener('change', (e) => importSQLiteFile(e.target.files[0]));
+            document.getElementById('fileTxtInput').addEventListener('change', (e) => importTxtWordlist(e.target.files[0]));
+            
+            document.getElementById('btnClearDb').addEventListener('click', () => {
+                if (db) {
+                    db.run("DELETE FROM wordlist;");
+                    saveDatabaseState();
+                    showToast("Database berhasil dikosongkan!");
+                }
+            });
 
-            // --- Logika Generator ---
+            document.getElementById('searchDbInput').addEventListener('input', (e) => {
+                updateDbUI(e.target.value.trim().toLowerCase());
+            });
+
             const inputTextArea = document.getElementById('inputText');
             const charCount = document.getElementById('charCount');
             const clearBtn = document.getElementById('clearBtn');
@@ -279,7 +547,7 @@
             const outBcrypt = document.getElementById('hash-bcrypt');
             const bcryptStatus = document.getElementById('bcrypt-status');
             
-            let bcryptTimeout;
+            let calcTimeout;
 
             function clearOutputs() {
                 outMD5.value = ''; outSHA1.value = ''; outSHA256.value = ''; 
@@ -296,27 +564,34 @@
                     return;
                 }
 
-                // Generasi instan untuk MD5 dan SHA
-                outMD5.value = CryptoJS.MD5(text).toString();
-                outSHA1.value = CryptoJS.SHA1(text).toString();
-                outSHA256.value = CryptoJS.SHA256(text).toString();
-                outSHA512.value = CryptoJS.SHA512(text).toString();
+                // Kalkulasi Cepat MD5 & SHA
+                const md5Val = CryptoJS.MD5(text).toString();
+                const sha1Val = CryptoJS.SHA1(text).toString();
+                const sha256Val = CryptoJS.SHA256(text).toString();
+                const sha512Val = CryptoJS.SHA512(text).toString();
 
-                // Bcrypt sangat berat, kita tunda kalkulasinya (debounce) 
-                // agar tidak freeze saat pengguna sedang mengetik cepat
-                clearTimeout(bcryptTimeout);
+                outMD5.value = md5Val;
+                outSHA1.value = sha1Val;
+                outSHA256.value = sha256Val;
+                outSHA512.value = sha512Val;
+
+                // Debounce untuk Simpan SQLite DB & Bcrypt
+                clearTimeout(calcTimeout);
                 outBcrypt.value = '';
                 bcryptStatus.classList.remove('hidden');
                 
-                bcryptTimeout = setTimeout(() => {
-                    // Generate Bcrypt async dengan Cost factor 10
+                calcTimeout = setTimeout(() => {
+                    // Simpan Ke SQLite DB File Buffer
+                    saveTextToSQLite(text, md5Val, sha1Val, sha256Val, sha512Val);
+
+                    // Bcrypt Async
                     bcrypt.genSalt(10, function(err, salt) {
                         bcrypt.hash(text, salt, function(err, hash) {
                             outBcrypt.value = hash;
                             bcryptStatus.classList.add('hidden');
                         });
                     });
-                }, 600); // Tunggu 600ms setelah selesai ngetik
+                }, 800);
             });
 
             clearBtn.addEventListener('click', () => {
@@ -326,8 +601,6 @@
                 inputTextArea.focus();
             });
 
-
-            // --- Logika Cracker (Pencari Auto) ---
             const btnCrack = document.getElementById('btnCrack');
             const inputHash = document.getElementById('inputHash');
             const crackResultBox = document.getElementById('crackResultBox');
@@ -340,17 +613,16 @@
                 const targetHash = inputHash.value.trim().toLowerCase();
                 if(!targetHash) return;
 
-                // Deteksi jika pengguna memasukkan hash Bcrypt di tempat yang salah
                 if(targetHash.startsWith("$2a$") || targetHash.startsWith("$2y$") || targetHash.startsWith("$2b$")) {
                     crackResultBox.classList.remove('hidden');
-                    tampilkanHasilCrack(false, "Ini adalah Hash Bcrypt!", "Anda tidak bisa menggunakan auto-cracker untuk Bcrypt. Silakan gunakan fitur 'Verifikasi Manual' di sebelah kanan.");
-                    document.getElementById('verifyHash').value = inputHash.value.trim(); // Pindahkan ke kotak kanan
+                    tampilkanHasilCrack(false, "Ini Hash Bcrypt!", "Gunakan fitur 'Verifikasi Bcrypt' di sebelah kanan.");
+                    document.getElementById('verifyHash').value = inputHash.value.trim();
                     return;
                 }
 
                 crackResultBox.classList.remove('hidden');
                 crackResultText.className = "p-4 rounded-xl border text-center font-bold text-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 animate-pulse border-slate-300 dark:border-slate-700";
-                crackResultText.textContent = "Sedang mencari...";
+                crackResultText.textContent = "Mencari di Database SQLite...";
                 crackResultMeta.textContent = "";
                 btnCrack.disabled = true;
 
@@ -365,24 +637,39 @@
                         return;
                     }
 
-                    // 1. Cek Kamus
+                    // 1. QUERY PERSIS KE SQLITE DB
+                    if (db) {
+                        try {
+                            const res = db.exec("SELECT plain_text, algo FROM wordlist WHERE hash = ?", [targetHash]);
+                            if (res.length > 0 && res[0].values.length > 0) {
+                                const matchedText = res[0].values[0][0];
+                                const matchedAlgo = res[0].values[0][1];
+                                tampilkanHasilCrack(true, matchedText, `Algoritma: ${matchedAlgo} (Ditemukan di SQLite .db File)`);
+                                return;
+                            }
+                        } catch(e) {
+                            console.error("SQL query failed:", e);
+                        }
+                    }
+
+                    // 2. CEK KAMUS DASAR
                     for (const kata of kamusUmum) {
                         if (cekHash(kata, targetHash, algo)) {
-                            tampilkanHasilCrack(true, kata, `Algoritma: ${algo} (Kamus)`);
+                            tampilkanHasilCrack(true, kata, `Algoritma: ${algo} (Ditemukan di Kamus Dasar)`);
                             return;
                         }
                     }
 
-                    // 2. Brute Force Angka (0 - 100.000)
+                    // 3. BRUTE FORCE ANGKA (0 - 100.000)
                     for (let i = 0; i <= 100000; i++) {
                         const angkaStr = i.toString();
                         if (cekHash(angkaStr, targetHash, algo)) {
-                            tampilkanHasilCrack(true, angkaStr, `Algoritma: ${algo} (Brute-force angka)`);
+                            tampilkanHasilCrack(true, angkaStr, `Algoritma: ${algo} (Brute-force Angka)`);
                             return;
                         }
                     }
 
-                    tampilkanHasilCrack(false, "Teks tidak ditemukan", "Hash terlalu kompleks. Alat ini hanya menebak kamus dan angka dasar.");
+                    tampilkanHasilCrack(false, "Teks tidak ditemukan", "Hash tidak ada di File DB SQLite maupun tebakan umum.");
                 }, 100);
             });
 
@@ -397,7 +684,6 @@
             function tampilkanHasilCrack(sukses, teks, meta = "") {
                 btnCrack.disabled = false;
                 crackResultText.classList.remove('animate-pulse');
-                
                 if (sukses) {
                     crackResultText.className = "p-4 rounded-xl border-2 text-center font-bold text-2xl bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-500 dark:border-green-600";
                     crackResultText.textContent = teks;
@@ -408,7 +694,6 @@
                 crackResultMeta.textContent = meta;
             }
 
-            // --- Logika Manual Verifier (Bcrypt) ---
             const btnVerify = document.getElementById('btnVerify');
             const verifyHash = document.getElementById('verifyHash');
             const verifyText = document.getElementById('verifyText');
@@ -427,15 +712,11 @@
                 setTimeout(() => {
                     let isMatch = false;
 
-                    // Jika Bcrypt
                     if(targetHash.startsWith("$2a$") || targetHash.startsWith("$2y$") || targetHash.startsWith("$2b$")) {
                         try {
                             isMatch = bcrypt.compareSync(guessText, targetHash);
-                        } catch (e) {
-                            console.error(e);
-                        }
+                        } catch (e) { console.error(e); }
                     } else {
-                        // Jika bukan bcrypt, kita coba hash standar
                         const hashL = targetHash.toLowerCase();
                         isMatch = (
                             CryptoJS.MD5(guessText).toString() === hashL ||
@@ -445,7 +726,6 @@
                         );
                     }
 
-                    // Tampilkan Hasil
                     verifyResult.classList.remove('bg-slate-100', 'text-slate-600', 'border-slate-300', 'dark:bg-slate-800', 'dark:text-slate-300', 'dark:border-slate-600');
                     if(isMatch) {
                         verifyResult.classList.add('bg-green-100', 'text-green-700', 'border-green-500', 'dark:bg-green-900/50', 'dark:text-green-400');
@@ -454,11 +734,71 @@
                         verifyResult.classList.add('bg-red-100', 'text-red-700', 'border-red-500', 'dark:bg-red-900/50', 'dark:text-red-400');
                         verifyResult.textContent = "❌ TIDAK COCOK. Coba teks lain.";
                     }
-                }, 50); // Jeda singkat agar UI merender
+                }, 50);
             });
         });
 
-        // --- Utils ---
+        function updateDbUI(filterQuery = '') {
+            if (!db) return;
+
+            const tbody = document.getElementById('dbTableBody');
+            const totalRowsEl = document.getElementById('statTotalRows');
+            const dbSizeEl = document.getElementById('statDbSize');
+            const badgeCount = document.getElementById('badgeDbCount');
+
+            try {
+                // Hitung total baris
+                const countRes = db.exec("SELECT COUNT(*) FROM wordlist");
+                const totalCount = countRes[0].values[0][0];
+                totalRowsEl.textContent = totalCount.toLocaleString();
+                badgeCount.textContent = totalCount.toLocaleString();
+
+                // Hitung perkiraan ukuran binary DB
+                const exportedBytes = db.export();
+                const kbSize = (exportedBytes.length / 1024).toFixed(1);
+                dbSizeEl.textContent = `${kbSize} KB`;
+
+                // Query baris data
+                let sql = "SELECT algo, plain_text, hash, created_at FROM wordlist ORDER BY ROWID DESC LIMIT 50";
+                let params = [];
+                if (filterQuery) {
+                    sql = "SELECT algo, plain_text, hash, created_at FROM wordlist WHERE plain_text LIKE ? OR hash LIKE ? ORDER BY ROWID DESC LIMIT 50";
+                    params = [`%${filterQuery}%`, `%${filterQuery}%`];
+                }
+
+                const res = db.exec(sql, params);
+                tbody.innerHTML = '';
+
+                if (res.length === 0 || res[0].values.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic">Database kosong. Mulai mengetik di Generator atau impor file .db / .txt!</td></tr>`;
+                    return;
+                }
+
+                res[0].values.forEach(row => {
+                    const [algo, plain_text, hash, created_at] = row;
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors";
+                    tr.innerHTML = `
+                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300">${algo}</span></td>
+                        <td class="p-3 font-semibold text-slate-800 dark:text-slate-100 max-w-[150px] truncate" title="${plain_text}">${plain_text}</td>
+                        <td class="p-3 text-slate-500 dark:text-slate-400 max-w-[200px] truncate">${hash}</td>
+                        <td class="p-3 text-slate-400 dark:text-slate-500">${created_at || '-'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch(e) {
+                console.error("Gagal render tabel DB:", e);
+            }
+        }
+
+        // Helper Toast Notification
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.style.opacity = '1';
+            setTimeout(() => { toast.style.opacity = '0'; }, 2500);
+        }
+
         function copyToClipboard(elementId) {
             const copyText = document.getElementById(elementId);
             if (!copyText.value) return;
@@ -467,9 +807,7 @@
             copyText.setSelectionRange(0, 99999); 
             try {
                 document.execCommand("copy");
-                const toast = document.getElementById('toast');
-                toast.style.opacity = '1';
-                setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+                showToast("Tersalin ke clipboard!");
             } catch (err) {
                 console.error('Gagal menyalin', err);
             }
