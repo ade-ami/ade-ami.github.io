@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub README.md Maker Tool</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons for UI elements -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Marked.js for rendering Markdown to HTML (Live Preview) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gh: {
+                            bg: '#0d1117',
+                            border: '#30363d',
+                            text: '#c9d1d9',
+                            muted: '#8b949e',
+                            btn: '#21262d',
+                            btnHover: '#30363d',
+                            accent: '#58a6ff',
+                            success: '#238636',
+                            successHover: '#2ea043'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['ui-monospace', 'SFMono-Regular', 'SF Mono', 'Menlo', 'Consolas', 'Liberation Mono', 'monospace'],
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Helvetica', 'Arial', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0d1117; }
+        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+        /* Textarea styling */
+        textarea {
+            tab-size: 4;
+        }
+        textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #58a6ff;
+        }
+
+        /* GitHub-like Markdown Preview Styling */
+        .markdown-body {
+            font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+            font-size: 16px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+        .markdown-body h1, .markdown-body h2 {
+            border-bottom: 1px solid #21262d;
+            padding-bottom: 0.3em;
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        .markdown-body h3, .markdown-body h4 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        .markdown-body a { color: #58a6ff; text-decoration: none; }
+        .markdown-body a:hover { text-decoration: underline; }
+        .markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol, .markdown-body dl, .markdown-body table, .markdown-body pre, .markdown-body details {
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+        .markdown-body blockquote {
+            padding: 0 1em;
+            color: #8b949e;
+            border-left: .25em solid #30363d;
+        }
+        .markdown-body ul, .markdown-body ol { padding-left: 2em; }
+        .markdown-body ul { list-style-type: disc; }
+        .markdown-body pre {
+            padding: 16px;
+            overflow: auto;
+            font-size: 85%;
+            line-height: 1.45;
+            background-color: #161b22;
+            border-radius: 6px;
+        }
+        .markdown-body pre code {
+            display: inline;
+            max-width: auto;
+            padding: 0;
+            margin: 0;
+            overflow: visible;
+            line-height: inherit;
+            word-wrap: normal;
+            background-color: transparent;
+            border: 0;
+        }
+        .markdown-body code {
+            padding: .2em .4em;
+            margin: 0;
+            font-size: 85%;
+            background-color: rgba(110,118,129,0.4);
+            border-radius: 6px;
+            font-family: ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace;
+        }
+        .markdown-body table {
+            display: block;
+            width: 100%;
+            width: max-content;
+            max-width: 100%;
+            overflow: auto;
+        }
+        .markdown-body table th {
+            font-weight: 600;
+        }
+        .markdown-body table th, .markdown-body table td {
+            padding: 6px 13px;
+            border: 1px solid #30363d;
+        }
+        .markdown-body table tr {
+            background-color: #0d1117;
+            border-top: 1px solid #21262d;
+        }
+        .markdown-body table tr:nth-child(2n) {
+            background-color: #161b22;
+        }
+        .markdown-body img {
+            max-width: 100%;
+            box-sizing: content-box;
+            background-color: #0d1117;
+        }
+        .markdown-body hr {
+            height: .25em;
+            padding: 0;
+            margin: 24px 0;
+            background-color: #30363d;
+            border: 0;
+        }
+    </style>
+</head>
+
+<body class="h-screen flex flex-col font-sans overflow-hidden">
+
+    <!-- Navbar/Header -->
+    <header class="bg-[#161b22] border-b border-gh-border p-4 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-3">
+            <i data-lucide="github" class="w-8 h-8 text-white"></i>
+            <div>
+                <h1 class="text-lg font-bold text-white leading-tight">README.md Maker</h1>
+                <p class="text-xs text-gh-muted">Markdown Editor & Live Preview</p>
+            </div>
+        </div>
+        
+        <div class="flex gap-3">
+            <button onclick="clearEditor()" class="px-4 py-2 text-sm font-semibold text-gh-text bg-gh-btn hover:bg-gh-btnHover border border-gh-border rounded-md transition-colors flex items-center gap-2">
+                <i data-lucide="trash-2" class="w-4 h-4"></i> Bersihkan
+            </button>
+            <button id="copyBtn" onclick="copyMarkdown()" class="px-4 py-2 text-sm font-semibold text-white bg-gh-success hover:bg-gh-successHover border border-[rgba(240,246,252,0.1)] rounded-md transition-colors flex items-center gap-2 shadow-sm">
+                <i data-lucide="copy" class="w-4 h-4"></i> <span id="copyText">Salin Markdown</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Toolbar -->
+    <div class="bg-gh-bg border-b border-gh-border p-2 flex gap-1 items-center px-4 shrink-0 overflow-x-auto">
+        <button onclick="insertFormat('bold')" class="p-1.5 text-gh-muted hover:text-white hover:bg-gh-btn rounded transition-colors" title="Bold (Ctrl+B)">
+            <i data-lucide="bold" class="w-4 h-4"></i>
+        </button>
+        <button onclick="insertFormat('italic')" class="p-1.5 text-gh-muted hover:text-white hover:bg-gh-btn rounded transition-colors" title="Italic (Ctrl+I)">
+            <i data-lucide="italic" class="w-4 h-4"></i>
+        </button>
+        <button onclick="insertFormat('strikethrough')" class="p-1.5 text-gh-muted hover:text-white hover:bg-gh-btn rounded transition-colors" title="Strikethrough">
+            <i data-lucide="strikethrough" class="w-4 h-4"></i>
+        </button>
+        
+        <div class="w-px h-5 bg-gh-border mx-1"></div>
+        
+        <button onclick="insertFormat('h1')" class="p-1.5 text-gh-muted hover:text-white hover:bg-gh-btn rounded transition-colors" title="Heading 1">
+            <i data-lucide="heading-1" class="w-4 h-4"></i>
+        </button>
+        <button onclick="insertFormat('h2')" class="p-1.5 text-gh-muted hover:text-white hover:bg-gh-btn rounded transition-colors" title="Heading 2">
+            <i data-lucide="heading-2" class="w-4 h-4"></i>
+        </button>
+        
+        <div class="w-px h-5 bg-gh-border mx-1"></div>
+        
+        <button onclick="insertFormat('link')" class="p-1.5 text-gh-muted hover:text-white hover:bg-gh-btn rounded transition-colors" title="Link (Ctrl+K)">
+            <i data-lucide="link" class="w-4 h-4"></i>
+        </button>
+        <button onclick="insertFormat('image')" class="p-1.5 text-gh-muted hover:text-white hover:bg-gh-btn rounded transition-colors" title="Image">
+            <i data-lucide="image" class="w-4 h-4"></i>
+        </button>
+        
+        <div class="w-px h-5 bg-gh-border mx-1"></div>
+        
+        <button onclick="insertFormat('list-ul')" class="p-1.5 text-gh-muted hover:text-white hover:bg-gh-btn rounded transition-colors" title="Bulleted List">
+            <i data-lucide="list" class="w-4 h-4"></i>
+        </button>
+        <button onclick="insertFormat('list-ol')" class="p-1.5 text-gh-muted hover:text-white hover:bg-gh-btn rounded transition-colors" title="Numbered List">
+            <i data-lucide="list-ordered" class="w-4 h-4"></i>
+        </button>
+        
+        <div class="w-px h-5 bg-gh-border mx-1"></div>
+        
+        <button onclick="insertFormat('code')" class="p-1.5 text-gh-muted hover:text-white hover:bg-gh-btn rounded transition-colors" title="Inline Code">
+            <i data-lucide="code" class="w-4 h-4"></i>
+        </button>
+        <button onclick="insertFormat('codeblock')" class="p-1.5 text-gh-muted hover:text-white hover:bg-gh-btn rounded transition-colors" title="Code Block">
+            <i data-lucide="file-code" class="w-4 h-4"></i>
+        </button>
+        <button onclick="insertFormat('table')" class="p-1.5 text-gh-muted hover:text-white hover:bg-gh-btn rounded transition-colors" title="Table">
+            <i data-lucide="table" class="w-4 h-4"></i>
+        </button>
+    </div>
+
+    <!-- Main Content Area (Split Screen) -->
+    <main class="flex-grow flex flex-col md:flex-row overflow-hidden">
+        
+        <!-- Editor Column -->
+        <div class="w-full md:w-1/2 flex flex-col border-r border-gh-border bg-[#0d1117] h-1/2 md:h-full">
+            <div class="bg-[#161b22] px-4 py-2 border-b border-gh-border flex justify-between items-center">
+                <span class="text-sm font-semibold text-gh-text flex items-center gap-2">
+                    <i data-lucide="edit-3" class="w-4 h-4"></i> Editor Mentah
+                </span>
+            </div>
+            <textarea id="markdownEditor" class="flex-grow w-full bg-transparent border-none text-gh-text font-mono text-sm p-4 resize-none" spellcheck="false" placeholder="Ketik Markdown Anda di sini..."></textarea>
+        </div>
+
+        <!-- Live Preview Column -->
+        <div class="w-full md:w-1/2 flex flex-col bg-[#0d1117] h-1/2 md:h-full">
+            <div class="bg-[#161b22] px-4 py-2 border-b border-gh-border flex justify-between items-center">
+                <span class="text-sm font-semibold text-gh-text flex items-center gap-2">
+                    <i data-lucide="eye" class="w-4 h-4"></i> Live Preview (Tampilan GitHub)
+                </span>
+            </div>
+            <div class="flex-grow w-full p-6 overflow-y-auto bg-[#0d1117]">
+                <div id="previewPane" class="markdown-body max-w-full">
+                    <!-- Markdown will be rendered here -->
+                </div>
+            </div>
+        </div>
+        
+    </main>
+
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        const editor = document.getElementById('markdownEditor');
+        const preview = document.getElementById('previewPane');
+
+        // Initial template content
+        const defaultTemplate = `# 🚀 Judul Proyek Anda
+
+Deskripsi singkat dan menarik tentang proyek Anda. Apa masalah yang diselesaikan?
+
+## ✨ Fitur Utama
+
+*   **Fitur 1:** Penjelasan singkat.
+*   **Fitur 2:** Penjelasan singkat.
+
+## 🛠️ Instalasi
+
+Ikuti langkah-langkah ini untuk menjalankan proyek secara lokal:
+
+\`\`\`bash
+git clone https://github.com/username/repo-anda.git
+cd repo-anda
+npm install
+npm start
+\`\`\`
+
+## 💻 Penggunaan
+
+Contoh bagaimana menggunakan proyek Anda:
+
+\`\`\`javascript
+const app = require('./app');
+app.run();
+\`\`\`
+
+## 🤝 Kontribusi
+
+Sangat dipersilakan! Silakan buat *Pull Request* atau buka *Issue*.
+`;
+
+        // Initialize content
+        editor.value = defaultTemplate;
+        
+        // Update Preview Function
+        function updatePreview() {
+            const markdownText = editor.value;
+            // Parse Markdown using marked.js
+            preview.innerHTML = marked.parse(markdownText);
+        }
+
+        // Event listener for live typing
+        editor.addEventListener('input', updatePreview);
+        
+        // Initial render
+        updatePreview();
+
+        // Copy Function
+        function copyMarkdown() {
+            const textToCopy = editor.value;
+            const btn = document.getElementById('copyBtn');
+            const textSpan = document.getElementById('copyText');
+            
+            // Create a temporary textarea to copy from (reliable fallback)
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            
+            try {
+                document.execCommand('copy');
+                
+                // Visual feedback
+                textSpan.innerText = 'Tersalin!';
+                btn.classList.replace('bg-gh-success', 'bg-[#1f6feb]'); // Change to blue
+                btn.classList.replace('hover:bg-gh-successHover', 'hover:bg-[#388bfd]');
+                
+                setTimeout(() => {
+                    textSpan.innerText = 'Salin Markdown';
+                    btn.classList.replace('bg-[#1f6feb]', 'bg-gh-success');
+                    btn.classList.replace('hover:bg-[#388bfd]', 'hover:bg-gh-successHover');
+                }, 2000);
+            } catch (err) {
+                alert('Gagal menyalin teks.');
+            } finally {
+                document.body.removeChild(tempTextArea);
+            }
+        }
+
+        // Clear Function
+        function clearEditor() {
+            if (confirm("Apakah Anda yakin ingin menghapus semua teks?")) {
+                editor.value = '';
+                updatePreview();
+                editor.focus();
+            }
+        }
+
+        // Toolbar formatting logic
+        function insertFormat(type) {
+            const start = editor.selectionStart;
+            const end = editor.selectionEnd;
+            const selectedText = editor.value.substring(start, end);
+            let replacement = '';
+            let cursorOffset = 0;
+
+            switch (type) {
+                case 'bold':
+                    replacement = `**${selectedText || 'Teks Tebal'}**`;
+                    cursorOffset = 2;
+                    break;
+                case 'italic':
+                    replacement = `_${selectedText || 'Teks Miring'}_`;
+                    cursorOffset = 1;
+                    break;
+                case 'strikethrough':
+                    replacement = `~~${selectedText || 'Coret'}~~`;
+                    cursorOffset = 2;
+                    break;
+                case 'h1':
+                    replacement = `\n# ${selectedText || 'Heading 1'}\n`;
+                    cursorOffset = 3;
+                    break;
+                case 'h2':
+                    replacement = `\n## ${selectedText || 'Heading 2'}\n`;
+                    cursorOffset = 4;
+                    break;
+                case 'link':
+                    replacement = `[${selectedText || 'Teks Tautan'}](https://url-anda.com)`;
+                    cursorOffset = selectedText ? replacement.length - 19 : 1;
+                    break;
+                case 'image':
+                    replacement = `![${selectedText || 'Teks Alt'}](https://url-gambar.com/gambar.png)`;
+                    cursorOffset = selectedText ? replacement.length - 33 : 2;
+                    break;
+                case 'list-ul':
+                    replacement = `\n- ${selectedText || 'Item Daftar'}`;
+                    cursorOffset = 3;
+                    break;
+                case 'list-ol':
+                    replacement = `\n1. ${selectedText || 'Item Berurut'}`;
+                    cursorOffset = 4;
+                    break;
+                case 'code':
+                    replacement = `\`${selectedText || 'kode'}\``;
+                    cursorOffset = 1;
+                    break;
+                case 'codeblock':
+                    replacement = `\n\`\`\`bash\n${selectedText || 'Masukkan kode Anda di sini'}\n\`\`\`\n`;
+                    cursorOffset = 9;
+                    break;
+                case 'table':
+                    replacement = `\n| Kolom 1 | Kolom 2 |\n| ------- | ------- |\n| Baris 1 | Data 1  |\n`;
+                    cursorOffset = replacement.length;
+                    break;
+            }
+
+            editor.value = editor.value.substring(0, start) + replacement + editor.value.substring(end);
+            
+            // Move cursor to appropriate position
+            editor.focus();
+            if (selectedText.length === 0 && type !== 'table') {
+                editor.selectionStart = editor.selectionEnd = start + cursorOffset;
+            } else {
+                editor.selectionStart = editor.selectionEnd = start + replacement.length;
+            }
+            
+            updatePreview();
+        }
+
+        // Basic Keyboard Shortcuts
+        editor.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'b') { e.preventDefault(); insertFormat('bold'); }
+            if (e.ctrlKey && e.key === 'i') { e.preventDefault(); insertFormat('italic'); }
+            if (e.ctrlKey && e.key === 'k') { e.preventDefault(); insertFormat('link'); }
+        });
+    </script>
+</body>
+</html>
