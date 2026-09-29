@@ -34,16 +34,10 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         
-        /* Sticky first columns for smooth horizontal scroll */
+        /* Sticky first column for smooth horizontal scroll without overlay issues */
         .sticky-col-1 {
             position: sticky;
             left: 0;
-            z-index: 20;
-            background-color: #ffffff;
-        }
-        .sticky-col-2 {
-            position: sticky;
-            left: 140px;
             z-index: 20;
             background-color: #ffffff;
         }
@@ -53,7 +47,7 @@
             .no-print { display: none !important; }
             body { background: white !important; font-size: 10px; }
             .print-container { width: 100% !important; overflow: visible !important; }
-            .sticky-col-1, .sticky-col-2 { position: static !important; }
+            .sticky-col-1 { position: static !important; }
             table { border-collapse: collapse !important; width: 100% !important; }
             th, td { border: 1px solid #cbd5e1 !important; padding: 4px 2px !important; }
             .shift-badge { border: 1px solid #94a3b8 !important; box-shadow: none !important; }
@@ -294,8 +288,7 @@
             // 1. Render Header
             let headerHTML = `
                 <tr>
-                    <th class="p-3 text-left sticky-col-1 w-[140px] shadow-sm bg-slate-100">Nakes</th>
-                    <th class="p-3 text-center sticky-col-2 w-[80px] shadow-sm bg-slate-100 border-r border-slate-300">Role</th>
+                    <th class="p-3 text-left sticky-col-1 min-w-[160px] shadow-sm bg-slate-100 border-r border-slate-300">Nakes & Jabatan</th>
             `;
 
             for (let day = 1; day <= totalDaysInMonth; day++) {
@@ -318,11 +311,11 @@
             NAKES_LIST.forEach(nakes => {
                 bodyHTML += `
                     <tr class="hover:bg-slate-50 transition">
-                        <td class="p-3 text-left font-semibold text-slate-800 sticky-col-1 shadow-sm border-r border-slate-200">
-                            ${nakes.name}
-                        </td>
-                        <td class="p-2 text-center text-[11px] text-slate-500 sticky-col-2 shadow-sm border-r border-slate-300">
-                            ${nakes.role}
+                        <td class="p-2.5 text-left sticky-col-1 shadow-sm border-r border-slate-300 bg-white">
+                            <div class="font-semibold text-slate-800 text-xs">${nakes.name}</div>
+                            <span class="inline-block text-[10px] text-medical-700 bg-medical-50 border border-medical-200 px-1.5 py-0.5 rounded font-medium mt-0.5">
+                                ${nakes.role}
+                            </span>
                         </td>
                 `;
 
@@ -348,7 +341,7 @@
             // 3. Render Footer (Daily Coverage Breakdown)
             let footerHTML = `
                 <tr>
-                    <td colspan="2" class="p-3 text-left font-bold text-slate-800 sticky-col-1 shadow-sm border-r border-slate-300 bg-slate-100">
+                    <td class="p-3 text-left font-bold text-slate-800 sticky-col-1 shadow-sm border-r border-slate-300 bg-slate-100">
                         Coverage Pagi (P)
                     </td>
             `;
@@ -358,7 +351,7 @@
                 footerHTML += `<td class="p-2 border-r border-slate-200 ${countP < 1 ? 'bg-red-100 text-red-700 font-bold' : 'text-slate-700'}">${countP}</td>`;
             }
             footerHTML += `</tr><tr>
-                <td colspan="2" class="p-3 text-left font-bold text-slate-800 sticky-col-1 shadow-sm border-r border-slate-300 bg-slate-100">
+                <td class="p-3 text-left font-bold text-slate-800 sticky-col-1 shadow-sm border-r border-slate-300 bg-slate-100">
                     Coverage Siang (S)
                 </td>
             `;
@@ -368,7 +361,7 @@
                 footerHTML += `<td class="p-2 border-r border-slate-200 ${countS < 1 ? 'bg-red-100 text-red-700 font-bold' : 'text-slate-700'}">${countS}</td>`;
             }
             footerHTML += `</tr><tr>
-                <td colspan="2" class="p-3 text-left font-bold text-slate-800 sticky-col-1 shadow-sm border-r border-slate-300 bg-slate-100">
+                <td class="p-3 text-left font-bold text-slate-800 sticky-col-1 shadow-sm border-r border-slate-300 bg-slate-100">
                     Coverage Malam (M)
                 </td>
             `;
