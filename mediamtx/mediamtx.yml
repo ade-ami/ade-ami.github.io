@@ -1,0 +1,105 @@
+###############################################
+# Global settings
+###############################################
+logLevel: info
+logDestinations: [stdout]
+logStructured: false
+logFile: mediamtx.log
+sysLogPrefix: mediamtx
+dumpPackets: false
+
+readTimeout: 10s
+writeTimeout: 10s
+writeQueueSize: 512
+udpMaxPayloadSize: 1452
+udpReadBufferSize: 0
+
+###############################################
+# Server endpoints (WebRTC is enabled for HTML5 playback)
+###############################################
+rtsp: true
+rtspTransports: [udp, multicast, tcp]
+rtspAddress: :8554
+rtpAddress: :8000
+rtcpAddress: :8001
+
+rtmp: true
+rtmpAddress: :1935
+
+hls: true
+hlsAddress: :8888
+hlsVariant: lowLatency
+
+webrtc: true
+webrtcAddress: :8889
+webrtcLocalUDPAddress: :8189
+
+api: true
+apiAddress: :9997
+
+###############################################
+# Default path settings
+###############################################
+pathDefaults:
+  source: publisher
+  sourceOnDemand: false # Change to true to pull from camera ONLY when viewed (saves bandwidth)
+  rtspTransport: tcp # Often more reliable for IP cameras over local network
+
+###############################################
+# Path settings (Your Cameras)
+###############################################
+# Format:
+# camera_name:
+#   source: rtsp://user:pass@ip:port/path
+paths:
+
+  # 1. CCTV Office - Office EMM
+  office_emm:
+    source: rtsp://admin:emm123@192.168.1.211:554/live/0/MAIN
+
+  # 2. CCTV Office - Lobby
+  lobby:
+    source: rtsp://admin:emm123@192.168.1.212:554/live/0/MAIN
+
+  # 3. CCTV Office - SalesAdmin
+  sales_admin:
+    source: rtsp://admin:emm123@192.168.1.213:554/live/0/MAIN
+
+  # 4. CCTV Office - Lt2
+  lt2:
+    source: rtsp://admin:emm123@192.168.1.214:554/live/0/MAIN
+
+  # 5. CCTV Office - Office Mobius
+  office_mobius:
+    source: rtsp://admin:emm123@192.168.1.216:554/live/0/MAIN
+
+  # 6. CCTV Office - Office Ex Intertekno
+  ex_intertekno:
+    source: rtsp://admin:emm123@192.168.1.64:554/live/0/MAIN
+
+  # 7. CCTV Office - Pantry
+  pantry:
+    source: rtsp://admin:emm123@192.168.1.222:554/live/0/MAIN
+
+  # 8. CCTV Office - Office AFS
+  office_afs:
+    source: rtsp://admin:Emm12345@192.168.1.226:554/live/0/MAIN
+
+  # 9. CCTV Office - Gudang Sparepart
+  gudang_sparepart:
+    source: rtsp://admin:Emm12345@192.168.1.227:554/live/0/MAIN
+
+  # 10. CCTV Office - Depan IT
+  depan_it:
+    source: rtsp://admin:Emm1982%23@192.168.1.224:554
+
+  # 11. CCTV Office - Ruang IT
+  ruang_it:
+    source: rtsp://admin:Emm1982%23@192.168.1.225:554
+
+  # 12. CCTV Office - Ruang R&D
+  ruang_rd:
+    source: rtsp://admin:Emm1982%23@192.168.1.223:554
+
+  # Fallback for anything else
+  all_others:
