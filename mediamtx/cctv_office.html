@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live CCTV Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #f8fafc; /* Slate 50 */
+        }
+        
+        .camera-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            background-color: #000;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+            border: 1px solid #334155; /* Slate 700 */
+        }
+
+        .camera-container object,
+        .camera-container embed,
+        .camera-container video,
+        .camera-container iframe,
+        .camera-container .fallback-msg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .fallback-msg {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 1rem;
+            color: #94a3b8; /* Slate 400 */
+            z-index: 10;
+        }
+
+        .camera-title {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 70%, transparent 100%);
+            padding: 1rem 0.75rem 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            z-index: 20;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: none; /* Let clicks pass through to video */
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #ef4444; /* Red for recording/live */
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Fullscreen modal styling */
+        #fullscreen-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 50;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #fullscreen-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            width: 90vw;
+            max-width: 1200px;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 flex justify-between items-center sticky top-0 z-40 shadow-md">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-video text-blue-500 text-xl"></i>
+            <h1 class="text-xl font-bold text-white tracking-wide">Office Security Center</h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="text-sm text-slate-400 font-mono" id="clock">00:00:00</div>
+            <select id="grid-layout" class="bg-slate-900 border border-slate-700 text-white text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block p-2">
+                <option value="grid-cols-1 md:grid-cols-2 lg:grid-cols-3">Grid 3x4 (Default)</option>
+                <option value="grid-cols-1 md:grid-cols-2">Grid 2x6</option>
+                <option value="grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">Grid 4x3</option>
+            </select>
+            <button onclick="toggleGlobalMute()" class="text-slate-400 hover:text-white transition" title="Toggle Audio">
+                <i id="global-mute-icon" class="fa-solid fa-volume-xmark"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow p-4 md:p-6 overflow-y-auto">
+        
+        <!-- Info Alert -->
+        <div class="bg-blue-900/30 border border-blue-800 text-blue-200 px-4 py-3 rounded-lg mb-6 flex items-start gap-3 text-sm">
+            <i class="fa-solid fa-circle-info mt-0.5"></i>
+            <div>
+                <p class="font-semibold mb-1">Mengapa Video Tidak Langsung Play?</p>
+                <p class="text-slate-300">Browser modern (Chrome, Firefox, Safari) <strong>tidak dapat</strong> memutar protokol <code class="bg-blue-950 px-1 rounded">rtsp://</code> secara langsung karena alasan keamanan (tidak mendukung TCP/UDP mentah) dan standar web HTML5. Anda memerlukan server perantara (seperti <a href="https://github.com/bluenviron/mediamtx" target="_blank" class="text-blue-400 underline">MediaMTX</a>) di jaringan Anda untuk mengubah RTSP menjadi WebRTC atau HLS.</p>
+            </div>
+        </div>
+
+        <!-- Camera Grid -->
+        <div id="camera-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+            <!-- Cameras will be injected here via JavaScript -->
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800 border-t border-slate-700 py-3 px-6 text-center text-xs text-slate-500">
+        &copy; 2026 Office EMM Security Dashboard. All streams are private and confidential.
+    </footer>
+
+    <!-- Fullscreen Modal -->
+    <div id="fullscreen-modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeFullscreen()"><i class="fa-solid fa-xmark"></i></button>
+            <div id="modal-video-container" class="camera-container border-2 border-blue-500">
+            <button onclick="closeFullscreen()"><i class="fa-solid fa-xmark"></i></button>
+            <div id="modal-video-container" class="camera-container border-2 border-blue-500">
+                <!-- Video will be copied here -->
+            </div>
+            <div id="modal-title" class="text-white mt-2 font-semibold text-center">Camera Title</div>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // PENGATURAN MEDIAMTX SERVER
+        // =========================================================================
+        // Ganti 'localhost' dengan IP komputer/server tempat Anda menjalankan MediaMTX
+        // Contoh jika MediaMTX diinstal di PC lain: const mediamtxHost = "192.168.1.50";
+        const mediamtxHost = "localhost"; 
+        const webrtcPort = "8889";
+        const baseURL = `http://${mediamtxHost}:${webrtcPort}`;
+
+        // Data Kamera (ID ini HARUS sama dengan yang ada di mediamtx.yml bagian 'paths')
+        const cameras = [
+            { id: 'office_emm', name: 'CCTV Office - Office EMM' },
+            { id: 'lobby', name: 'CCTV Office - Lobby' },
+            { id: 'sales_admin', name: 'CCTV Office - SalesAdmin' },
+            { id: 'lt2', name: 'CCTV Office - Lt2' },
+            { id: 'office_mobius', name: 'CCTV Office - Office Mobius' },
+            { id: 'ex_intertekno', name: 'CCTV Office - Office Ex Intertekno' },
+            { id: 'pantry', name: 'CCTV Office - Pantry' },
+            { id: 'office_afs', name: 'CCTV Office - Office AFS' },
+            { id: 'gudang_sparepart', name: 'CCTV Office - Gudang Sparepart' },
+            { id: 'depan_it', name: 'CCTV Office - Depan IT' },
+            { id: 'ruang_it', name: 'CCTV Office - Ruang IT' },
+            { id: 'ruang_rd', name: 'CCTV Office - Ruang R&D' }
+        ];
+
+        let globalMuted = true;
+
+        function initDashboard() {
+            const grid = document.getElementById('camera-grid');
+            
+            // Menyembunyikan Info Alert karena sekarang kita menggunakan MediaMTX yang valid
+            const infoAlert = document.querySelector('.bg-blue-900\\/30');
+            if (infoAlert) {
+                infoAlert.innerHTML = `
+                    <i class="fa-solid fa-server mt-0.5"></i>
+                    <div>
+                        <p class="font-semibold mb-1">Terhubung ke MediaMTX Proxy</p>
+                        <p class="text-slate-300">Mengambil stream dari <strong>${baseURL}</strong> menggunakan WebRTC untuk latensi rendah (Low Latency HTML5).</p>
+                    </div>
+                `;
+                infoAlert.classList.replace('border-blue-800', 'border-green-800');
+                infoAlert.classList.replace('bg-blue-900/30', 'bg-green-900/30');
+                infoAlert.classList.replace('text-blue-200', 'text-green-200');
+            }
+
+            cameras.forEach(cam => {
+                const card = document.createElement('div');
+                card.className = 'group flex flex-col bg-slate-800 rounded-lg overflow-hidden border border-slate-700 hover:border-slate-500 transition-colors duration-200 relative';
+                
+                const streamUrl = `${baseURL}/${cam.id}`;
+                
+                card.innerHTML = `
+                    <div class="camera-container" id="container_${cam.id}">
+                        
+                        <!-- MediaMTX menyediakan halaman web player default bawaan -->
+                        <!-- Kita menyematkannya (embed) menggunakan iframe agar sangat mudah -->
+                        <iframe 
+                            src="${streamUrl}" 
+                            width="100%" 
+                            height="100%" 
+                            frameborder="0" 
+                            scrolling="no" 
+                            allow="autoplay; fullscreen"
+                            title="${cam.name}"
+                            class="bg-black/50"
+                        ></iframe>
+                        
+                        <div class="camera-title">
+                            <div class="flex items-center">
+                                <span class="status-indicator"></span>
+                                <span class="truncate shadow-text">${cam.name}</span>
+                            </div>
+                            <div class="flex gap-2 pointer-events-auto">
+                                <button onclick="window.open('${streamUrl}', '_blank')" class="text-slate-300 hover:text-white bg-black/50 p-1 rounded transition" title="Buka Player Baru">
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                                </button>
+                                <button onclick="openFullscreen('${cam.id}', '${cam.name}')" class="text-slate-300 hover:text-white bg-black/50 p-1 rounded transition" title="Enlarge (Custom)">
+                                    <i class="fa-solid fa-expand text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        // Clock functionality
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('id-ID', { hour12: false });
+            document.getElementById('clock').textContent = timeString;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Grid Layout Switcher
+        document.getElementById('grid-layout').addEventListener('change', function(e) {
+            const grid = document.getElementById('camera-grid');
+            grid.className = `grid ${e.target.value} gap-4 lg:gap-6`;
+        });
+
+        function toggleGlobalMute() {
+            globalMuted = !globalMuted;
+            const icon = document.getElementById('global-mute-icon');
+            if(globalMuted) {
+                icon.className = 'fa-solid fa-volume-xmark';
+                alert("Catatan: Mute global pada Iframe seringkali tidak bisa dikontrol lewat JavaScript (aturan peramban lintas-domain). Gunakan kontrol volume di dalam masing-masing video jika diperlukan.");
+            } else {
+                icon.className = 'fa-solid fa-volume-high text-green-400';
+            }
+        }
+
+        function copyToClipboard(text) {
+            // Using a temporary textarea to copy text
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                // Could add a toast notification here
+            } catch (err) {
+                console.error('Failed to copy', err);
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // Fullscreen Modal Logic
+        function openFullscreen(id, name) {
+            const modal = document.getElementById('fullscreen-modal');
+            const title = document.getElementById('modal-title');
+            const container = document.getElementById('modal-video-container');
+            const streamUrl = `${baseURL}/${id}`;
+            
+            title.textContent = name;
+            
+            // Recreate iframe in modal
+            container.innerHTML = `
+                <iframe 
+                    src="${streamUrl}" 
+                    width="100%" 
+                    height="100%" 
+                    frameborder="0" 
+                    allow="autoplay; fullscreen"
+                ></iframe>
+            `;
+            
+            modal.classList.add('active');
+        }
+
+        function closeFullscreen() {
+            const modal = document.getElementById('fullscreen-modal');
+            const container = document.getElementById('modal-video-container');
+            modal.classList.remove('active');
+            container.innerHTML = ''; // Clear contents
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', initDashboard);
+
+        // Close modal on escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeFullscreen();
+            }
+        });
+    </script>
+</body>
+</html>
