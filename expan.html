@@ -1,9 +1,9 @@
-<!DOCTYPE1 html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panduan Ekspansi F&B & Central Kitchen Planner</title>
+    <title>Rasa Ci Amy - Panduan Ekspansi & Central Kitchen Ketan Nusantara</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
@@ -16,14 +16,14 @@
             background-color: #f8fafc;
         }
         .tab-active {
-            border-bottom: 3px solid #ef4444;
-            color: #ef4444;
+            border-bottom: 3px solid #0d9488;
+            color: #0d9488;
             font-weight: 700;
         }
         .glass-card {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(8px);
-            border: 1px solid rgba(226, 232, 240, 0.8);
+            border: 1px solid rgba(226, 232, 240, 0.9);
         }
     </style>
 </head>
@@ -34,17 +34,20 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center space-x-3">
-                    <div class="p-2 bg-red-600 text-white rounded-xl shadow-md">
-                        <i class="fa-solid fa-utensils text-xl"></i>
+                    <div class="p-2.5 bg-teal-700 text-amber-300 rounded-xl shadow-md">
+                        <i class="fa-solid fa-wheat-awn text-2xl"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold text-slate-900 leading-tight">F&B Strategy & Central Kitchen Planner</h1>
-                        <p class="text-xs text-slate-500">Panduan Ekspansi Produk Kuliner Konsisten & Tahan Lama</p>
+                        <div class="flex items-center space-x-2">
+                            <h1 class="text-xl font-extrabold text-teal-900 leading-tight">RASA CI AMY</h1>
+                            <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-300">Spesialis Ketan Nusantara</span>
+                        </div>
+                        <p class="text-xs text-slate-500 font-medium">Rasa Enak · Cita Rasa Nusantara · Olahan Ketan Putih & Hitam Konsisten</p>
                     </div>
                 </div>
                 <div class="hidden md:flex space-x-2">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
-                        <i class="fa-solid fa-shield-halved mr-1.5"></i> Standar Kualitas Terjamin
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-teal-100 text-teal-800">
+                        <i class="fa-solid fa-mortar-pestle mr-1.5"></i> Central Kitchen Ready
                     </span>
                 </div>
             </div>
@@ -55,125 +58,265 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-2 mb-8">
             <nav class="flex flex-wrap gap-2 text-sm font-medium text-center text-slate-500 border-b border-slate-100 pb-2">
-                <button onclick="switchTab('comparison')" id="tab-comparison" class="tab-btn flex-1 py-3 px-4 rounded-xl hover:bg-slate-50 transition flex items-center justify-center space-x-2 tab-active">
-                    <i class="fa-solid fa-scale-balanced"></i>
-                    <span>Perbandingan Ekspansi</span>
+                <button onclick="switchTab('products')" id="tab-products" class="tab-btn flex-1 py-3 px-4 rounded-xl hover:bg-slate-50 transition flex items-center justify-center space-x-2 tab-active">
+                    <i class="fa-solid fa-bowl-food"></i>
+                    <span>Katalog Olahan Ketan</span>
                 </button>
                 <button onclick="switchTab('centralkitchen')" id="tab-centralkitchen" class="tab-btn flex-1 py-3 px-4 rounded-xl hover:bg-slate-50 transition flex items-center justify-center space-x-2">
                     <i class="fa-solid fa-kitchen-set"></i>
-                    <span>Alur Central Kitchen</span>
+                    <span>Central Kitchen & SOP</span>
                 </button>
-                <button onclick="switchTab('roadmap')" id="tab-roadmap" class="tab-btn flex-1 py-3 px-4 rounded-xl hover:bg-slate-50 transition flex items-center justify-center space-x-2">
-                    <i class="fa-solid fa-map-location-dot"></i>
-                    <span>Roadmap Bisnis</span>
+                <button onclick="switchTab('comparison')" id="tab-comparison" class="tab-btn flex-1 py-3 px-4 rounded-xl hover:bg-slate-50 transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-store"></i>
+                    <span>Format Stand Gerobak</span>
                 </button>
                 <button onclick="switchTab('calculator')" id="tab-calculator" class="tab-btn flex-1 py-3 px-4 rounded-xl hover:bg-slate-50 transition flex items-center justify-center space-x-2">
                     <i class="fa-solid fa-calculator"></i>
-                    <span>Simulasi Biaya & Profit</span>
+                    <span>Simulasi Profit Stand</span>
                 </button>
             </nav>
         </div>
 
-        <!-- TAB 1: Comparison -->
-        <section id="content-comparison" class="tab-content space-y-6">
-            <div class="bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-2xl p-6 sm:p-8 shadow-lg">
-                <h2 class="text-2xl sm:text-3xl font-extrabold mb-2">Memilih Model Ekspansi yang Tepat</h2>
-                <p class="text-red-100 max-w-3xl text-sm sm:text-base">
-                    Untuk membangun merek yang bertahan lama, penting untuk menyeimbangkan antara kecepatan pertumbuhan (*speed*), kendali kualitas (*quality control*), dan efisiensi modal (*capital efficiency*).
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Gerobak / Booth Card -->
-                <div class="glass-card rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="p-3 bg-amber-100 text-amber-600 rounded-xl">
-                                <i class="fa-solid fa-store text-2xl"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-bold text-slate-900">Stand Gerobak / Booth</h3>
-                                <p class="text-xs text-slate-500">Modal Terjangkau & Multi-Outlet</p>
-                            </div>
-                        </div>
-                        <span class="text-xs font-bold px-2.5 py-1 bg-amber-50 text-amber-700 rounded-lg border border-amber-200">
-                            Rp 3 - 15 Juta/Unit
-                        </span>
+        <!-- TAB 1: Product Showcase -->
+        <section id="content-products" class="tab-content space-y-6">
+            <div class="bg-gradient-to-r from-teal-800 to-teal-900 text-white rounded-2xl p-6 sm:p-8 shadow-lg">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <span class="text-amber-300 font-bold text-xs uppercase tracking-wider">Lini Produk Lengkap</span>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold mt-1">Katalog Olahan Ketan Putih & Hitam "Rasa Ci Amy"</h2>
+                        <p class="text-teal-100 max-w-2xl text-sm mt-2">
+                            Memadukan tekstur pulen alami dari beras ketan pilihan dengan racikan santan & gula aren asli Nusantara. Diproduksi terpusat agar rasa manis, gurih, dan kekenyalannya selalu konsisten di setiap gerobak.
+                        </p>
                     </div>
-                    <ul class="space-y-2.5 text-sm text-slate-600 mb-6">
-                        <li class="flex items-start"><i class="fa-solid fa-circle-check text-emerald-500 mr-2 mt-1"></i> Biaya investasi awal rendah dan mudah direplikasi.</li>
-                        <li class="flex items-start"><i class="fa-solid fa-circle-check text-emerald-500 mr-2 mt-1"></i> Sangat efisien di area high foot-traffic (mall, Minimarket, minimarket).</li>
-                        <li class="flex items-start"><i class="fa-solid fa-circle-xmark text-rose-500 mr-2 mt-1"></i> Terikat biaya sewa lahan & kapasitas stok terbatas.</li>
-                    </ul>
-                    <div class="p-3 bg-slate-50 rounded-xl text-xs text-slate-500 border border-slate-100">
-                        <strong>Rekomendasi:</strong> Terbaik untuk jualan makanan saji cepat, camilan, minuman, & ekspansi jumlah titik dengan cepat.
-                    </div>
-                </div>
-
-                <!-- Food Truck Card -->
-                <div class="glass-card rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="p-3 bg-blue-100 text-blue-600 rounded-xl">
-                                <i class="fa-solid fa-truck-monster text-2xl"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-bold text-slate-900">Food Truck</h3>
-                                <p class="text-xs text-slate-500">Mobilitas & Lifestyle Branding</p>
-                            </div>
-                        </div>
-                        <span class="text-xs font-bold px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg border border-blue-200">
-                            Rp 80 - 200+ Juta/Unit
-                        </span>
-                    </div>
-                    <ul class="space-y-2.5 text-sm text-slate-600 mb-6">
-                        <li class="flex items-start"><i class="fa-solid fa-circle-check text-emerald-500 mr-2 mt-1"></i> Fleksibel berpindah event, bazar, dan titik kumpul ramai.</li>
-                        <li class="flex items-start"><i class="fa-solid fa-circle-check text-emerald-500 mr-2 mt-1"></i> Alat dapur lebih lengkap & nilai visual branding tinggi.</li>
-                        <li class="flex items-start"><i class="fa-solid fa-circle-xmark text-rose-500 mr-2 mt-1"></i> Modal besar, perawatan mesin, dan risiko biaya operasional tinggi.</li>
-                    </ul>
-                    <div class="p-3 bg-slate-50 rounded-xl text-xs text-slate-500 border border-slate-100">
-                        <strong>Rekomendasi:</strong> Terbaik untuk branding segmen menengah ke atas, target bazar/event, dan menu yang butuh perkakas dapur lengkap.
+                    <div class="bg-white/10 p-4 rounded-xl border border-white/20 text-center min-w-[200px]">
+                        <span class="block text-2xl font-black text-amber-300">5 Kategori</span>
+                        <span class="text-xs text-teal-100 font-medium">Lini Spesialis Ketan Nusantara</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Matrix Franchise vs Modal Sendiri -->
-            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm mt-8">
-                <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
-                    <i class="fa-solid fa-diagram-project text-red-500 mr-2"></i> Perbandingan Model Bisnis: Franchise vs Own Store
+            <!-- Category 1: Bubur & Makanan Manis Berkuah -->
+            <div class="space-y-3">
+                <h3 class="text-lg font-extrabold text-teal-900 border-l-4 border-teal-700 pl-3 flex items-center space-x-2">
+                    <i class="fa-solid fa-mug-hot text-teal-700"></i>
+                    <span>1. Olahan Bubur & Makanan Manis Berkuah</span>
                 </h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left text-slate-600">
-                        <thead class="text-xs text-slate-700 uppercase bg-slate-100 rounded-lg">
-                            <tr>
-                                <th class="py-3 px-4">Parameter</th>
-                                <th class="py-3 px-4 bg-amber-50/50 text-amber-900">Franchise / Kemitraan Jual Putus</th>
-                                <th class="py-3 px-4 bg-emerald-50/50 text-emerald-900">Modal Sendiri (Own Store) + Central Kitchen</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            <tr>
-                                <td class="py-3 px-4 font-semibold text-slate-900">Kecepatan Tutup/Gagal</td>
-                                <td class="py-3 px-4 text-rose-600 font-medium"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Sangat Tinggi (Jika hanya ikut tren)</td>
-                                <td class="py-3 px-4 text-emerald-600 font-medium"><i class="fa-solid fa-shield-heart mr-1"></i> Rendah (Kualitas terjaga)</td>
-                            </tr>
-                            <tr>
-                                <td class="py-3 px-4 font-semibold text-slate-900">Konsistensi Rasa</td>
-                                <td class="py-3 px-4">Sering berubah tergantung kepatuhan mitra</td>
-                                <td class="py-3 px-4 font-semibold text-emerald-700">100% Terkontrol via Central Kitchen</td>
-                            </tr>
-                            <tr>
-                                <td class="py-3 px-4 font-semibold text-slate-900">Margin Keuntungan</td>
-                                <td class="py-3 px-4">Terbagi / Kecil per outlet</td>
-                                <td class="py-3 px-4">100% Profit Bersih Milik Anda</td>
-                            </tr>
-                            <tr>
-                                <td class="py-3 px-4 font-semibold text-slate-900">Kontrol Kualitas SOP</td>
-                                <td class="py-3 px-4">Sulit diawasi secara penuh</td>
-                                <td class="py-3 px-4">Sangat Mudah Diawasi & Diperbaiki</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="glass-card rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="px-2 py-0.5 bg-purple-100 text-purple-900 font-bold text-[11px] rounded-md">Ketan Hitam & Putih</span>
+                                <span class="text-[11px] font-semibold text-slate-500"><i class="fa-solid fa-fire-burner mr-1"></i>Saji Hangat</span>
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-base">Bubur Ketan Hitam / Putih</h4>
+                            <p class="text-xs text-slate-600 mt-1">Olahan klasik yang direbus dengan gula merah atau gula pasir, daun pandan, lalu disajikan dengan siraman santan kental. Sering dipadukan dengan kacang hijau atau campuran ketan hitam dan putih sekaligus.</p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
+                            <span class="font-bold text-teal-800">Target HPP: Rp 4.500</span>
+                            <span class="font-extrabold text-slate-900">Jual: Rp 12.000 / porsi</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="px-2 py-0.5 bg-amber-100 text-amber-900 font-bold text-[11px] rounded-md">Jajanan Tradisional</span>
+                                <span class="text-[11px] font-semibold text-slate-500"><i class="fa-solid fa-leaf mr-1"></i>Khas Nusantara</span>
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-base">Lapek Sagan</h4>
+                            <p class="text-xs text-slate-600 mt-1">Jajanan tradisional khas Nusantara berbahan pisang manis yang dibalut gurihnya campuran ketan putih dan ketan hitam dalam bungkus daun pisang.</p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
+                            <span class="font-bold text-teal-800">Target HPP: Rp 3.500</span>
+                            <span class="font-extrabold text-slate-900">Jual: Rp 10.000 / isi 2</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category 2: Olahan Fermentasi (Tape) -->
+            <div class="space-y-3 pt-2">
+                <h3 class="text-lg font-extrabold text-teal-900 border-l-4 border-teal-700 pl-3 flex items-center space-x-2">
+                    <i class="fa-solid fa-jar text-teal-700"></i>
+                    <span>2. Olahan Fermentasi (Tape)</span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="glass-card rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="px-2 py-0.5 bg-emerald-100 text-emerald-900 font-bold text-[11px] rounded-md">Fermentasi Alami</span>
+                                <span class="text-[11px] font-semibold text-slate-500"><i class="fa-solid fa-snowflake mr-1"></i>Saji Dingin/Chilled</span>
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-base">Tape Ketan Hitam & Putih</h4>
+                            <p class="text-xs text-slate-600 mt-1">Beras ketan yang dikukus, didinginkan, lalu diberi ragi tape dan difermentasi presisi di Dapur Pusat hingga menghasilkan rasa manis, legit, dan aroma khas alami.</p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
+                            <span class="font-bold text-teal-800">Target HPP: Rp 4.000</span>
+                            <span class="font-extrabold text-slate-900">Jual: Rp 12.000 / cup</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category 3: Olahan Gurih & Lauk Pendamping -->
+            <div class="space-y-3 pt-2">
+                <h3 class="text-lg font-extrabold text-teal-900 border-l-4 border-teal-700 pl-3 flex items-center space-x-2">
+                    <i class="fa-solid fa-bowl-rice text-teal-700"></i>
+                    <span>3. Olahan Gurih & Lauk Pendamping</span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="glass-card rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="px-2 py-0.5 bg-amber-100 text-amber-900 font-bold text-[11px] rounded-md">Gurih Rempah</span>
+                                <span class="text-[11px] font-semibold text-slate-500"><i class="fa-solid fa-pepper-hot mr-1"></i>Serundeng Aren</span>
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-base">Ketan Serundeng Dual Warna</h4>
+                            <p class="text-xs text-slate-600 mt-1">Ketan (campuran hitam dan putih) yang dimasak dengan santan gurih, lalu disajikan dengan taburan serundeng kelapa sangrai rempah & gula aren khas Ci Amy.</p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
+                            <span class="font-bold text-teal-800">Target HPP: Rp 4.500</span>
+                            <span class="font-extrabold text-slate-900">Jual: Rp 12.000 / porsi</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="px-2 py-0.5 bg-yellow-100 text-yellow-900 font-bold text-[11px] rounded-md">Ketan Kuning</span>
+                                <span class="text-[11px] font-semibold text-slate-500"><i class="fa-solid fa-egg mr-1"></i>Abon / Telur</span>
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-base">Ketan Bumbu / Ketan Kuning</h4>
+                            <p class="text-xs text-slate-600 mt-1">Ketan putih yang dimasak gurih dengan santan kental dan kunyit/rempah pilihan, disajikan dengan topping abon sapi premium atau irisan telur dadar khas.</p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
+                            <span class="font-bold text-teal-800">Target HPP: Rp 5.500</span>
+                            <span class="font-extrabold text-slate-900">Jual: Rp 15.000 / porsi</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category 4: Kue Basah & Jajanan Pasar -->
+            <div class="space-y-3 pt-2">
+                <h3 class="text-lg font-extrabold text-teal-900 border-l-4 border-teal-700 pl-3 flex items-center space-x-2">
+                    <i class="fa-solid fa-cookie-bite text-teal-700"></i>
+                    <span>4. Kue Basah & Jajanan Pasar</span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="glass-card rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="px-2 py-0.5 bg-teal-100 text-teal-900 font-bold text-[11px] rounded-md">Ketan Putih</span>
+                                <span class="text-[11px] font-semibold text-slate-500">Kinca Aren</span>
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-base">Lupis Ketan Aren</h4>
+                            <p class="text-xs text-slate-600 mt-1">Ketan putih padat dibentuk segitiga, direbus dalam daun pisang, disajikan dengan kelapa parut kukus & siraman kinca gula aren pekat.</p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
+                            <span class="font-bold text-teal-800">Target HPP: Rp 4.500</span>
+                            <span class="font-extrabold text-slate-900">Jual: Rp 12.000 / porsi</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="px-2 py-0.5 bg-slate-100 text-slate-900 font-bold text-[11px] rounded-md">Isian Ayam/Daging</span>
+                                <span class="text-[11px] font-semibold text-slate-500">Praktis & Savory</span>
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-base">Lemper Ketan Spesial</h4>
+                            <p class="text-xs text-slate-600 mt-1">Ketan putih gurih bersantan yang diisi abon ayam melimpah atau cincangan daging sapi berbumbu, dibungkus rapi daun pisang bakar.</p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
+                            <span class="font-bold text-teal-800">Target HPP: Rp 3.000</span>
+                            <span class="font-extrabold text-slate-900">Jual: Rp 7.000 / pcs</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="px-2 py-0.5 bg-purple-100 text-purple-900 font-bold text-[11px] rounded-md">Ketan Hitam & Putih</span>
+                                <span class="text-[11px] font-semibold text-slate-500">Balut Gula</span>
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-base">Kue Getas Ketan Hitam</h4>
+                            <p class="text-xs text-slate-600 mt-1">Kue tradisional berbahan tepung ketan hitam, ketan putih, dan kelapa parut. Digoreng garing lalu dibalut larutan gula pasir hingga mengeras putih.</p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
+                            <span class="font-bold text-teal-800">Target HPP: Rp 2.500</span>
+                            <span class="font-extrabold text-slate-900">Jual: Rp 6.000 / pcs</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="px-2 py-0.5 bg-amber-100 text-amber-900 font-bold text-[11px] rounded-md">Kelapa Parut</span>
+                                <span class="text-[11px] font-semibold text-slate-500">Khas Tradisional</span>
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-base">Wingko Ketan Hitam / Putih</h4>
+                            <p class="text-xs text-slate-600 mt-1">Kue panggang padat, gurih, dan legit berbahan dasar ketan pilihan serta parutan kelapa muda berkualitas tinggi.</p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
+                            <span class="font-bold text-teal-800">Target HPP: Rp 3.500</span>
+                            <span class="font-extrabold text-slate-900">Jual: Rp 8.000 / pcs</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="px-2 py-0.5 bg-orange-100 text-orange-900 font-bold text-[11px] rounded-md">Kue Lapis</span>
+                                <span class="text-[11px] font-semibold text-slate-500">Legit & Rich</span>
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-base">Engkak Ketan Nusantara</h4>
+                            <p class="text-xs text-slate-600 mt-1">Kue lapis panggang khas berbasis tepung ketan dan santan kental yang dipanggang berlapis-lapis hingga menghasilkan tekstur kenyal dan legit.</p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
+                            <span class="font-bold text-teal-800">Target HPP: Rp 6.000</span>
+                            <span class="font-extrabold text-slate-900">Jual: Rp 15.000 / potong</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category 5: Olahan Kue Modern & Bolu -->
+            <div class="space-y-3 pt-2">
+                <h3 class="text-lg font-extrabold text-teal-900 border-l-4 border-teal-700 pl-3 flex items-center space-x-2">
+                    <i class="fa-solid fa-cake-candles text-teal-700"></i>
+                    <span>5. Olahan Kue Modern & Bolu</span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="glass-card rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="px-2 py-0.5 bg-purple-100 text-purple-900 font-bold text-[11px] rounded-md">Ketan Hitam</span>
+                                <span class="text-[11px] font-semibold text-slate-500"><i class="fa-solid fa-temperature-arrow-up mr-1"></i>Panggang / Kukus</span>
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-base">Bolu Ketan Hitam Ci Amy</h4>
+                            <p class="text-xs text-slate-600 mt-1">Kue bolu lembut, berpori rapat, dan legit dibuat dari tepung ketan hitam murni, telur segar, santan, dan mentega pilihan.</p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
+                            <span class="font-bold text-teal-800">Target HPP: Rp 5.500</span>
+                            <span class="font-extrabold text-slate-900">Jual: Rp 15.000 / potong</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="px-2 py-0.5 bg-amber-100 text-amber-900 font-bold text-[11px] rounded-md">Topping Ketan Hitam</span>
+                                <span class="text-[11px] font-semibold text-slate-500">Khas Ci Amy</span>
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-base">Martabak Ketan Hitam Manis</h4>
+                            <p class="text-xs text-slate-600 mt-1">Martabak manis bersarang lezat disajikan dengan isian olahan ketan hitam manis legit, parutan keju, dan siraman susu kental manis.</p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
+                            <span class="font-bold text-teal-800">Target HPP: Rp 7.000</span>
+                            <span class="font-extrabold text-slate-900">Jual: Rp 18.000 / porsi</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -182,10 +325,10 @@
         <section id="content-centralkitchen" class="tab-content hidden space-y-6">
             <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
                 <div class="max-w-3xl mb-8">
-                    <span class="text-xs font-extrabold uppercase tracking-wider text-red-600 bg-red-50 px-3 py-1 rounded-full">Kunci Produk Konsisten</span>
-                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">Alur Kerja Dapur Pusat (Central Kitchen)</h2>
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-teal-700 bg-teal-50 px-3 py-1 rounded-full">Kunci Kualitas & Rasa Sama</span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">Dapur Pusat (Central Kitchen) "Rasa Ci Amy"</h2>
                     <p class="text-slate-600 mt-2 text-sm sm:text-base">
-                        Memindahkan 80% proses produksi rumit ke dapur pusat agar operasional di stand/cabang menjadi sangat sederhana, cepat, dan rasa terjamin sama.
+                        Memindahkan 80% proses pengolahan ketan (merendam, mengukus, menguleni, dan meracik kinca) ke Dapur Pusat. Staf di gerobak hanya fokus serving cepat.
                     </p>
                 </div>
 
@@ -194,105 +337,93 @@
                     <!-- Step 1 -->
                     <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col justify-between">
                         <div>
-                            <div class="w-8 h-8 bg-red-600 text-white font-bold rounded-xl flex items-center justify-center mb-3">1</div>
-                            <h4 class="font-bold text-slate-900 mb-1">Pencampuran Bumbu Biang</h4>
-                            <p class="text-xs text-slate-500">Resep rahasia dibuat terpusat menggunakan timbangan gramasi presisi.</p>
+                            <div class="w-8 h-8 bg-teal-800 text-white font-bold rounded-xl flex items-center justify-center mb-3">1</div>
+                            <h4 class="font-bold text-slate-900 mb-1">Standardisasi Beras Ketan</h4>
+                            <p class="text-xs text-slate-500">Pemilihan beras ketan putih & hitam super, perendaman presisi, dan pengukusan dengan santan terukur gramasi.</p>
                         </div>
-                        <div class="mt-4 pt-3 border-t border-slate-200 text-xs text-slate-600 font-medium">
-                            <i class="fa-solid fa-flask text-red-500 mr-1"></i> Dapur Pusat (Homemade)
+                        <div class="mt-4 pt-3 border-t border-slate-200 text-xs text-teal-700 font-medium">
+                            <i class="fa-solid fa-scale-balanced mr-1"></i> Resep Bumbu Kunci Ci Amy
                         </div>
                     </div>
 
                     <!-- Step 2 -->
                     <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col justify-between">
                         <div>
-                            <div class="w-8 h-8 bg-red-600 text-white font-bold rounded-xl flex items-center justify-center mb-3">2</div>
-                            <h4 class="font-bold text-slate-900 mb-1">Portion Control & Packaging</h4>
-                            <p class="text-xs text-slate-500">Bumbu & bahan diporsi per porsi jualan lalu di-vacuum seal / frozen.</p>
+                            <div class="w-8 h-8 bg-teal-800 text-white font-bold rounded-xl flex items-center justify-center mb-3">2</div>
+                            <h4 class="font-bold text-slate-900 mb-1">Portion Control & Vacuum Pack</h4>
+                            <p class="text-xs text-slate-500">Ketan dan olahan kue diporsi per kemasan/kg lalu di-vacuum sealer higienis bersertifikat P-IRT.</p>
                         </div>
-                        <div class="mt-4 pt-3 border-t border-slate-200 text-xs text-slate-600 font-medium">
-                            <i class="fa-solid fa-box-archive text-amber-500 mr-1"></i> Standar Kebersihan (PIRT)
+                        <div class="mt-4 pt-3 border-t border-slate-200 text-xs text-amber-700 font-medium">
+                            <i class="fa-solid fa-box-archive mr-1"></i> Standar Kebersihan Higienis
                         </div>
                     </div>
 
                     <!-- Step 3 -->
                     <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col justify-between">
                         <div>
-                            <div class="w-8 h-8 bg-red-600 text-white font-bold rounded-xl flex items-center justify-center mb-3">3</div>
-                            <h4 class="font-bold text-slate-900 mb-1">Distribusi ke Outlet</h4>
-                            <p class="text-xs text-slate-500">Pengiriman stok bumbu & bahan setengah jadi berkala sesuai kebutuhan cabang.</p>
+                            <div class="w-8 h-8 bg-teal-800 text-white font-bold rounded-xl flex items-center justify-center mb-3">3</div>
+                            <h4 class="font-bold text-slate-900 mb-1">Pengiriman Pasokan Rutin</h4>
+                            <p class="text-xs text-slate-500">Distribusi stok ketan setengah jadi / kue siap saji ke tiap gerobak cabang 2 hari sekali.</p>
                         </div>
-                        <div class="mt-4 pt-3 border-t border-slate-200 text-xs text-slate-600 font-medium">
-                            <i class="fa-solid fa-truck-fast text-blue-500 mr-1"></i> Cold Chain / Supply Chain
+                        <div class="mt-4 pt-3 border-t border-slate-200 text-xs text-blue-700 font-medium">
+                            <i class="fa-solid fa-truck-ram-box mr-1"></i> Logistik Terjadwal
                         </div>
                     </div>
 
                     <!-- Step 4 -->
                     <div class="p-5 bg-emerald-50 rounded-2xl border border-emerald-200 flex flex-col justify-between">
                         <div>
-                            <div class="w-8 h-8 bg-emerald-600 text-white font-bold rounded-xl flex items-center justify-center mb-3">4</div>
-                            <h4 class="font-bold text-emerald-900 mb-1">Penyajian Ringkas di Cabang</h4>
-                            <p class="text-xs text-emerald-700">Staf cabang tinggal melakukan *heating*, goreng, atau *assembling* akhir.</p>
+                            <div class="w-8 h-8 bg-emerald-700 text-white font-bold rounded-xl flex items-center justify-center mb-3">4</div>
+                            <h4 class="font-bold text-emerald-900 mb-1">Penyajian Ringkas 2 Menit</h4>
+                            <p class="text-xs text-emerald-700">Staf gerobak tinggal menghangatkan di kloter pemanas / memotong dan memberi topping khas Ci Amy.</p>
                         </div>
                         <div class="mt-4 pt-3 border-t border-emerald-200 text-xs text-emerald-800 font-medium">
-                            <i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> Konsisten & Cepat Saji
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Checklist Keuntungan Dapur Pusat -->
-                <div class="mt-8 bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                    <h3 class="text-md font-bold text-slate-900 mb-3">Keuntungan Utama Central Kitchen untuk Branding Tahan Lama:</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm text-slate-600">
-                        <div class="flex items-start space-x-2">
-                            <i class="fa-solid fa-lock text-red-500 mt-1"></i>
-                            <span><strong>Rahasia Resep Aman:</strong> Karyawan stand tidak tahu racikan bumbu biang.</span>
-                        </div>
-                        <div class="flex items-start space-x-2">
-                            <i class="fa-solid fa-clock text-amber-500 mt-1"></i>
-                            <span><strong>Layanan Cepat:</strong> Pelanggan tidak perlu menunggu lama saat memesan.</span>
-                        </div>
-                        <div class="flex items-start space-x-2">
-                            <i class="fa-solid fa-chart-line text-emerald-500 mt-1"></i>
-                            <span><strong>Food Waste Rendah:</strong> Pembagian porsi presisi mengurangi bahan terbuang.</span>
+                            <i class="fa-solid fa-circle-check mr-1"></i> Rasa 100% Otentik
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- TAB 3: Roadmap -->
-        <section id="content-roadmap" class="tab-content hidden space-y-6">
+        <!-- TAB 3: Comparison & Gerobak Stand -->
+        <section id="content-comparison" class="tab-content hidden space-y-6">
             <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
-                <h2 class="text-2xl font-extrabold text-slate-900 mb-6">Tahapan Pembangunan Brand Makanan Tahan Lama</h2>
-                
-                <div class="space-y-6 relative border-l-2 border-red-200 ml-4 pl-6">
-                    <!-- Phase 1 -->
-                    <div class="relative">
-                        <span class="absolute -left-9 top-0 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center text-xs font-bold">F1</span>
-                        <h3 class="text-lg font-bold text-slate-900">Fase 1: Standarisasi Resep & Uji Daya Simpan</h3>
-                        <p class="text-sm text-slate-600 mt-1">Ubah resep masakan dari ukuran takaran sendok menjadi gramasi standar. Lakukan tes ketahanan bumbu (suhu ruang, kulkas, & freezer).</p>
+                <h2 class="text-2xl font-extrabold text-slate-900 mb-2">Desain & Operasional Stand Gerobak "Rasa Ci Amy"</h2>
+                <p class="text-sm text-slate-500 mb-6">Membangun gerobak beridentitas tebal (Warna Teal-Kayu-Emas) dengan alur kerja cepat & bersih.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-3 bg-teal-700 text-white rounded-xl">
+                                <i class="fa-solid fa-store text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900">Spesifikasi Gerobak Modal Sendiri</h3>
+                                <p class="text-xs text-slate-500">Estimasi Investasi Unit: Rp 6 - 12 Juta/Gerobak</p>
+                            </div>
+                        </div>
+                        <ul class="space-y-2 text-xs text-slate-600">
+                            <li class="flex items-start"><i class="fa-solid fa-check text-teal-600 mr-2 mt-0.5"></i> Frame kayu jati/alumunium dengan warna dominan Teal & elemen kayu hangat.</li>
+                            <li class="flex items-start"><i class="fa-solid fa-check text-teal-600 mr-2 mt-0.5"></i> Dilengkapi panci kukusan stainless tanam & warmer display kue.</li>
+                            <li class="flex items-start"><i class="fa-solid fa-check text-teal-600 mr-2 mt-0.5"></i> Memiliki banner bagan edukasi Central Kitchen agar menambah kepercayaan pembeli.</li>
+                        </ul>
                     </div>
 
-                    <!-- Phase 2 -->
-                    <div class="relative">
-                        <span class="absolute -left-9 top-0 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center text-xs font-bold">F2</span>
-                        <h3 class="text-lg font-bold text-slate-900">Fase 2: Uji Coba 2-3 Outlet Modal Sendiri (Own Store)</h3>
-                        <p class="text-sm text-slate-600 mt-1">Buka 2-3 gerobak/booth milik sendiri. Pasok bumbu dari Central Kitchen rumahan Anda untuk menguji alur operasional dan penerimaan pasar.</p>
-                    </div>
-
-                    <!-- Phase 3 -->
-                    <div class="relative">
-                        <span class="absolute -left-9 top-0 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center text-xs font-bold">F3</span>
-                        <h3 class="text-lg font-bold text-slate-900">Fase 3: Pemantapan Branding & Legalisasi Usaha</h3>
-                        <p class="text-sm text-slate-600 mt-1">Buat kemasan eksklusif, desain logo profesional, urus legalitas (PIRT, BPOM, Halal), serta buat SOP tertulis secara detail.</p>
-                    </div>
-
-                    <!-- Phase 4 -->
-                    <div class="relative">
-                        <span class="absolute -left-9 top-0 w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center text-xs font-bold">F4</span>
-                        <h3 class="text-lg font-bold text-slate-900">Fase 4: Ekspansi Agresif / Kemitraan Terintegrasi</h3>
-                        <p class="text-sm text-slate-600 mt-1">Setelah rantai pasok dan profitabilitas terbukti, lakukan penambahan cabang secara mandiri atau tawarkan kemitraan autopilot yang wajib mengambil bumbu dari Central Kitchen Anda.</p>
+                    <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-3 bg-amber-600 text-white rounded-xl">
+                                <i class="fa-solid fa-bullseye text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900">Kriteria Lokasi Gerobak Ideal</h3>
+                                <p class="text-xs text-slate-500">Menyasar Pembeli Rutin & Jajanan Sore/Malam</p>
+                            </div>
+                        </div>
+                        <ul class="space-y-2 text-xs text-slate-600">
+                            <li class="flex items-start"><i class="fa-solid fa-location-dot text-amber-600 mr-2 mt-0.5"></i> Pelataran minimarket (Indomaret/Alfamart) kawasan pemukiman padat.</li>
+                            <li class="flex items-start"><i class="fa-solid fa-location-dot text-amber-600 mr-2 mt-0.5"></i> Area Pujasera / Pasar Kuliner Malam dekat stasiun atau area perkantoran.</li>
+                            <li class="flex items-start"><i class="fa-solid fa-location-dot text-amber-600 mr-2 mt-0.5"></i> Sewa lokasi terjangkau (Rp 700rb - 1.5jt/bulan) untuk menjaga modal aman.</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -301,59 +432,60 @@
         <!-- TAB 4: Calculator -->
         <section id="content-calculator" class="tab-content hidden space-y-6">
             <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
-                <h2 class="text-2xl font-extrabold text-slate-900 mb-2">Simulasi Keuntungan Stand / Outlet</h2>
-                <p class="text-sm text-slate-500 mb-6">Hitung estimasi potensi keuntungan harian dan bulanan per satu unit stand.</p>
+                <h2 class="text-2xl font-extrabold text-slate-900 mb-2">Simulasi Keuntungan 1 Gerobak "Rasa Ci Amy"</h2>
+                <p class="text-sm text-slate-500 mb-6">Hitung estimasi potensi profit bulanan per unit gerobak olahan ketan.</p>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <!-- Calculator Form -->
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Harga Jual Per Porsi (Rp)</label>
-                            <input type="number" id="calc-price" value="15000" class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Rata-rata Harga Jual Per Porsi (Rp)</label>
+                            <input type="number" id="calc-price" value="14000" class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-600 focus:outline-none text-sm">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Modal HPP / Bumbu + Bahan Per Porsi (Rp)</label>
-                            <input type="number" id="calc-hpp" value="7000" class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">HPP Bahan Ketan & Kemasan / Porsi (Rp)</label>
+                            <input type="number" id="calc-hpp" value="5800" class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-600 focus:outline-none text-sm">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Target Penjualan Per Hari (Porsi)</label>
-                            <input type="number" id="calc-qty" value="60" class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Target Terjual Per Hari (Porsi)</label>
+                            <input type="number" id="calc-qty" value="70" class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-600 focus:outline-none text-sm">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Sewa Lapan & Operasional Bulanan (Rp)</label>
-                            <input type="number" id="calc-opex" value="1500000" class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Gaji Karyawan + Sewa Lapak / Bulan (Rp)</label>
+                            <input type="number" id="calc-opex" value="3200000" class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-600 focus:outline-none text-sm">
                         </div>
-                        <button onclick="calculateProfit()" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition shadow-md">
-                            Hitung Profitabilitas
+                        <button onclick="calculateProfit()" class="w-full py-3 bg-teal-800 hover:bg-teal-900 text-amber-300 font-bold rounded-xl transition shadow-md flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-calculator"></i>
+                            <span>Hitung Estimasi Profit</span>
                         </button>
                     </div>
 
                     <!-- Calculator Output -->
                     <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col justify-between">
                         <div>
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">Estimasi Hasil Finansial</h3>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">Proyeksi Finansial Harian & Bulanan</h3>
                             <div class="space-y-3">
                                 <div class="flex justify-between text-sm">
                                     <span class="text-slate-600">Omset Bulanan (30 Hari):</span>
-                                    <span id="res-omset" class="font-bold text-slate-900">Rp 27.000.000</span>
+                                    <span id="res-omset" class="font-bold text-slate-900">Rp 29.400.000</span>
                                 </div>
                                 <div class="flex justify-between text-sm">
-                                    <span class="text-slate-600">Total HPP Bahan Baku:</span>
-                                    <span id="res-hpp" class="font-bold text-slate-900">Rp 12.600.000</span>
+                                    <span class="text-slate-600">Total HPP Bahan Baku Pasokan:</span>
+                                    <span id="res-hpp" class="font-bold text-slate-900">Rp 12.180.000</span>
                                 </div>
                                 <div class="flex justify-between text-sm">
-                                    <span class="text-slate-600">Biaya Operasional & Sewa:</span>
-                                    <span id="res-opex" class="font-bold text-slate-900">Rp 1.500.000</span>
+                                    <span class="text-slate-600">Biaya Operasional Gerobak:</span>
+                                    <span id="res-opex" class="font-bold text-slate-900">Rp 3.200.000</span>
                                 </div>
                                 <hr class="border-slate-200 my-2">
                                 <div class="flex justify-between text-base font-bold">
-                                    <span class="text-emerald-700">Profit Bersih / Bulan:</span>
-                                    <span id="res-profit" class="text-emerald-600 text-lg">Rp 12.900.000</span>
+                                    <span class="text-teal-800">Profit Bersih Bersih / Bulan:</span>
+                                    <span id="res-profit" class="text-teal-700 text-lg">Rp 14.020.000</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="mt-6 p-3 bg-emerald-100/60 rounded-xl text-xs text-emerald-800 border border-emerald-200">
-                            <i class="fa-solid fa-lightbulb mr-1"></i> Keuntungan ini milik penuh Anda jika menggunakan cabang modal sendiri!
+                        <div class="mt-6 p-3 bg-teal-100/60 rounded-xl text-xs text-teal-900 border border-teal-200">
+                            <i class="fa-solid fa-shield-heart mr-1 text-teal-700"></i> Dengan 3 gerobak modal sendiri yang stabil, potensi profit bersih usaha Anda bisa mencapai <strong>Rp 40+ Juta / Bulan</strong>.
                         </div>
                     </div>
                 </div>
@@ -364,12 +496,12 @@
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 py-6 mt-12">
         <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
-            <p>© 2026 Strategy & Central Kitchen Planner - Formula Bisnis Kuliner Konsisten & Tahan Lama</p>
+            <p>© 2026 <strong>Rasa Ci Amy</strong> - Strategi Ekspansi Ketan Nusantara dengan Dapur Pusat Konsisten</p>
         </div>
     </footer>
 
+    <!-- JavaScript logic -->
     <script>
-        // Tab Switcher Logic
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('tab-active'));
@@ -378,7 +510,6 @@
             document.getElementById('tab-' + tabId).classList.add('tab-active');
         }
 
-        // Financial Profit Calculator
         function calculateProfit() {
             const price = parseFloat(document.getElementById('calc-price').value) || 0;
             const hpp = parseFloat(document.getElementById('calc-hpp').value) || 0;
@@ -398,7 +529,7 @@
             document.getElementById('res-profit').innerText = 'Rp ' + profitBulanan.toLocaleString('id-ID');
         }
 
-        // Initial Calculation
+        // Initialize calculation
         calculateProfit();
     </script>
 </body>
