@@ -1,0 +1,405 @@
+<!DOCTYPE1 html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panduan Ekspansi F&B & Central Kitchen Planner</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .tab-active {
+            border-bottom: 3px solid #ef4444;
+            color: #ef4444;
+            font-weight: 700;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Header Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 bg-red-600 text-white rounded-xl shadow-md">
+                        <i class="fa-solid fa-utensils text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-slate-900 leading-tight">F&B Strategy & Central Kitchen Planner</h1>
+                        <p class="text-xs text-slate-500">Panduan Ekspansi Produk Kuliner Konsisten & Tahan Lama</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex space-x-2">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                        <i class="fa-solid fa-shield-halved mr-1.5"></i> Standar Kualitas Terjamin
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-2 mb-8">
+            <nav class="flex flex-wrap gap-2 text-sm font-medium text-center text-slate-500 border-b border-slate-100 pb-2">
+                <button onclick="switchTab('comparison')" id="tab-comparison" class="tab-btn flex-1 py-3 px-4 rounded-xl hover:bg-slate-50 transition flex items-center justify-center space-x-2 tab-active">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                    <span>Perbandingan Ekspansi</span>
+                </button>
+                <button onclick="switchTab('centralkitchen')" id="tab-centralkitchen" class="tab-btn flex-1 py-3 px-4 rounded-xl hover:bg-slate-50 transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-kitchen-set"></i>
+                    <span>Alur Central Kitchen</span>
+                </button>
+                <button onclick="switchTab('roadmap')" id="tab-roadmap" class="tab-btn flex-1 py-3 px-4 rounded-xl hover:bg-slate-50 transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                    <span>Roadmap Bisnis</span>
+                </button>
+                <button onclick="switchTab('calculator')" id="tab-calculator" class="tab-btn flex-1 py-3 px-4 rounded-xl hover:bg-slate-50 transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span>Simulasi Biaya & Profit</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- TAB 1: Comparison -->
+        <section id="content-comparison" class="tab-content space-y-6">
+            <div class="bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-2xl p-6 sm:p-8 shadow-lg">
+                <h2 class="text-2xl sm:text-3xl font-extrabold mb-2">Memilih Model Ekspansi yang Tepat</h2>
+                <p class="text-red-100 max-w-3xl text-sm sm:text-base">
+                    Untuk membangun merek yang bertahan lama, penting untuk menyeimbangkan antara kecepatan pertumbuhan (*speed*), kendali kualitas (*quality control*), dan efisiensi modal (*capital efficiency*).
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Gerobak / Booth Card -->
+                <div class="glass-card rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-3 bg-amber-100 text-amber-600 rounded-xl">
+                                <i class="fa-solid fa-store text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900">Stand Gerobak / Booth</h3>
+                                <p class="text-xs text-slate-500">Modal Terjangkau & Multi-Outlet</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold px-2.5 py-1 bg-amber-50 text-amber-700 rounded-lg border border-amber-200">
+                            Rp 3 - 15 Juta/Unit
+                        </span>
+                    </div>
+                    <ul class="space-y-2.5 text-sm text-slate-600 mb-6">
+                        <li class="flex items-start"><i class="fa-solid fa-circle-check text-emerald-500 mr-2 mt-1"></i> Biaya investasi awal rendah dan mudah direplikasi.</li>
+                        <li class="flex items-start"><i class="fa-solid fa-circle-check text-emerald-500 mr-2 mt-1"></i> Sangat efisien di area high foot-traffic (mall, Minimarket, minimarket).</li>
+                        <li class="flex items-start"><i class="fa-solid fa-circle-xmark text-rose-500 mr-2 mt-1"></i> Terikat biaya sewa lahan & kapasitas stok terbatas.</li>
+                    </ul>
+                    <div class="p-3 bg-slate-50 rounded-xl text-xs text-slate-500 border border-slate-100">
+                        <strong>Rekomendasi:</strong> Terbaik untuk jualan makanan saji cepat, camilan, minuman, & ekspansi jumlah titik dengan cepat.
+                    </div>
+                </div>
+
+                <!-- Food Truck Card -->
+                <div class="glass-card rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-3 bg-blue-100 text-blue-600 rounded-xl">
+                                <i class="fa-solid fa-truck-monster text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900">Food Truck</h3>
+                                <p class="text-xs text-slate-500">Mobilitas & Lifestyle Branding</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg border border-blue-200">
+                            Rp 80 - 200+ Juta/Unit
+                        </span>
+                    </div>
+                    <ul class="space-y-2.5 text-sm text-slate-600 mb-6">
+                        <li class="flex items-start"><i class="fa-solid fa-circle-check text-emerald-500 mr-2 mt-1"></i> Fleksibel berpindah event, bazar, dan titik kumpul ramai.</li>
+                        <li class="flex items-start"><i class="fa-solid fa-circle-check text-emerald-500 mr-2 mt-1"></i> Alat dapur lebih lengkap & nilai visual branding tinggi.</li>
+                        <li class="flex items-start"><i class="fa-solid fa-circle-xmark text-rose-500 mr-2 mt-1"></i> Modal besar, perawatan mesin, dan risiko biaya operasional tinggi.</li>
+                    </ul>
+                    <div class="p-3 bg-slate-50 rounded-xl text-xs text-slate-500 border border-slate-100">
+                        <strong>Rekomendasi:</strong> Terbaik untuk branding segmen menengah ke atas, target bazar/event, dan menu yang butuh perkakas dapur lengkap.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Matrix Franchise vs Modal Sendiri -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm mt-8">
+                <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
+                    <i class="fa-solid fa-diagram-project text-red-500 mr-2"></i> Perbandingan Model Bisnis: Franchise vs Own Store
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-slate-600">
+                        <thead class="text-xs text-slate-700 uppercase bg-slate-100 rounded-lg">
+                            <tr>
+                                <th class="py-3 px-4">Parameter</th>
+                                <th class="py-3 px-4 bg-amber-50/50 text-amber-900">Franchise / Kemitraan Jual Putus</th>
+                                <th class="py-3 px-4 bg-emerald-50/50 text-emerald-900">Modal Sendiri (Own Store) + Central Kitchen</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr>
+                                <td class="py-3 px-4 font-semibold text-slate-900">Kecepatan Tutup/Gagal</td>
+                                <td class="py-3 px-4 text-rose-600 font-medium"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Sangat Tinggi (Jika hanya ikut tren)</td>
+                                <td class="py-3 px-4 text-emerald-600 font-medium"><i class="fa-solid fa-shield-heart mr-1"></i> Rendah (Kualitas terjaga)</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 px-4 font-semibold text-slate-900">Konsistensi Rasa</td>
+                                <td class="py-3 px-4">Sering berubah tergantung kepatuhan mitra</td>
+                                <td class="py-3 px-4 font-semibold text-emerald-700">100% Terkontrol via Central Kitchen</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 px-4 font-semibold text-slate-900">Margin Keuntungan</td>
+                                <td class="py-3 px-4">Terbagi / Kecil per outlet</td>
+                                <td class="py-3 px-4">100% Profit Bersih Milik Anda</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 px-4 font-semibold text-slate-900">Kontrol Kualitas SOP</td>
+                                <td class="py-3 px-4">Sulit diawasi secara penuh</td>
+                                <td class="py-3 px-4">Sangat Mudah Diawasi & Diperbaiki</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: Central Kitchen Workflow -->
+        <section id="content-centralkitchen" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+                <div class="max-w-3xl mb-8">
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-red-600 bg-red-50 px-3 py-1 rounded-full">Kunci Produk Konsisten</span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">Alur Kerja Dapur Pusat (Central Kitchen)</h2>
+                    <p class="text-slate-600 mt-2 text-sm sm:text-base">
+                        Memindahkan 80% proses produksi rumit ke dapur pusat agar operasional di stand/cabang menjadi sangat sederhana, cepat, dan rasa terjamin sama.
+                    </p>
+                </div>
+
+                <!-- Process Steps -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 relative">
+                    <!-- Step 1 -->
+                    <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col justify-between">
+                        <div>
+                            <div class="w-8 h-8 bg-red-600 text-white font-bold rounded-xl flex items-center justify-center mb-3">1</div>
+                            <h4 class="font-bold text-slate-900 mb-1">Pencampuran Bumbu Biang</h4>
+                            <p class="text-xs text-slate-500">Resep rahasia dibuat terpusat menggunakan timbangan gramasi presisi.</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-200 text-xs text-slate-600 font-medium">
+                            <i class="fa-solid fa-flask text-red-500 mr-1"></i> Dapur Pusat (Homemade)
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col justify-between">
+                        <div>
+                            <div class="w-8 h-8 bg-red-600 text-white font-bold rounded-xl flex items-center justify-center mb-3">2</div>
+                            <h4 class="font-bold text-slate-900 mb-1">Portion Control & Packaging</h4>
+                            <p class="text-xs text-slate-500">Bumbu & bahan diporsi per porsi jualan lalu di-vacuum seal / frozen.</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-200 text-xs text-slate-600 font-medium">
+                            <i class="fa-solid fa-box-archive text-amber-500 mr-1"></i> Standar Kebersihan (PIRT)
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col justify-between">
+                        <div>
+                            <div class="w-8 h-8 bg-red-600 text-white font-bold rounded-xl flex items-center justify-center mb-3">3</div>
+                            <h4 class="font-bold text-slate-900 mb-1">Distribusi ke Outlet</h4>
+                            <p class="text-xs text-slate-500">Pengiriman stok bumbu & bahan setengah jadi berkala sesuai kebutuhan cabang.</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-200 text-xs text-slate-600 font-medium">
+                            <i class="fa-solid fa-truck-fast text-blue-500 mr-1"></i> Cold Chain / Supply Chain
+                        </div>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="p-5 bg-emerald-50 rounded-2xl border border-emerald-200 flex flex-col justify-between">
+                        <div>
+                            <div class="w-8 h-8 bg-emerald-600 text-white font-bold rounded-xl flex items-center justify-center mb-3">4</div>
+                            <h4 class="font-bold text-emerald-900 mb-1">Penyajian Ringkas di Cabang</h4>
+                            <p class="text-xs text-emerald-700">Staf cabang tinggal melakukan *heating*, goreng, atau *assembling* akhir.</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-emerald-200 text-xs text-emerald-800 font-medium">
+                            <i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> Konsisten & Cepat Saji
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Checklist Keuntungan Dapur Pusat -->
+                <div class="mt-8 bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                    <h3 class="text-md font-bold text-slate-900 mb-3">Keuntungan Utama Central Kitchen untuk Branding Tahan Lama:</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm text-slate-600">
+                        <div class="flex items-start space-x-2">
+                            <i class="fa-solid fa-lock text-red-500 mt-1"></i>
+                            <span><strong>Rahasia Resep Aman:</strong> Karyawan stand tidak tahu racikan bumbu biang.</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <i class="fa-solid fa-clock text-amber-500 mt-1"></i>
+                            <span><strong>Layanan Cepat:</strong> Pelanggan tidak perlu menunggu lama saat memesan.</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <i class="fa-solid fa-chart-line text-emerald-500 mt-1"></i>
+                            <span><strong>Food Waste Rendah:</strong> Pembagian porsi presisi mengurangi bahan terbuang.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: Roadmap -->
+        <section id="content-roadmap" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+                <h2 class="text-2xl font-extrabold text-slate-900 mb-6">Tahapan Pembangunan Brand Makanan Tahan Lama</h2>
+                
+                <div class="space-y-6 relative border-l-2 border-red-200 ml-4 pl-6">
+                    <!-- Phase 1 -->
+                    <div class="relative">
+                        <span class="absolute -left-9 top-0 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center text-xs font-bold">F1</span>
+                        <h3 class="text-lg font-bold text-slate-900">Fase 1: Standarisasi Resep & Uji Daya Simpan</h3>
+                        <p class="text-sm text-slate-600 mt-1">Ubah resep masakan dari ukuran takaran sendok menjadi gramasi standar. Lakukan tes ketahanan bumbu (suhu ruang, kulkas, & freezer).</p>
+                    </div>
+
+                    <!-- Phase 2 -->
+                    <div class="relative">
+                        <span class="absolute -left-9 top-0 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center text-xs font-bold">F2</span>
+                        <h3 class="text-lg font-bold text-slate-900">Fase 2: Uji Coba 2-3 Outlet Modal Sendiri (Own Store)</h3>
+                        <p class="text-sm text-slate-600 mt-1">Buka 2-3 gerobak/booth milik sendiri. Pasok bumbu dari Central Kitchen rumahan Anda untuk menguji alur operasional dan penerimaan pasar.</p>
+                    </div>
+
+                    <!-- Phase 3 -->
+                    <div class="relative">
+                        <span class="absolute -left-9 top-0 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center text-xs font-bold">F3</span>
+                        <h3 class="text-lg font-bold text-slate-900">Fase 3: Pemantapan Branding & Legalisasi Usaha</h3>
+                        <p class="text-sm text-slate-600 mt-1">Buat kemasan eksklusif, desain logo profesional, urus legalitas (PIRT, BPOM, Halal), serta buat SOP tertulis secara detail.</p>
+                    </div>
+
+                    <!-- Phase 4 -->
+                    <div class="relative">
+                        <span class="absolute -left-9 top-0 w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center text-xs font-bold">F4</span>
+                        <h3 class="text-lg font-bold text-slate-900">Fase 4: Ekspansi Agresif / Kemitraan Terintegrasi</h3>
+                        <p class="text-sm text-slate-600 mt-1">Setelah rantai pasok dan profitabilitas terbukti, lakukan penambahan cabang secara mandiri atau tawarkan kemitraan autopilot yang wajib mengambil bumbu dari Central Kitchen Anda.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: Calculator -->
+        <section id="content-calculator" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+                <h2 class="text-2xl font-extrabold text-slate-900 mb-2">Simulasi Keuntungan Stand / Outlet</h2>
+                <p class="text-sm text-slate-500 mb-6">Hitung estimasi potensi keuntungan harian dan bulanan per satu unit stand.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Calculator Form -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Harga Jual Per Porsi (Rp)</label>
+                            <input type="number" id="calc-price" value="15000" class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Modal HPP / Bumbu + Bahan Per Porsi (Rp)</label>
+                            <input type="number" id="calc-hpp" value="7000" class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Target Penjualan Per Hari (Porsi)</label>
+                            <input type="number" id="calc-qty" value="60" class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Sewa Lapan & Operasional Bulanan (Rp)</label>
+                            <input type="number" id="calc-opex" value="1500000" class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none">
+                        </div>
+                        <button onclick="calculateProfit()" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition shadow-md">
+                            Hitung Profitabilitas
+                        </button>
+                    </div>
+
+                    <!-- Calculator Output -->
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">Estimasi Hasil Finansial</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-600">Omset Bulanan (30 Hari):</span>
+                                    <span id="res-omset" class="font-bold text-slate-900">Rp 27.000.000</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-600">Total HPP Bahan Baku:</span>
+                                    <span id="res-hpp" class="font-bold text-slate-900">Rp 12.600.000</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-600">Biaya Operasional & Sewa:</span>
+                                    <span id="res-opex" class="font-bold text-slate-900">Rp 1.500.000</span>
+                                </div>
+                                <hr class="border-slate-200 my-2">
+                                <div class="flex justify-between text-base font-bold">
+                                    <span class="text-emerald-700">Profit Bersih / Bulan:</span>
+                                    <span id="res-profit" class="text-emerald-600 text-lg">Rp 12.900.000</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-6 p-3 bg-emerald-100/60 rounded-xl text-xs text-emerald-800 border border-emerald-200">
+                            <i class="fa-solid fa-lightbulb mr-1"></i> Keuntungan ini milik penuh Anda jika menggunakan cabang modal sendiri!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+            <p>© 2026 Strategy & Central Kitchen Planner - Formula Bisnis Kuliner Konsisten & Tahan Lama</p>
+        </div>
+    </footer>
+
+    <script>
+        // Tab Switcher Logic
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('tab-active'));
+
+            document.getElementById('content-' + tabId).classList.remove('hidden');
+            document.getElementById('tab-' + tabId).classList.add('tab-active');
+        }
+
+        // Financial Profit Calculator
+        function calculateProfit() {
+            const price = parseFloat(document.getElementById('calc-price').value) || 0;
+            const hpp = parseFloat(document.getElementById('calc-hpp').value) || 0;
+            const qty = parseFloat(document.getElementById('calc-qty').value) || 0;
+            const opex = parseFloat(document.getElementById('calc-opex').value) || 0;
+
+            const omsetHarian = price * qty;
+            const hppHarian = hpp * qty;
+
+            const omsetBulanan = omsetHarian * 30;
+            const hppBulanan = hppHarian * 30;
+            const profitBulanan = omsetBulanan - hppBulanan - opex;
+
+            document.getElementById('res-omset').innerText = 'Rp ' + omsetBulanan.toLocaleString('id-ID');
+            document.getElementById('res-hpp').innerText = 'Rp ' + hppBulanan.toLocaleString('id-ID');
+            document.getElementById('res-opex').innerText = 'Rp ' + opex.toLocaleString('id-ID');
+            document.getElementById('res-profit').innerText = 'Rp ' + profitBulanan.toLocaleString('id-ID');
+        }
+
+        // Initial Calculation
+        calculateProfit();
+    </script>
+</body>
+</html>
